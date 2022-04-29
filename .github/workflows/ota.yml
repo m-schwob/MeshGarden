@@ -1,0 +1,43 @@
+name: upload file to Firebase workflow
+
+on:
+  push:
+    branches: [ ota ]
+
+jobs:
+  ciTask:
+    name: test CI
+    runs-on: macos-latest
+    steps:
+      #do something
+        - run: echo 'do something here'
+          
+  check-json:
+    needs: [ciTask] # trigger the ci task must be success to run this upload task
+    name: Make a json
+    runs-on: macos-latest
+    steps:
+      # check out the repository
+      - name: check out
+        uses: actions/checkout@v2
+      
+      # install python for running the script
+      - name: Setup Python and dependencies
+        uses: actions/setup-python@v2
+        with:
+            python-version: '3.x' # Version range or exact version of a Python version to use, using SemVer's version range syntax
+            architecture: 'x64' # optional x64 or x86. Defaults to x64 if not specified
+      - run: |
+          pip install firebase-admin
+        
+      # write the Credential json secrect key from git_secrect
+      - name: get secrect key
+        id: write_key_file
+        uses: timheuer/base64-to-file@v1
+        with:
+          fileName: 'ota_key.json' # name of the written key file
+          encodedString: ${{ secrets.OTA_TEST_KEY }} # Secret stored in Github secrets
+      
+      # run the upload script
+      - name: run upload script
+        run: python ./utils/upload_binary.py # the path to upload script in the repository
