@@ -1,7 +1,7 @@
 """The script encodes a file to a base64 string and print it out to file.
 
 Usage:
-    'python <path to json key>'
+    'python ./encode_key.py <path to json key>' (from the script folder)
 
 Output:
     file which contain the base64 string. the file will be locate at the same directory as the input file. if the file exist it will be override.
@@ -36,5 +36,5 @@ def encode(file: os.PathLike):
 if __name__ == '__main__':
     if len(sys.argv) < 2:
         print('error: a path to file must be provided.')
-        exit()
+        exit(2)
     encode(sys.argv[1])
