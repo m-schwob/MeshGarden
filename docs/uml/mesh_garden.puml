@@ -1,0 +1,72 @@
+@startuml
+
+interface Device{
+    - string HARDWARE_INFO
+    - int id 
+
+    + void init()
+    + void enable()
+    + void disable()
+}
+
+abstract Sensor{
+    + string UNITS
+    # float[] values
+
+    + void measure()
+    + float[] get_vlaues()
+}
+
+abstract Actuator{}
+
+class SoilMoistureSensor{}
+
+class AirHumidityTemperatureSensor{}
+
+class UVSensor{}
+
+class LightSensor{}
+
+class HoseActuator{}
+
+class MeshGraden{
+    - set<Device> Devices
+}
+
+class OTA{}
+
+class main{
+    void setup()
+    void loop()
+}
+hide main circle
+hide main fields
+
+
+Device <|-- Sensor
+Device <|-- Actuator
+Sensor <|-- SoilMoistureSensor
+Sensor <|-- AirHumidityTemperatureSensor
+Sensor <|-- UVSensor
+Sensor <|-- LightSensor
+Actuator <|-- HoseActuator
+
+main o-- MeshGraden
+MeshGraden o-- OTA
+MeshGraden o-- Device
+
+
+
+skinparam legendBackgroundColor #ffffff
+legend
+
+|= field |= method |=  |
+|  <img:https://s.plantuml.com/private-field.png>     |   <img:https://s.plantuml.com/private-method.png>     | private |
+|  <img:https://s.plantuml.com/protected-field.png>   |   <img:https://s.plantuml.com/protected-method.png>   | protected |
+|  <img:https://s.plantuml.com/package-private-field.png>     |   <img:https://s.plantuml.com/package-private-method.png>    | package private |
+|  <img:https://s.plantuml.com/public-field.png>     |   <img:https://s.plantuml.com/public-method.png>     | public |
+
+endlegend
+
+@enduml
+
