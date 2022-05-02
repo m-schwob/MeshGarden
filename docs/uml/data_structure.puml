@@ -1,0 +1,30 @@
+@startuml Data Strucures
+skinparam titleFontSize 14
+title
+Nodes
+|= node_id |= sensor_type |= last_update |= time_interval |= value |= controller_type |= firmware_version |
+|  | | | | |
+|  | | | | |
+|  | | | | |
+
+Measured Data
+|= node_id |= time |= value |= sensore_type |
+| | | | |
+| | | | |
+| | | | |
+
+Firmware Update
+|= controller_type |= binary_file |= firmware_version |
+| | | |
+| | | |
+| | | |
+
+Active Nodes
+|= node_id |
+| |
+| |
+| |
+
+
+end title
+@enduml
