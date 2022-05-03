@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "721356919732",
+    "project_id": "meshgarden-iot",
+    "storage_bucket": "meshgarden-iot.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:721356919732:android:f4a53b83cff5d50532d8e1",
+        "android_client_info": {
+          "package_name": "com.iot.mesh_garden"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "721356919732-bppj1afc3tjbqo8ppcrvenrnmhr2qa43.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAD29eT6yr4S8yzhecMRcoWnX3V9WrDH-w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "721356919732-bppj1afc3tjbqo8ppcrvenrnmhr2qa43.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
