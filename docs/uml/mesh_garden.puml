@@ -29,8 +29,16 @@ class LightSensor{}
 
 class HoseActuator{}
 
+class Network{}
+
 class MeshGraden{
     - set<Device> Devices
+    
+    init_network()
+    init_devices()
+    check_firmware_update()
+    update_firmware()
+    sync_with_server()
 }
 
 class OTA{}
@@ -53,6 +61,7 @@ Actuator <|-- HoseActuator
 
 main o-- MeshGraden
 MeshGraden o-- OTA
+MeshGarden o-- Network
 MeshGraden o-- Device
 
 
