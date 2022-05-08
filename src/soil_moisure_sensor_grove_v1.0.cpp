@@ -57,7 +57,7 @@ class SoilMoisureSensorGroveV1{
             // init I/O power pin if define. init to power off state
             if(power_pin != -1){
                 pinMode(power_pin,OUTPUT);
-                digitalWrite(power_pin, LOW);
+                digitalWrite(power_pin, HIGH); //TODO solve it and change to low
             }
             init_adc(); // ADS1X15 related.
             Serial.printf("%s: initelized", HARDWARE_INFO.c_str()); // add details about pins i.e. 
@@ -76,6 +76,10 @@ class SoilMoisureSensorGroveV1{
             //TODO handle the case that the value go off range
             result = 1 - percentage(volt, C_air, C_water);
             Serial.printf("%s: measure %f volts, %f/1 range\n", HARDWARE_INFO.c_str(), volt, result);
+
+            // power on sensor if power pin is defined 
+            if(power_pin != -1)
+                digitalWrite(power_pin, HIGH); //TODO solve it and change to low
         }
 
         Measurement get_values(){
