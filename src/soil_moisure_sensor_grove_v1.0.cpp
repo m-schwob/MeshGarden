@@ -1,6 +1,9 @@
 #include <Arduino.h>
 #include "Sensor.cpp"
 
+// ADS1X15 related. remove later
+#include <Adafruit_ADS1X15.h>
+
 class SoilMoisureSensorGroveV1{
     private:
 
@@ -9,14 +12,13 @@ class SoilMoisureSensorGroveV1{
 
         //TODO config this at calibration
         bool calibrated = true;
-        float C_air = 2; //volts
+        float C_air = 2.2; //volts
         float C_water = 1; //volts
 
         float result = -1; //percentage as 0-1 value
         
 
         // ADS1X15 related. TODO make driver for it. check example file
-        #include <Adafruit_ADS1X15.h>
         Adafruit_ADS1115 ads;
 
         void init_adc(){
@@ -39,9 +41,9 @@ class SoilMoisureSensorGroveV1{
         // return percentage, in [0,1] range, of value in range.
         // parameter min is optional and the default is 0.
         // return -1 in case of error
-        float percentage(int value, int max, int min = 0){
+        float percentage(float value, float max, float min = 0){
             if(min > value || value > max) return -1;
-            return (value - min)/(max - min) ;
+            return (value - min)/(max - min);
         }
 
 
@@ -58,7 +60,7 @@ class SoilMoisureSensorGroveV1{
                 digitalWrite(power_pin, LOW);
             }
             init_adc(); // ADS1X15 related.
-            Serial.printf("%s: initelized", HARDWARE_INFO); // add details about pins i.e. 
+            Serial.printf("%s: initelized", HARDWARE_INFO.c_str()); // add details about pins i.e. 
         }
 
         void measure(){
@@ -71,8 +73,9 @@ class SoilMoisureSensorGroveV1{
             //     analogRead(pin);
             // else
             float volt = extender_measure(analog_pin);
+            //TODO handle the case that the value go off range
             result = 1 - percentage(volt, C_air, C_water);
-            Serial.printf("%s: measure %f volts, %f%\n", HARDWARE_INFO, volt, result);
+            Serial.printf("%s: measure %f volts, %f/1 range\n", HARDWARE_INFO.c_str(), volt, result);
         }
 
         Measurement get_values(){
