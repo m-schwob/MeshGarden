@@ -19,6 +19,7 @@ class Sensor:Device{
         virtual void disable();
         virtual void measure();
         virtual Measurement get_values(); 
+        virtual void calibrate();
         virtual void power_on();
         virtual void power_off();
 };
