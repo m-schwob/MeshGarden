@@ -3,7 +3,7 @@
   Complete project details at https://RandomNerdTutorials.com/esp-mesh-esp32-esp8266-painlessmesh/
   
   This is a simple example that uses the painlessMesh library: https://github.com/gmag11/painlessMesh/blob/master/examples/basic/basic.ino
-*/
+//*/
 #include "painlessMesh.h"
 #include "string.h"
 #include <iostream>
@@ -27,7 +27,11 @@ std::list<int> counterList;
 
 Task taskSendMessage( TASK_SECOND * 20 , TASK_FOREVER, &sendMessage );
 //Task mapAccessPoints( TASK_SECOND * 20, TASK_FOREVER , &mapNetwork);
-
+//TODO figgure out if there is need to split.
+void TaskManager(){
+  userScheduler.addTask( taskSendMessage );
+  taskSendMessage.enable();
+}
 //for Now the message simply contains the nodeId and a counter 
 void sendMessage() {
   String msg;
@@ -76,8 +80,7 @@ void setup() {
    // Do something with the event
    Serial.println(String(nodeId));
 });
-  userScheduler.addTask( taskSendMessage );
-  taskSendMessage.enable();
+  TaskManager();
 }
 
 void loop() {

@@ -2,7 +2,7 @@
 //(for now the message contains 2 values and it is written in the following manner: "<NODE_ID> <NODE COUNTER>")
 //the bridge will decode the message, and every time he recieves one he will add the values to a map by:
 //key: nodeId , value: measurment. every 30 seconds it will disconnect from the mesh, connect to WiFi, and push the last saved data
-
+//start:
 //#include <Arduino.h>
 #include <painlessMesh.h>
 #include <Firebase_ESP_Client.h>
@@ -21,7 +21,7 @@ using namespace std;
 #define   MESH_PASSWORD   "somethingSneaky"
 #define   MESH_PORT       5555
 /***************************
- *  Variables Definitions For the WiFi
+ *  Variables Definitions For the WiFi - Change wifi ssid,password to match yours
  **************************/
 const char* ssid     = "My_hotspot";
 const char* password = "mypassword";
@@ -36,13 +36,14 @@ const int   daylightOffset_sec = 7200;
 #define USER_EMAIL "ioadmin@ioadmin.com"
 #define USER_PASSWORD "ioadmin"
 
-
+//mesh global variables
 Scheduler userScheduler; // to control your personal task
 painlessMesh  mesh;
+//firebase global variables
 FirebaseData fbdo;
 FirebaseAuth auth;
 FirebaseConfig config;
-
+//sync with the server, saving data variables
 int lasttime=0; //initialized, used to messure time interaval for the disconnect
 std::map<String,String> dict;
 
@@ -70,6 +71,10 @@ void firebaseInit(){
 //fireBase update Function For moisture and humidity sensor, will recieve 3 Values
 // (Have to fix temp- for now its the nodeId), and post them on the firebase 
 //under the plantId
+
+//Todo- check option for sensor to sand Json messge on mesh, and firestore will decode it
+//declare Strings in each sensor class 
+
 void firestoreDataUpdate(String plantId,double temp, double humi){
   if(WiFi.status() == WL_CONNECTED && Firebase.ready()){
     String documentPath = "Hause/" + plantId;
