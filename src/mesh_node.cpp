@@ -9,21 +9,25 @@
 #include <iostream>
 #include <list>
 
-#define   MESH_PREFIX     "whateverYouLike"
-#define   MESH_PASSWORD   "somethingSneaky"
-#define   MESH_PORT       5555
-
+class Mesh_Node{
+private:
+#define MESH_PREFIX "whateverYouLike"     
+#define MESH_PASSWORD "somethingSneaky"   
+#define MESH_PORT 5555
 Scheduler userScheduler; // to control your personal task
 painlessMesh  mesh;
+int counter;
+std::list<int> counterList;
 
+Mesh_Node(){
+counter = 0 ;
+setup();
+}
 // User stub
 void sendMessage() ; // Prototype so PlatformIO doesn't complain
 void mapNetwork();
 
 //if the node is the wifi access point it will be true
-int counter = 0;
-int lasttime=0;
-std::list<int> counterList;
 
 Task taskSendMessage( TASK_SECOND * 20 , TASK_FOREVER, &sendMessage );
 //Task mapAccessPoints( TASK_SECOND * 20, TASK_FOREVER , &mapNetwork);
@@ -43,14 +47,6 @@ void sendMessage() {
   mesh.sendBroadcast(msg);
   }
 
-// void mapNetwork(){
-//   std::list<uint32_t> nodes = mesh.getNodeList();
-//   std::list<uint32_t>::iterator it;
-//   Serial.printf("gotHere list size is: %d\n",nodes.size());
-//   for (it = nodes.begin(); it != nodes.end(); ++it)
-//     Serial.printf("node: %u\n",*it); 
-// }
-// Needed for painless library
 void receivedCallback( uint32_t from, String &msg ) {
   Serial.printf("startHere: Received from %u msg=%s\n", from, msg.c_str());
 }
@@ -67,7 +63,7 @@ void nodeTimeAdjustedCallback(int32_t offset) {
     Serial.printf("Adjusted time %u. Offset = %d\n", mesh.getNodeTime(),offset);
 }
 
-void setup() {
+void setup_node() {
   Serial.begin(115200);
   //mesh.setDebugMsgTypes( ERROR | MESH_STATUS | CONNECTION | SYNC | COMMUNICATION | GENERAL | MSG_TYPES | REMOTE ); // all types on
   mesh.setDebugMsgTypes( ERROR | STARTUP );  // set before init() so that you can see startup messages
@@ -83,8 +79,9 @@ void setup() {
   TaskManager();
 }
 
-void loop() {
+void loop_node() {
   // it will run the user scheduler as well
   mesh.update();
 
+}
 }
