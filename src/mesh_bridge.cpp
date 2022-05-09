@@ -4,6 +4,7 @@
 //key: nodeId , value: measurment. every 30 seconds it will disconnect from the mesh, connect to WiFi, and push the last saved data
 //start:
 //#include <Arduino.h>
+#include "mesh_bridge.h"
 #include <painlessMesh.h>
 #include <Firebase_ESP_Client.h>
 #include "time.h"
