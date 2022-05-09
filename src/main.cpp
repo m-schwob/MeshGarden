@@ -6,7 +6,6 @@
 #include "soil_moisure_sensor_grove_v1.0.cpp"
 
 #define BAUD_RATE 115200 
-Soi
 
 void setup(void)
 {
