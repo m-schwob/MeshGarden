@@ -120,7 +120,7 @@ void nodeTimeAdjustedCallback(int32_t offset) {
 }
 
 
-void setup() {
+void init_node() {
   Serial.begin(115200);
   //mesh.setDebugMsgTypes( ERROR | MESH_STATUS | CONNECTION | SYNC | COMMUNICATION | GENERAL | MSG_TYPES | REMOTE ); // all types on
   mesh.setDebugMsgTypes( ERROR | STARTUP );  // set before init() so that you can see startup messages
@@ -139,7 +139,7 @@ void setup() {
   mesh.setContainsRoot(true);
 }
 
-void loop() {
+void update_node() {
   // it will run the user scheduler as well
   mesh.update();
   
