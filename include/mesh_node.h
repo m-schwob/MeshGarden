@@ -7,7 +7,7 @@
 #define MESH_PASSWORD "somethingSneaky"
 #define MESH_PORT 5555
 
-class Mesh_Node
+class MeshNode
 {
 	private:
 		painlessMesh mesh;
@@ -23,6 +23,8 @@ class Mesh_Node
 		friend void sendMessage();
 
 	public:
-		Mesh_Node();
+		MeshNode();
 		void update();
+		void add_task(TaskCallback callable);
+		void remove_task();
 };

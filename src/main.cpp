@@ -13,16 +13,18 @@
 
 #define BAUD_RATE 115200 
 
+MeshNode node;
+
 void setup(void)
 {
   Serial.begin(BAUD_RATE);
-  Serial.println("Hello!");
+  Serial.println("Hello1!");
+  Serial.println("Hello2!");
 
 }
 
 void loop(void)
 {
-  
-  delay(1000);
+  node.update();
 }
 
