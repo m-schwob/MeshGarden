@@ -1,4 +1,4 @@
-//BRIDGE NODE Code - has to be ESP32 for now, the node will recieve a message from the other nodes 
+//BRIDGE NODE Code - has to be ESP32 for now, the node will receive a message from the other nodes 
 //(for now the message contains 2 values and it is written in the following manner: "<NODE_ID> <NODE COUNTER>")
 //the bridge will decode the message, and every time he recieves one he will add the values to a map by:
 //key: nodeId , value: measurment. every 30 seconds it will disconnect from the mesh, connect to WiFi, and push the last saved data
@@ -120,7 +120,7 @@ void nodeTimeAdjustedCallback(int32_t offset) {
 }
 
 
-void setup() {
+void init_node() {
   Serial.begin(115200);
   //mesh.setDebugMsgTypes( ERROR | MESH_STATUS | CONNECTION | SYNC | COMMUNICATION | GENERAL | MSG_TYPES | REMOTE ); // all types on
   mesh.setDebugMsgTypes( ERROR | STARTUP );  // set before init() so that you can see startup messages
@@ -139,7 +139,7 @@ void setup() {
   mesh.setContainsRoot(true);
 }
 
-void loop() {
+void update_node() {
   // it will run the user scheduler as well
   mesh.update();
   
