@@ -86,6 +86,7 @@ class SoilMoisureSensorGroveV1{
             Measurement measurement;
             measurement.key = TYPE;
             measurement.value = result;
+            result = -1;
             return measurement;
         }
 };
