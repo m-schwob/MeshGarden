@@ -1,11 +1,14 @@
 #include <Arduino.h>
 #include "Device.cpp"
 
+//REMOVE LATER
+#include "soil_moisure_sensor_grove_v1.0.h"
 
-struct Measurement{
-    String key;
-    float value;
-};
+// struct Measurement{
+//     bool last = false;
+//     String type;
+//     float value;
+// };
 
 class Sensor:Device{
     private:
