@@ -46,7 +46,8 @@ FirebaseAuth auth;
 FirebaseConfig config;
 //sync with the server, saving data variables
 int lasttime=0; //initialized, used to messure time interaval for the disconnect
-std::map<String,String> dict;
+// std::map<String,vector<String>> dict;
+std::vector<String> server_data;
 
 // a function that parses a string and creates a vector of words
 vector<string> split (string s, string delimiter) {
@@ -76,13 +77,12 @@ void firebaseInit(){
 //Todo- check option for sensor to sand Json messge on mesh, and firestore will decode it
 //declare Strings in each sensor class 
 
-void firestoreDataUpdate(String plantId,double temp, double humi){
+void firestoreDataUpdate(String plantId,String msg){
   if(WiFi.status() == WL_CONNECTED && Firebase.ready()){
     String documentPath = "Hause/" + plantId;
     FirebaseJson content;
-    content.set("fields/temperature/doubleValue", String(temp).c_str());
-    content.set("fields/humidity/doubleValue", String(humi).c_str());
- if(Firebase.Firestore.patchDocument(&fbdo, FIREBASE_PROJECT_ID, "", documentPath.c_str(), content.raw(), "temperature,humidity")){
+    content.set("fields/last_message/", msg.c_str());
+ if(Firebase.Firestore.patchDocument(&fbdo, FIREBASE_PROJECT_ID, "", documentPath.c_str(), content.raw(), "last_message")){
       Serial.printf("ok\n%s\n\n", fbdo.payload().c_str());
       return;
     }else{
@@ -98,15 +98,17 @@ void firestoreDataUpdate(String plantId,double temp, double humi){
 }
 
 // Needed for painless library
-//receivedCallback - when we get a post on the mesh, it will update the dict by the values got from it
+//receivedCallback - when we get a post on the mesh, it will update the dict by the message sent to it
+//the dict will have nodeId as its key, and the Entire message as its value
 void receivedCallback( uint32_t from, String &msg ) {
   Serial.printf("startHere: Received from %u msg=%s\n", from, msg.c_str());
-  std::vector<string> vec = split(msg.c_str(), " ");
-  if(dict.find(String(vec[0].c_str())) == dict.end())
-    dict.insert(make_pair(String(vec[0].c_str()), String(vec[1].c_str())));
-  else
-    dict[String(vec[0].c_str())] = String(vec[1].c_str()); 
-  Serial.printf("updated DICT [%s] = %s",String(vec[0].c_str()),String(vec[1].c_str()));   
+  std::vector<string> vec = split(msg.c_str(), " "); //split the String to vector of Strins by word
+  // if(dict.find(String(vec[0].c_str())) == dict.end())
+    // dict.insert(make_pair(String(vec[0].c_str()), msg));
+  // else
+    // dict[String(vec[0].c_str())] = msg; 
+  server_data.push_back(msg);
+  Serial.printf("updated DICT [%s] = %s",String(vec[0].c_str()),msg);   
 }
 
 //Needed for mesh, do not change
@@ -158,11 +160,18 @@ void update_node() {
     Serial.println("");
     Serial.println("WiFi connected.");
     firebaseInit();
-  //  //pst on the firebase server what was saved on the map
-    for(std::map<String,String>::iterator iter = dict.begin(); iter != dict.end(); ++iter){
-      firestoreDataUpdate(iter->first,stod(iter->first.c_str()),stod(iter->second.c_str()));
-    }
-    dict.clear(); //clears the map in order to be more space efficiant, nodes that did not changed would not be posted again
+  // //  //pst on the firebase server what was saved on the map
+  //for(std::map<String,vector<String>>::iterator iter = dict.begin(); iter != dict.end(); ++iter){
+  //for(vector<String>::iterator measures_iter = iter->second.begin(); measures_iter!=iter->second.end() ; measures_iter++ ){
+  // firestoreDataUpdate(iter->first, *measures_iter);
+  //}
+  //   }
+    for(vector<String>::iterator measures_iter = server_data.begin(); measures_iter!=server_data.end() ; measures_iter++ ){
+      std::vector<string> vec = split((*measures_iter).c_str(), " "); //split the String to vector of Strins by word
+      firestoreDataUpdate(String(vec[0].c_str()) , *measures_iter);
+      }
+      server_data.clear();
+  //  dict.clear(); //clears the map in order to be more space efficiant, nodes that did not changed would not be posted again
     Serial.println("WiFi disconnected. initialize mesh");
   //  // initializing the mesh network again
     mesh.setDebugMsgTypes( ERROR | STARTUP );  // set before init() so that you can see startup messages
