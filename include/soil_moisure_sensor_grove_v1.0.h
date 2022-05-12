@@ -4,22 +4,17 @@
 #include <Arduino.h>
 // ADS1X15 related. remove later
 #include <Adafruit_ADS1X15.h>
+#include "Sensor.h"
 
-// #include "Sensor.cpp"
+#define _HARDWARE_INFO "Groove Soil Moisture"
+#define _TYPE "Soil Moisture"
+#define _UNITS "%"
 
-struct Measurement{
-    bool last = false;
-    String type;
-    float value;
-};
 
-class SoilMoisureSensorGroveV1{
+class SoilMoisureSensorGroveV1 : public Sensor{
     private:
         uint8_t analog_pin;
-        uint8_t power_pin;
 
-        //TODO config this at calibration
-        bool calibrated = true;
         float C_air = 2.2; //volts
         float C_water = 1; //volts
 
@@ -32,14 +27,10 @@ class SoilMoisureSensorGroveV1{
         float percentage(float value, float max, float min = 0);
 
     public:
-        String HARDWARE_INFO = "Groove Soil Moisture";
-        String TYPE = "Soil Moisture";
-
         SoilMoisureSensorGroveV1(uint8_t analog_pin = 0, uint8_t power_pin = -1);
         void measure();
         Measurement get_values();
-        std::function<void()> get_measure_callback();
-        std::function<Measurement()> get_values_callback();
+        void calibrate();
 };
 
 #endif /* _SOILMOISTURESENSORGROOVEV1_0_H_ */

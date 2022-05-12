@@ -30,7 +30,7 @@ float SoilMoisureSensorGroveV1::percentage(float value, float max, float min){
 
 //TODO remove hard coded. remove default value from analog_pin after solving data saving
 SoilMoisureSensorGroveV1::SoilMoisureSensorGroveV1(uint8_t analog_pin, uint8_t power_pin) 
-    : analog_pin(analog_pin), power_pin(power_pin){
+    : Sensor(_HARDWARE_INFO, _TYPE, _UNITS, power_pin), analog_pin(analog_pin){
     // init I/O power pin if define. init to power off state
     if(power_pin != -1){
         pinMode(power_pin,OUTPUT);
@@ -67,10 +67,8 @@ Measurement SoilMoisureSensorGroveV1::get_values(){
     return measurement;
 }
 
-std::function<void()> SoilMoisureSensorGroveV1::get_measure_callback(){
-    return [this](){measure();};
+void SoilMoisureSensorGroveV1::calibrate(){
+    //TODO
+    calibrated = true;
 }
 
-std::function<Measurement()> SoilMoisureSensorGroveV1::get_values_callback(){
-    return [this]()->Measurement{return get_values();};
-}

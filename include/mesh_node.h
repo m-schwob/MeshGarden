@@ -6,8 +6,8 @@
 #include <iostream>
 #include <list>
 
-// #include "sensor.cpp"
-#include "soil_moisure_sensor_grove_v1.0.h"
+#include "sensor.h"
+// #include "soil_moisure_sensor_grove_v1.0.h"
 
 #define MESH_PREFIX "whateverYouLike"
 #define MESH_PASSWORD "somethingSneaky"

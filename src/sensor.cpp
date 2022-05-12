@@ -1,28 +1,29 @@
-#include <Arduino.h>
-#include "Device.cpp"
+#include "sensor.h"
 
-//REMOVE LATER
-#include "soil_moisure_sensor_grove_v1.0.h"
 
-// struct Measurement{
-//     bool last = false;
-//     String type;
-//     float value;
-// };
+Sensor::Sensor(String HARDWARE_INFO, String TYPE, String UNITS, uint8_t power_pin)
+    : power_pin(power_pin), HARDWARE_INFO(HARDWARE_INFO), TYPE(TYPE), UNITS(UNITS) {}
 
-class Sensor:Device{
-    private:
+void Sensor::power_on(){
+    //TODO
+}
+void Sensor::power_off(){
+    //TODO
+}
 
-    public:
-        int n;
-        const String UNITS; // TODO should be array 
+void Sensor::enable(){
+    enabled = true;
+    power_on(); //TODO maybe enable should not power on?
+}
+void Sensor::disable(){
+    enabled = false;
+    power_off();
+}
 
-        Sensor(){};
-        virtual void enable();
-        virtual void disable();
-        virtual void measure();
-        virtual Measurement get_values(); 
-        virtual void calibrate();
-        virtual void power_on();
-        virtual void power_off();
-};
+measure_callback_t Sensor::get_measure_callback(){
+    return [this](){measure();};
+}
+
+get_values_callback_t Sensor::get_values_callback(){
+    return [this]()->Measurement{return get_values();};
+}
