@@ -1,5 +1,5 @@
-// #ifndef _TASKSCHEDULER_H_
-// #define _TASKSCHEDULER_H_
+#ifndef _MESHNODE_H_
+#define _MESHNODE_H_
 
 #include <painlessMesh.h>
 #include <string.h>
@@ -43,4 +43,4 @@ class MeshNode
 };
 
 
-// #endif /* _TASKSCHEDULER_H_ */
+#endif /* _MESHNODE_H_ */

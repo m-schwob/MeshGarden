@@ -9,7 +9,7 @@
 #include "mesh_bridge.h"
 #elif defined(ESP8266)
 #include "mesh_node.h"
-#include "soil_moisure_sensor_grove_v1.0.cpp"
+#include "soil_moisure_sensor_grove_v1.0.h"
 MeshNode* mesh = NULL;
 SoilMoisureSensorGroveV1* soil_moisture = NULL;
 #endif

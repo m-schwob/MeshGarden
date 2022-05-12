@@ -1,5 +1,6 @@
 #include "mesh_node.h"
 
+
 static MeshNode *node = NULL;
 
 // for Now the message simply contains the nodeId and a counter
