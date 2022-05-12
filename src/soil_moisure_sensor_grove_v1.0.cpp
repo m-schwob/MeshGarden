@@ -1,8 +1,11 @@
+#include "soil_moisure_sensor_grove_v1.0.h"
 #include <Arduino.h>
-#include "Sensor.cpp"
+// #include "Sensor.cpp"
 
 // ADS1X15 related. remove later
 #include <Adafruit_ADS1X15.h>
+
+
 
 class SoilMoisureSensorGroveV1{
     private:
@@ -84,9 +87,17 @@ class SoilMoisureSensorGroveV1{
 
         Measurement get_values(){
             Measurement measurement;
-            measurement.key = TYPE;
+            measurement.type = TYPE;
             measurement.value = result;
-            result = -1;
+            measurement.last = true;
             return measurement;
+        }
+
+        std::function<void()> get_measure_callback(){
+            return [this](){measure();};
+        }
+
+        std::function<Measurement()> get_values_callback(){
+            return [this]()->Measurement{return get_values();};
         }
 };
