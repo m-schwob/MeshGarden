@@ -29,9 +29,9 @@ class Sensor{
         const String TYPE;
         const String UNITS; // TODO should be array 
 
-        virtual void measure();
-        virtual Measurement get_values(); 
-        virtual void calibrate();
+        virtual void measure() = 0;
+        virtual Measurement get_values() = 0; 
+        virtual void calibrate() = 0;
         virtual void power_on();
         virtual void power_off();
         virtual void enable();
