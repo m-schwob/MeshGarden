@@ -29,21 +29,17 @@ float SoilMoisureSensorGroveV1::percentage(float value, float max, float min){
 
 
 //TODO remove hard coded. remove default value from analog_pin after solving data saving
-SoilMoisureSensorGroveV1::SoilMoisureSensorGroveV1(uint8_t analog_pin, uint8_t power_pin) 
-    : Sensor(_HARDWARE_INFO, _TYPE, _UNITS, power_pin), analog_pin(analog_pin){
+SoilMoisureSensorGroveV1::SoilMoisureSensorGroveV1(int id, uint8_t analog_pin, uint8_t power_pin ) 
+    : Sensor(id, _DEVICE_TYPE, _HARDWARE_INFO, analog_pin, _MEASUREMENTS_TYPE, _UNITS, power_pin){
     // init I/O power pin if define. init to power off state
-    if(power_pin != -1){
-        pinMode(power_pin,OUTPUT);
-        digitalWrite(power_pin, HIGH); //TODO solve it and change to low
-    }
     init_adc(); // ADS1X15 related.
     Serial.printf("%s: initelized", HARDWARE_INFO.c_str()); // add details about pins i.e. 
 }
 
 void SoilMoisureSensorGroveV1::measure(){
     // power on sensor if power pin is defined 
-    if(power_pin != -1)
-        digitalWrite(power_pin, HIGH);
+    if(POWER_PIN != -1)
+        digitalWrite(POWER_PIN, HIGH);
 
     // TODO solve it when solving extender
     // if(!extender)
@@ -55,13 +51,13 @@ void SoilMoisureSensorGroveV1::measure(){
     Serial.printf("%s: measure %f volts, %f/1 range\n", HARDWARE_INFO.c_str(), volt, result);
 
     // power on sensor if power pin is defined 
-    if(power_pin != -1)
-        digitalWrite(power_pin, HIGH); //TODO solve it and change to low
+    if(POWER_PIN != -1)
+        digitalWrite(POWER_PIN, HIGH); //TODO solve it and change to low
 }
 
 Measurement SoilMoisureSensorGroveV1::get_values(){
     Measurement measurement;
-    measurement.type = TYPE;
+    measurement.type = MEASUREMENTS_TYPE;
     measurement.value = result;
     measurement.last = true;
     return measurement;

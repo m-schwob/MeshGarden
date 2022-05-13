@@ -1,29 +1,32 @@
-#include <Arduino.h>
-
-/* data from memory/server:
-    - id
-    - pins - format (number, I/O, job)? array?
-    - power pin and if power enable.
-    - type of the device.
+#include "device.h"
 
 
-*/
-class Device{
-    private:
-        const int POWER_PIN;
-        const bool POWER_CONTROL;
-        const int DATA_PINS; // should be an array
+Device::Device(int id, String device_type, String hardware_info, uint8_t data_pins, uint8_t power_pin) 
+        : ID(id), DEVICE_TYPE(device_type), HARDWARE_INFO(hardware_info), DATA_PINS(data_pins), POWER_PIN(power_pin) {
+    if(POWER_PIN != -1){
+        pinMode(POWER_PIN, OUTPUT);
+        digitalWrite(POWER_PIN, LOW);
+    }
+}
 
-    public:
-        const String HARDWARE_INFO; // per implementation info e.g. 2 different uv sensors can hav different info
-        // TODO enum of types
-        const int DEVICE_TYPE;  // per device type. e.g. 2 UV sensors will have the same type
-        const int ID;
-        
+void Device::power_on(){
+    if(POWER_PIN != -1)
+        digitalWrite(POWER_PIN, HIGH);
+}
+void Device::power_off(){
+    if(POWER_PIN != -1)
+        digitalWrite(POWER_PIN, LOW);
+}
 
-        Device();
-        virtual void enable();
-        virtual void disable();
-        virtual void power_on();
-        virtual void power_off();
-};
+// by default enabling the device does not power it on. 
+void Device::enable(bool _power_on){
+    enabled = true;
+    if(_power_on && POWER_PIN != -1)
+        power_on();
+}
+
+// disabling the device will allways power it off
+void Device::disable(){
+    enabled = false;
+    power_off();
+}

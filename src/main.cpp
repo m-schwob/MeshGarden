@@ -26,7 +26,8 @@ void setup(void)
     init_node();
     #else
     mesh = new MeshNode();
-    soil_moisture = new SoilMoisureSensorGroveV1(0);
+    soil_moisture = new SoilMoisureSensorGroveV1(1,0);
+    soil_moisture->enable(true);
     Serial.println("adding tasks");
     mesh->add_measurement(soil_moisture->get_measure_callback(), 2);
     mesh->add_send_values(soil_moisture->get_values_callback(), 4);

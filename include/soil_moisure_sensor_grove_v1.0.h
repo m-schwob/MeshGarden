@@ -6,8 +6,10 @@
 #include <Adafruit_ADS1X15.h>
 #include "Sensor.h"
 
+
+#define _DEVICE_TYPE "Soil Moisture Sensor"
 #define _HARDWARE_INFO "Groove Soil Moisture"
-#define _TYPE "Soil Moisture"
+#define _MEASUREMENTS_TYPE "Soil Moisture"
 #define _UNITS "%"
 
 
@@ -27,7 +29,7 @@ class SoilMoisureSensorGroveV1 : public Sensor{
         float percentage(float value, float max, float min = 0);
 
     public:
-        SoilMoisureSensorGroveV1(uint8_t analog_pin = 0, uint8_t power_pin = -1);
+        SoilMoisureSensorGroveV1(int id, uint8_t data_pins, uint8_t power_pin = -1);
         void measure();
         Measurement get_values();
         void calibrate();

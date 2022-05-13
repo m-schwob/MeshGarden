@@ -1,24 +1,8 @@
 #include "sensor.h"
 
 
-Sensor::Sensor(String HARDWARE_INFO, String TYPE, String UNITS, uint8_t power_pin)
-    : power_pin(power_pin), HARDWARE_INFO(HARDWARE_INFO), TYPE(TYPE), UNITS(UNITS) {}
-
-void Sensor::power_on(){
-    //TODO
-}
-void Sensor::power_off(){
-    //TODO
-}
-
-void Sensor::enable(){
-    enabled = true;
-    power_on(); //TODO maybe enable should not power on?
-}
-void Sensor::disable(){
-    enabled = false;
-    power_off();
-}
+Sensor::Sensor(int id, String device_type, String hardware_info, uint8_t data_pins, String measurements_type, String units, uint8_t power_pin)
+    : Device(id, device_type, hardware_info, data_pins, power_pin), MEASUREMENTS_TYPE(measurements_type), UNITS(units) {}
 
 measure_callback_t Sensor::get_measure_callback(){
     return [this](){measure();};
