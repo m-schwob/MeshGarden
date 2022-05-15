@@ -10,7 +10,7 @@ MeshBridge::MeshBridge(){
 
 // a function that parses a string and creates a vector of words
 vector<String> MeshBridge::split(String _s, String _delimiter)
-{
+{   
     string s = _s.c_str();
     string delimiter = _delimiter.c_str();
     size_t pos_start = 0, pos_end, delim_len = delimiter.length();
@@ -35,32 +35,36 @@ void MeshBridge::firebaseInit()
     Firebase.begin(&config, &auth);
 }
 
-// fireBase update Function For moisture and humidity sensor, will recieve 3 Values
+// fireBase update Function For moisture and humidity sensor, will receive 3 Values
 //  (Have to fix temp- for now its the nodeId), and post them on the firebase
-// under the plantId
+// under the plant_id
 
-// Todo- check option for sensor to sand Json messge on mesh, and firestore will decode it
+// Todo- check option for sensor to sand Json message on mesh, and firestore will decode it
 // declare Strings in each sensor class
-void MeshBridge::firestoreDataUpdate(String plantId, String msg)
+void MeshBridge::firestoreDataUpdate(String plant_id, String meas_type, String value) //TEMP parameters edited have measurement type and value 
 {
     if (WiFi.status() == WL_CONNECTED && Firebase.ready())
     {
-        String documentPath = "prototype/" + plantId;
+        Serial.printf("updating firebase with data: %s:%s\n", meas_type.c_str(), value.c_str());
+        String document_path = "prototype/"; // + plant_id;
         FirebaseJson content;
-        content.set("fields/last_message/", msg.c_str());
-        if (Firebase.Firestore.patchDocument(&fbdo, FIREBASE_PROJECT_ID, "", documentPath.c_str(), content.raw(), "last_message"))
+        bool response;
+
+        content.set("fields/" + plant_id + "/mapValue/fields/" + meas_type.c_str()+ "/doubleValue/", value.c_str());
+
+        // check if node has a document nad create new if not exists
+        if (Firebase.Firestore.getDocument(&fbdo, FIREBASE_PROJECT_ID, "", document_path.c_str(), plant_id.c_str())){
+            Serial.printf("node document found\n%s\n\n", fbdo.payload().c_str());
+            response = Firebase.Firestore.patchDocument(&fbdo, FIREBASE_PROJECT_ID, "", document_path.c_str(), content.raw(), "last_message");
+        }
+        else{
+            Serial.println("node document does not exist. creating document..)");
+            response = Firebase.Firestore.createDocument(&fbdo, FIREBASE_PROJECT_ID, "", document_path.c_str(), content.raw());
+        }
+        
+        if (response)
         {
             Serial.printf("ok\n%s\n\n", fbdo.payload().c_str());
-            return;
-        }
-        else
-        {
-            Serial.println(fbdo.errorReason());
-        }
-        if (Firebase.Firestore.createDocument(&fbdo, FIREBASE_PROJECT_ID, "", documentPath.c_str(), content.raw()))
-        {
-            Serial.printf("ok\n%s\n\n", fbdo.payload().c_str());
-            return;
         }
         else
         {
@@ -74,14 +78,8 @@ void MeshBridge::firestoreDataUpdate(String plantId, String msg)
 // the dict will have nodeId as its key, and the Entire message as its value
 void receivedCallback(uint32_t from, String &msg)
 {
-    Serial.printf("startHere: Received from %u msg=%s\n", from, msg.c_str());
-    std::vector<String> vec = node->split(msg.c_str(), " "); // split the String to vector of Strins by word
-    // if(dict.find(String(vec[0].c_str())) == dict.end())
-    // dict.insert(make_pair(String(vec[0].c_str()), msg));
-    // else
-    // dict[String(vec[0].c_str())] = msg;
-    node->server_data.push_back(msg);
-    Serial.printf("updated DICT [%s] = %s", String(vec[0].c_str()), msg);
+    Serial.printf("message received from %u msg=%s. saving to cache\n", from, msg.c_str());
+    node->server_data.push_back(String(from) + "," + msg);
 }
 
 // Needed for mesh, do not change
@@ -146,13 +144,15 @@ void MeshBridge::update()
         // firestoreDataUpdate(iter->first, *measures_iter);
         //}
         //   }
+        Serial.printf("sending %d cached messages..\n", server_data.size());
         for (vector<String>::iterator measures_iter = server_data.begin(); measures_iter != server_data.end(); measures_iter++)
         {
-            std::vector<String> vec = split((*measures_iter).c_str(), " "); // split the String to vector of Strins by word
-            firestoreDataUpdate(String(vec[0].c_str()), *measures_iter);
+            Serial.printf("sending message <%s>\n", measures_iter->c_str());
+            std::vector<String> vec = split((*measures_iter), ","); // split the String to vector of Strins by word
+            firestoreDataUpdate(String(vec[0].c_str()), String(vec[1].c_str()), String(vec[2].c_str()));
         }
         server_data.clear();
-        //  dict.clear(); //clears the map in order to be more space efficiant, nodes that did not changed would not be posted again
+        //  dict.clear(); //clears the map in order to be more space efficient, nodes that did not changed would not be posted again
         Serial.println("WiFi disconnected. initialize mesh");
         // initializing the mesh network again
         init_mesh();

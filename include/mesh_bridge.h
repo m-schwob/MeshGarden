@@ -3,18 +3,16 @@
 
 // BRIDGE NODE Code - has to be ESP32 for now, the node will receive a message from the other nodes
 //(for now the message contains 2 values and it is written in the following manner: "<NODE_ID> <NODE COUNTER>")
-// the bridge will decode the message, and every time he recieves one he will add the values to a map by:
-// key: nodeId , value: measurment. every 30 seconds it will disconnect from the mesh, connect to WiFi, and push the last saved data
+// the bridge will decode the message, and every time he receives one he will add the values to a map by:
+// key: nodeId , value: measurement. every 30 seconds it will disconnect from the mesh, connect to WiFi, and push the last saved data
 // start:
-//#include <Arduino.h>
+#include <Arduino.h>
 #include <painlessMesh.h>
 #include <Firebase_ESP_Client.h>
-#include <time.h>
 #include <AsyncTCP.h>
 #include <ESPAsyncWebServer.h>
 #include <vector>
-#include <map>
-#include <cstdlib>
+
 
 using namespace painlessmesh;
 using namespace std;
@@ -66,7 +64,7 @@ private:
 
     void init_mesh();
     void firebaseInit();
-    void firestoreDataUpdate(String plantId, String msg);
+    void firestoreDataUpdate(String plant_id, String meas_type, String value);
     vector<String> split(String s, String delimiter);
 
 

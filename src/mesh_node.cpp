@@ -20,7 +20,7 @@ void MeshNode::send_values(std::function<Measurement()> get_values_callback){
     Measurement meas;
     do {
         meas = get_values_callback();
-        mesh.sendBroadcast(mesh.getNodeId() + " " + meas.type + " " + meas.value);
+        mesh.sendBroadcast(mesh.getNodeId() + "," + meas.type + "," + meas.value);
     } while(!meas.last);
 }
 
