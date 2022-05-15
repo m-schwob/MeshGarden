@@ -2,6 +2,7 @@
 #define _SENSOR_H_
 
 #include <Arduino.h>
+#include <functional>
 #include "Device.h"
 
 
