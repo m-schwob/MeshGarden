@@ -1,53 +1,4 @@
-//BRIDGE NODE Code - has to be ESP32 for now, the node will receive a message from the other nodes 
-//(for now the message contains 2 values and it is written in the following manner: "<NODE_ID> <NODE COUNTER>")
-//the bridge will decode the message, and every time he recieves one he will add the values to a map by:
-//key: nodeId , value: measurment. every 30 seconds it will disconnect from the mesh, connect to WiFi, and push the last saved data
-//start:
-//#include <Arduino.h>
 #include "mesh_bridge.h"
-#include <painlessMesh.h>
-#include <Firebase_ESP_Client.h>
-#include "time.h"
-#include <AsyncTCP.h>
-#include <ESPAsyncWebServer.h>
-#include <vector>
-#include <map>
-#include <cstdlib>
-using namespace painlessmesh;
-using namespace std;
-/***************************
- *  Macro Definitions For the mesh
- **************************/
-#define   MESH_PREFIX     "whateverYouLike"
-#define   MESH_PASSWORD   "somethingSneaky"
-#define   MESH_PORT       5555
-/***************************
- *  Variables Definitions For the WiFi - Change wifi ssid,password to match yours
- **************************/
-const char* ssid     = "My_hotspot";
-const char* password = "mypassword";
-const char* ntpServer = "pool.ntp.org";
-const long  gmtOffset_sec = 7200;
-const int   daylightOffset_sec = 7200;
-/***************************
- *  Macro Definitions For the FireStore DB
- **************************/
-#define API_KEY "AIzaSyCpnmHDV7B7oR6pnKXS0VBFoqaF174UzZM"
-#define FIREBASE_PROJECT_ID "meshgarden-iot"
-#define USER_EMAIL "ioadmin@ioadmin.com"
-#define USER_PASSWORD "ioadmin"
-
-//mesh global variables
-Scheduler userScheduler; // to control your personal task
-painlessMesh  mesh;
-//firebase global variables
-FirebaseData fbdo;
-FirebaseAuth auth;
-FirebaseConfig config;
-//sync with the server, saving data variables
-int lasttime=0; //initialized, used to messure time interaval for the disconnect
-// std::map<String,vector<String>> dict;
-std::vector<String> server_data;
 
 // a function that parses a string and creates a vector of words
 vector<string> split (string s, string delimiter) {
@@ -63,7 +14,7 @@ vector<string> split (string s, string delimiter) {
     return res;
 }
 //fireBase Init function, insert the Project firestore ID and do authentication by userName and password
-void firebaseInit(){
+void MeshBridge::firebaseInit(){
     config.api_key =API_KEY;
     auth.user.email =USER_EMAIL;
     auth.user.password = USER_PASSWORD;
