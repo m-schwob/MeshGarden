@@ -15,7 +15,7 @@ class Device {
     private:
         bool enabled = false; // device is disabled when initialized
     public:
-        const int ID;
+        const unsigned int ID;
         const String DEVICE_TYPE; // per device type. e.g. 2 UV sensors will have the same type. // TODO enum or list of types
         const String HARDWARE_INFO; // per implementation info e.g. 2 different uv sensors can hav different info
     private:
