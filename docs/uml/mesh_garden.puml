@@ -29,8 +29,19 @@ class LightSensor{}
 
 class HoseActuator{}
 
-class MeshGraden{
+class Network{
+    add_task()
+    remove_task()
+}
+
+class MeshGarden{
     - set<Device> Devices
+    
+    init_network()
+    init_devices()
+    check_firmware_update()
+    update_firmware()
+    sync_with_server()
 }
 
 class OTA{}
@@ -51,9 +62,10 @@ Sensor <|-- UVSensor
 Sensor <|-- LightSensor
 Actuator <|-- HoseActuator
 
-main o-- MeshGraden
-MeshGraden o-- OTA
-MeshGraden o-- Device
+main o-- MeshGarden
+MeshGarden o-- OTA
+MeshGarden o-- Network
+MeshGarden o-- Device
 
 
 
