@@ -1,22 +1,40 @@
-@startuml
+@startuml MeshGarden Classes
 
-interface Device{
-    - string HARDWARE_INFO
-    - int id 
+abstract Device{
+    - bool enabled
+    - int ID 
+    + String DEVICE_TYPE 
+    + String HARDWARE_INFO
+    - uint8_t data_pins
+    + uint8_t POWER_PIN
 
-    + void init()
-    + void enable()
+
+    # void Device(int id, String device_type, String hardware_info, uint8_t data_pins, uint8_t power_pin)
+    + void enable(bool _power_on)
     + void disable()
+    + void power_on()
+    + void power_off()
 }
 
 abstract Sensor{
-    + string UNITS
+    + String UNITS
     # float[] values
 
     + void measure()
     + float[] get_vlaues()
 }
 
+entity Measurement{
+    + bool last
+    + String type
+    + float value
+}
+
+annotation measure_callback_t <<typedef std::function<void()> >> {
+    hide fields
+}
+
+    ' hide members
 abstract Actuator{}
 
 class SoilMoistureSensor{}
