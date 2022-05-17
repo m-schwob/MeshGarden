@@ -17,12 +17,14 @@ void MeshNode::sendMessage()
 
 void MeshNode::send_values(std::function<Measurement()> get_values_callback){
     Serial.println("sending values");
-    Measurement meas;
-    do {
-        meas = get_values_callback();
-        mesh.sendBroadcast(mesh.getNodeId() + "," + meas.type + "," + meas.value);
-    } while(!meas.last);
-}
+    //add it when we will have a sensor
+    // Measurement meas;
+    // do {
+    //     meas = get_values_callback();
+    //     mesh.sendBroadcast(mesh.getNodeId() + "," + meas.type + "," + meas.value);
+    // } while(!meas.last);
+    mesh.sendBroadcast(mesh.getNodeId() + ",soil measure , 10" );
+    }
 
 void receivedCallback(uint32_t from, String &msg)
 {
@@ -69,20 +71,22 @@ void MeshNode::update()
 
 void MeshNode::add_measurement(TaskCallback callable, unsigned long interval, long iterations)
 {
-    Serial.println("adding measurement task");
-    measure.set(TASK_SECOND*interval, iterations, callable);
-    userScheduler.addTask(measure);
-    measure.enable();
+    // Serial.println("adding measurement task");
+    // measure.set(TASK_SECOND*interval, iterations, callable);
+    // userScheduler.addTask(measure);
+    // measure.enable();
 }
 
 void MeshNode::add_send_values(std::function<Measurement()> callable, unsigned long interval, long iterations)
 {
-    Serial.println("adding value reading task");
-    get_value.set(TASK_SECOND*interval, iterations, [this, callable](){send_values(callable);});
-    userScheduler.addTask(get_value);
-    get_value.enable();
+    // Serial.println("adding value reading task");
+    // get_value.set(TASK_SECOND*interval, iterations, [this, callable](){send_values(callable);});
+    // userScheduler.addTask(get_value);
+    // get_value.enable();
 }
 
 void remove_task()
 {
 }
+
+

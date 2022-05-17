@@ -12,7 +12,7 @@
 #include <AsyncTCP.h>
 #include <ESPAsyncWebServer.h>
 #include <vector>
-
+#include <list>
 
 using namespace painlessmesh;
 using namespace std;
@@ -55,8 +55,8 @@ private:
     // sync with the server, saving data variables
     int lasttime = 0; // initialized, used to messure time interaval for the disconnect
     // std::map<String,vector<String>> dict;
+    std::list<String> mesh_values ; 
     std::vector<String> server_data;
-
     friend void receivedCallback(uint32_t from, String &msg);
     friend void newConnectionCallback(uint32_t nodeId);
     friend void changedConnectionCallback();
@@ -64,6 +64,8 @@ private:
 
     void init_mesh();
     void firebaseInit();
+    void firestoreMeshCollectionClear();
+    void firestoreMeshCollectionUpdate();
     void firestoreDataUpdate(String plant_id, String meas_type, String value);
     vector<String> split(String s, String delimiter);
 
@@ -71,6 +73,7 @@ private:
 public:
     MeshBridge();
     void update();
+    void get_mesh_nodes();
 };
 
 #endif /* _BRIDGENODE_H_ */
