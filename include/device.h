@@ -12,6 +12,10 @@
     - type of the device.
 */
 
+inline String* arr_end(String* arr){
+    return arr + sizeof(arr)/sizeof(String);
+}
+
 class Device {
     private:
         bool enabled = false; // device is disabled when initialized
@@ -26,6 +30,8 @@ class Device {
 
     protected:
         Device() = delete; //since the class isn't pure virtual, that will prevent constracting object of this class 
+        Device(int id, String device_type, String hardware_info, uint8_t data_pins, uint8_t power_pin = -1);
+        Device(int id, String device_type[], String hardware_info, uint8_t data_pins, uint8_t power_pin = -1);
         Device(int id, std::vector<String> device_type, String hardware_info, uint8_t data_pins, uint8_t power_pin = -1);
 
     public:

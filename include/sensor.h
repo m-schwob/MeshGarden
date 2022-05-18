@@ -22,7 +22,9 @@ class Sensor : public Device{
         //TODO config this at calibration
         bool calibrated = true;
         Sensor() = delete;
-        Sensor(int id, std::vector<String> device_type, String hardware_info, uint8_t data_pins, std::vector<String> measurements_type, std::vector<String> units, uint8_t power_pin = -1);
+        Sensor(int id, String sensor_type, String hardware_info, uint8_t data_pins, String measurement_type, String units, uint8_t power_pin = -1);
+        Sensor(int id, String sensor_type[], String hardware_info, uint8_t data_pins, String measurement_type[], String units[], uint8_t power_pin = -1);
+        Sensor(int id, std::vector<String> sensor_type, String hardware_info, uint8_t data_pins, std::vector<String> measurement_type, std::vector<String> units, uint8_t power_pin = -1);
 
     public:
         const std::vector<String> MEASUREMENTS_TYPE; // identifier for what is being measured. e.g. humidity, temperature // TODO should be array 

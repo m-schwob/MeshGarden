@@ -1,6 +1,12 @@
 #include "device.h"
 
 
+Device::Device(int id, String device_type, String hardware_info, uint8_t data_pins, uint8_t power_pin)
+        : Device(id, std::vector<String>({device_type}), hardware_info, data_pins, power_pin){}
+
+Device::Device(int id, String device_type[], String hardware_info, uint8_t data_pins, uint8_t power_pin)
+        : Device(id, std::vector<String>(device_type, arr_end(device_type)), hardware_info, data_pins, power_pin){}
+
 Device::Device(int id, std::vector<String> device_type, String hardware_info, uint8_t data_pins, uint8_t power_pin) 
         : ID(id), DEVICE_TYPE(device_type), HARDWARE_INFO(hardware_info), DATA_PINS(data_pins), POWER_PIN(power_pin) {
     if(POWER_PIN != -1){
