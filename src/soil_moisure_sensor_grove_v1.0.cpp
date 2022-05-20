@@ -57,7 +57,7 @@ void SoilMoisureSensorGroveV1::measure(){
 
 Measurement SoilMoisureSensorGroveV1::get_values(){
     Measurement measurement;
-    measurement.type = MEASUREMENTS_TYPE;
+    measurement.type = MEASUREMENTS_TYPE[0];
     measurement.value = result;
     measurement.last = true;
     return measurement;
