@@ -1,30 +1,131 @@
-@startuml Data Strucures
-skinparam titleFontSize 14
-title
-Nodes
-|= node_id |= sensor_type |= last_update |= time_interval |= value |= controller_type |= firmware_version |
-|  | | | | |
-|  | | | | |
-|  | | | | |
+@startjson
 
-Measured Data
-|= node_id |= time |= value |= sensore_type |
-| | | | |
-| | | | |
-| | | | |
+{
+    "Nodes": [
+        {
+            "nodeId": {
+                "sensors": [
+                    {
+                        "sensor type": [
+                            "Temperature",
+                            "Humidity"
+                        ],
+                        "measurement interval(seconds)": "60",
+                        "pinout": {
+                            "DAT": "D1",
+                            "VCC": "D2"
+                        },
+                        "measurements": [
+                            {
+                                "measurement type": "Humidity",
+                                "samples": [
+                                    {
+                                        "measure value": "value",
+                                        "measure time": "time"
+                                    },
+                                    {
+                                        "measure value": "value",
+                                        "measure time": "time"
+                                    }
+                                ],
+                                "units": "%"
+                            },
+                            {
+                                "measurement type": "Temperature",
+                                "samples": [
+                                    {
+                                        "measure value": "value",
+                                        "measure time": "time"
+                                    },
+                                    {
+                                        "measure value": "value",
+                                        "measure time": "time"
+                                    }
+                                ],
+                                "units": "%"
+                            }
+                        ]
+                    },
+                    {
+                        "sensor type": [
+                            "Soil Humidity"
+                        ],
+                        "measurement interval(seconds)": "60",
+                        "pinout": {
+                            "AOUT": "A0",
+                            "VCC": "D4"
+                        },
+                        "measurements": [
+                            {
+                                "measurement type": "Soil Humidity",
+                                "samples": [
+                                    {
+                                        "measure value": "value",
+                                        "measure time": "time"
+                                    },
+                                    {
+                                        "measure value": "value",
+                                        "measure time": "time"
+                                    }
+                                ],
+                                "units": "%"
+                            }
+                        ]
+                    }
+                ],
+                "firmware version": "version",
+                "nickname": "nick"
+            }
+        },
+        {
+            "nodeId": {
+                "sensors": [
+                    {
+                        "sensor type": "sensor",
+                        "pinout": {},
+                        "measurement interval(seconds)": "600",
+                        "measurements": []
+                    },
+                    {
+                        "sensor type": "sensor",
+                        "pinout": {},
+                        "measurement interval(seconds)": "60",
+                        "measurements": []
+                    }
+                ],
+                "firmware version": "version",
+                "nickname": "nick"
+            }
+        }
+    ],
+    "Mesh Network": {
+        "node1": "nodeId1",
+        "nodeId2": "nodeid2",
+        "nodeId3": "nodeid3"
+    },
+    "Nodes Nicknames": [
+        {
+            "nodeId": "nickname"
+        },
+        {
+            "nodeId2": "nickname"
+        },
+        {
+            "nodeId3": "nickname"
+        }
+    ],
+    "Nodes changes": [
+        {
+            "nodeId": "ID",
+            "node sensor": "sensor",
+            "time interval": "time"
+        },
+        {
+            "nodeId2": "ID2",
+            "node sensor": "sensor",
+            "time interval": "time"
+        }
+    ]
+}
 
-Firmware Update
-|= controller_type |= binary_file |= firmware_version |
-| | | |
-| | | |
-| | | |
-
-Active Nodes
-|= node_id |
-| |
-| |
-| |
-
-
-end title
-@enduml
+@endjson
