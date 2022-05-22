@@ -1,0 +1,91 @@
+@startjson
+
+{   
+    "Measurements": [
+    {      
+        "nodeId":[
+        {
+        "sensor id": "1" ,   
+        "samples": [
+        {
+            "measure value": "value",
+            "measure time": "time"
+        },
+        {
+            "measure value": "value",
+            "measure time": "time"
+        }
+        ]
+        }
+        ]
+    }
+    ],
+    "Nodes": [
+    {    
+        "nodeId":[
+        {
+            "nickname": "nick",
+            "firmware_version" : "f1",  
+            "sensors" : [
+                {
+                    "sensor_id": "1",
+                    "measurement type": "Humidity",
+                    "sensor_time_interval": "40",
+                    "sensor units": "%",
+                    "pinout": {
+                        "AOUT": "A0",
+                        "VCC": "D4"
+                    }
+                }
+                ] 
+        },
+                {
+            "nickname": "nick",
+            "firmware_version" : "f1",  
+            "sensors" : [
+                {
+                    "sensor_id": "1",
+                    "measurement type": "Humidity",
+                    "sensor_time_interval": "40",
+                    "sensor units": "%",
+                    "pinout": {
+                        "AOUT": "A0",
+                        "VCC": "D4"
+                    }
+                }
+                ] 
+        }
+        ]
+    }
+    ],
+    "Mesh Network": {
+        "node1": "nodeId1",
+        "nodeId2": "nodeid2",
+        "nodeId3": "nodeid3"
+    },
+    "Nodes Nicknames": [
+        {
+            "nodeId": "nickname"
+        },
+        {
+            "nodeId2": "nickname"
+        },
+        {
+            "nodeId3": "nickname"
+        }
+    ],
+    "Nodes changes": [
+        {
+            "nodeId": "ID",
+            "node sensor": "sensor",
+            "time interval": "time"
+        },
+        {
+            "nodeId2": "ID2",
+            "node sensor": "sensor",
+            "time interval": "time"
+        }
+    ]
+}
+
+@endjson

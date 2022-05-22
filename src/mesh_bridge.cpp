@@ -41,12 +41,12 @@ void MeshBridge::firebaseInit()
 
 // Todo- check option for sensor to sand Json message on mesh, and firestore will decode it
 // declare Strings in each sensor class
-void MeshBridge::firestoreDataUpdate(String plant_id, String meas_type, String value) //TEMP parameters edited have measurement type and value 
+void MeshBridge::firestoreDataUpdate(String plant_id, String sensor_id ,String meas_type, String value) //TEMP parameters edited have measurement type and value 
 {
     if (WiFi.status() == WL_CONNECTED && Firebase.ready())
     {
         Serial.printf("updating firebase with data: %s:%s\n", meas_type.c_str(), value.c_str());
-        String document_path = "prototype/" + plant_id;
+        String document_path = "Nodes/" + plant_id +"/sensors/meassurments";
         FirebaseJson content;
         bool response;
 
@@ -56,11 +56,6 @@ void MeshBridge::firestoreDataUpdate(String plant_id, String meas_type, String v
             Serial.printf("node document found\n%s\n\n", fbdo.payload().c_str());
             response = Firebase.Firestore.patchDocument(&fbdo, FIREBASE_PROJECT_ID, "", document_path.c_str(), content.raw(), "last_message");
         }
-        else{
-            Serial.println("node document does not exist. creating document..)");
-            response = Firebase.Firestore.createDocument(&fbdo, FIREBASE_PROJECT_ID, "", document_path.c_str(), content.raw());
-        }
-        
         if (response)
         {
             Serial.printf("ok\n%s\n\n", fbdo.payload().c_str());
@@ -180,25 +175,29 @@ void MeshBridge::update()
         {
             Serial.printf("sending message <%s>\n", measures_iter->c_str());
             std::vector<String> vec = split((*measures_iter), ","); // split the String to vector of Strins by word
-            //firestoreDataUpdate(String(vec[0].c_str()), String(vec[1].c_str()), String(vec[2].c_str()));
+            firestoreDataUpdate(String(vec[0].c_str()),String(vec[1].c_str()), String(vec[2].c_str()), String(vec[3].c_str()));
         }
         server_data.clear();
-        Serial.println("send to server list:");
+        //Serial.println("send to server list:");
         firestoreMeshCollectionClear();
         firestoreMeshCollectionUpdate();
+        firestoreReadChanges();	
 
         mesh_values.clear();
         Serial.println("send to server end");
         //  dict.clear(); //clears the map in order to be more space efficient, nodes that did not changed would not be posted again
         Serial.println("WiFi disconnected. initialize mesh");
         // initializing the mesh network again
+        for(list<String>::iterator iter= change_log.begin(); iter!=change_log.end() ; ++iter ){
+            Serial.println("change in: ");
+            Serial.printf("%s\n\n",(*iter).c_str());//FROM HERE WE CAN EXTRACT NIDE ID AND SEND THE JSON AS SINGLE
+        }
         init_mesh();
-
         lasttime = millis();
     }
 }
-
-    void MeshBridge::firestoreMeshCollectionClear(){
+//this function will delete the active mesh nodes before inserting the new mesh network active nodes in
+void MeshBridge::firestoreMeshCollectionClear(){
     if(WiFi.status() == WL_CONNECTED && Firebase.ready()){
     }
         String documentPath = "MeshNetwork/active";
@@ -206,8 +205,37 @@ void MeshBridge::update()
     if (Firebase.Firestore.deleteDocument(&fbdo, FIREBASE_PROJECT_ID, "", documentPath.c_str(), content.raw()))
     {
         Serial.printf("ok\n%s\n\n", fbdo.payload().c_str());
+        Serial.print(fbdo.payload());
         return;
     }else{
       Serial.println(fbdo.errorReason());
     }
     }
+
+
+void MeshBridge:: firestoreReadChanges()
+{
+    if(WiFi.status() == WL_CONNECTED && Firebase.ready()){
+        for(list<String>::iterator iter= mesh_values.begin(); iter!=mesh_values.end() ; ++iter ){
+            String documentPath = "/Changes/"+(*iter);
+            FirebaseJson content;
+            bool response;
+            Serial.printf("check change for %s\n",documentPath.c_str());
+        if(Firebase.Firestore.getDocument(&fbdo, FIREBASE_PROJECT_ID, "", documentPath.c_str(), content.raw())){
+            Serial.printf("recieved %s\n", fbdo.payload().c_str());
+            change_log.push_back(fbdo.payload()); // Saves changes log as String object in vector of changes.
+        }
+        // A CODE TO DELETE A CHANGE THAT HAS BEEN READ:: for now its in comment cause the insertion is manual
+        //
+        //
+        // if (Firebase.Firestore.deleteDocument(&fbdo, FIREBASE_PROJECT_ID, "", documentPath.c_str(), content.raw()))
+        // {
+        //     Serial.printf("deleted \n%s\n\n", fbdo.payload().c_str());
+        //     return;
+        // }else{
+        // Serial.println(fbdo.errorReason());
+        // }
+        }
+
+    }
+}
