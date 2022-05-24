@@ -74,18 +74,10 @@
             "nodeId3": "nickname"
         }
     ],
-    "Nodes changes": [
-        {
+    "Nodes changes": {
             "nodeId": "ID",
-            "node sensor": "sensor",
-            "time interval": "time"
-        },
-        {
-            "nodeId2": "ID2",
-            "node sensor": "sensor",
-            "time interval": "time"
-        }
-    ]
+            "nodeId2": "ID2"
+    }
 }
 
 @endjson

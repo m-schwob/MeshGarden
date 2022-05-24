@@ -46,7 +46,7 @@ void MeshBridge::firestoreDataUpdate(String plant_id, String sensor_id ,String m
     if (WiFi.status() == WL_CONNECTED && Firebase.ready())
     {
         Serial.printf("updating firebase with data: %s:%s\n", meas_type.c_str(), value.c_str());
-        String document_path = "Nodes/" + plant_id +"/sensors/meassurments";
+        String document_path = "Measurements/" + plant_id +"/"+ sensor_id +"/meassurments";
         FirebaseJson content;
         bool response;
 
@@ -223,7 +223,8 @@ void MeshBridge:: firestoreReadChanges()
             Serial.printf("check change for %s\n",documentPath.c_str());
         if(Firebase.Firestore.getDocument(&fbdo, FIREBASE_PROJECT_ID, "", documentPath.c_str(), content.raw())){
             Serial.printf("recieved %s\n", fbdo.payload().c_str());
-            change_log.push_back(fbdo.payload()); // Saves changes log as String object in vector of changes.
+            change_log.push_back(fbdo.payload());   // Saves changes log as String object in vector of changes.
+                                                    // the messages are Strings in Json format
         }
         // A CODE TO DELETE A CHANGE THAT HAS BEEN READ:: for now its in comment cause the insertion is manual
         //
