@@ -74,9 +74,8 @@ void MeshBridge::firestoreMeshCollectionUpdate(){
         bool response;
 
         for(list<String>:: iterator map_iter = mesh_values.begin(); map_iter!= mesh_values.end(); ++map_iter){
-            Serial.println("send to server " + *map_iter);
-            content.set("fields/" + *map_iter+ "/nullValue");
-
+            Serial.println("send to server " + (*map_iter));
+            content.set("fields/" + (*map_iter)+ "/nullValue");
         }
         if(Firebase.Firestore.createDocument(&fbdo, FIREBASE_PROJECT_ID, "", documentPath.c_str(), content.raw())){
             Serial.printf("ok\n%s\n\n", fbdo.payload().c_str());
@@ -84,7 +83,6 @@ void MeshBridge::firestoreMeshCollectionUpdate(){
         }else{
             Serial.println(fbdo.errorReason());
         }
-
   }
 }
 
@@ -137,8 +135,10 @@ void MeshBridge::get_mesh_nodes()
     list<uint32_t>::iterator i;
     list<uint32_t> map_node = mesh.getNodeList();
     for(i=map_node.begin() ; i!= map_node.end(); ++i){
+        Serial.println("mesh network contains:" + String(*i));
         mesh_values.push_back(String(*i));
     }
+    Serial.println("mesh network bridge:" + String(mesh.getNodeId()));
     mesh_values.push_back(String(mesh.getNodeId()));
 }
 
@@ -181,6 +181,7 @@ void MeshBridge::update()
         //Serial.println("send to server list:");
         firestoreMeshCollectionClear();
         firestoreMeshCollectionUpdate();
+        firestoreNetworkDataCollectionUpdate();
         firestoreReadChanges();	
 
         mesh_values.clear();
@@ -188,10 +189,10 @@ void MeshBridge::update()
         //  dict.clear(); //clears the map in order to be more space efficient, nodes that did not changed would not be posted again
         Serial.println("WiFi disconnected. initialize mesh");
         // initializing the mesh network again
-        for(list<String>::iterator iter= change_log.begin(); iter!=change_log.end() ; ++iter ){
-            Serial.println("change in: ");
-            Serial.printf("%s\n\n",(*iter).c_str());//FROM HERE WE CAN EXTRACT NIDE ID AND SEND THE JSON AS SINGLE
-        }
+        // for(list<String>::iterator iter= change_log.begin(); iter!=change_log.end() ; ++iter ){
+        //     Serial.println("change in: ");
+        //     Serial.printf("%s\n\n",(*iter).c_str());//FROM HERE WE CAN EXTRACT NIDE ID AND SEND THE JSON AS SINGLE
+        // }
         init_mesh();
         lasttime = millis();
     }
@@ -212,23 +213,26 @@ void MeshBridge::firestoreMeshCollectionClear(){
     }
     }
 
-
 void MeshBridge:: firestoreReadChanges()
 {
     if(WiFi.status() == WL_CONNECTED && Firebase.ready()){
         for(list<String>::iterator iter= mesh_values.begin(); iter!=mesh_values.end() ; ++iter ){
-            String documentPath = "/Changes/"+(*iter);
+            String documentPath = "/Changes/"+ (*iter);
             FirebaseJson content;
             bool response;
             Serial.printf("check change for %s\n",documentPath.c_str());
+        //if we get a document here hence the node_id has gone through changes.
         if(Firebase.Firestore.getDocument(&fbdo, FIREBASE_PROJECT_ID, "", documentPath.c_str(), content.raw())){
+            //now we will scan the Nodes collection in order to retrieve all changes: 
             Serial.printf("recieved %s\n", fbdo.payload().c_str());
-            change_log.push_back(fbdo.payload());   // Saves changes log as String object in vector of changes.
-                                                    // the messages are Strings in Json format
+            String changeid;
+            String network_data;
+            if( get_node_changes((*iter), changeid) && firestoreReadNetwork(network_data))
+                change_log[(*iter)] = changeid + network_data;
+            Serial.println("done retrieving:\n\n");
+            Serial.println(change_log[(*iter)]);   
         }
         // A CODE TO DELETE A CHANGE THAT HAS BEEN READ:: for now its in comment cause the insertion is manual
-        //
-        //
         // if (Firebase.Firestore.deleteDocument(&fbdo, FIREBASE_PROJECT_ID, "", documentPath.c_str(), content.raw()))
         // {
         //     Serial.printf("deleted \n%s\n\n", fbdo.payload().c_str());
@@ -240,3 +244,108 @@ void MeshBridge:: firestoreReadChanges()
 
     }
 }
+
+bool MeshBridge::get_node_changes(String node_id, String &changes)
+{
+    if (WiFi.status() == WL_CONNECTED && Firebase.ready())
+    {
+        String document_path = "Nodes/" + node_id;
+        FirebaseJson json;
+        FirebaseData fbdo;
+        FirebaseJsonData data;
+        int response_size = 2048;
+        bool succeed;
+        do
+        {
+            response_size *= 2;
+            Serial.println(String(response_size));
+            fbdo.setResponseSize(response_size);
+            if(!Firebase.Firestore.getDocument(&fbdo, FIREBASE_PROJECT_ID, "", document_path.c_str())){
+                break;
+            }
+            // succeed = json.setJsonData(fbdo.payload()) && json.get(data, "fields") && data.getJSON(json);
+            Serial.println(succeed);
+            if(!json.setJsonData(fbdo.payload())){
+                Serial.println("set json fail");
+                continue;
+            }
+            succeed = json.setJsonData(fbdo.payload());
+            Serial.println(succeed);
+            succeed =  json.get(data, "fields") ;
+            Serial.println(succeed);
+            succeed =  data.getJSON(json);
+            Serial.println(succeed);
+            //Serial.println(json.raw());
+            if(succeed){
+                changes = json.raw();
+                return true;
+            }
+        } while (!succeed && response_size < 16384); // TODO consider this number again
+    }
+    Serial.println("data failed");
+    Serial.println(fbdo.errorReason());
+    return false;
+}
+
+void MeshBridge::firestoreNetworkDataCollectionUpdate(){
+
+    if (WiFi.status() == WL_CONNECTED && Firebase.ready()){
+        String documentPathNetwork = "Network/mesh";
+        FirebaseJson content_m;
+        bool response2;
+        String prefix = MESH_PREFIX;
+        String password = MESH_PASSWORD;
+        int port = MESH_PORT; 
+        content_m.set("fields/mesh_prefix/stringValue/",prefix.c_str());
+        content_m.set("fields/mesh_password/stringValue/",password.c_str());
+        content_m.set("fields/mesh_port/integerValue/",port);
+
+        if(Firebase.Firestore.createDocument(&fbdo, FIREBASE_PROJECT_ID, "", documentPathNetwork.c_str(), content_m.raw())){
+            Serial.printf("ok\n%s\n\n", fbdo.payload().c_str());
+            return;
+        }else{
+            Serial.println(fbdo.errorReason());
+        }
+    }
+}
+
+bool MeshBridge::firestoreReadNetwork(String &changes){
+   if (WiFi.status() == WL_CONNECTED && Firebase.ready())
+    {
+        String document_path = "Network/mesh/";
+        FirebaseJson json;
+        FirebaseData fbdo;
+        FirebaseJsonData data;
+        int response_size = 2048;
+        bool succeed;
+        do
+        {
+            response_size *= 2;
+            Serial.println(String(response_size));
+            fbdo.setResponseSize(response_size);
+            if(!Firebase.Firestore.getDocument(&fbdo, FIREBASE_PROJECT_ID, "", document_path.c_str())){
+                break;
+            }
+            // succeed = json.setJsonData(fbdo.payload()) && json.get(data, "fields") && data.getJSON(json);
+            Serial.println(succeed);
+            if(!json.setJsonData(fbdo.payload())){
+                Serial.println("set json fail");
+                continue;
+            }
+            succeed = json.setJsonData(fbdo.payload());
+            Serial.println(succeed);
+            succeed =  json.get(data, "fields") ;
+            Serial.println(succeed);
+            succeed =  data.getJSON(json);
+            Serial.println(succeed);
+            //Serial.println(json.raw());
+            if(succeed){
+                changes = json.raw();
+                return true;
+            }
+        } while (!succeed && response_size < 16384); // TODO consider this number again
+    }
+    Serial.println("data failed");
+    Serial.println(fbdo.errorReason());
+    return false;
+    }
