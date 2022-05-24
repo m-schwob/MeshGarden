@@ -13,6 +13,7 @@
 #include <ESPAsyncWebServer.h>
 #include <vector>
 #include <list>
+#include <map>
 #include "ArduinoJson.h"
 
 using namespace painlessmesh;
@@ -53,7 +54,7 @@ private:
     FirebaseData fbdo;
     FirebaseAuth auth;
     FirebaseConfig config;
-    list<String> change_log;
+    std::map<String,String> change_log;
     // sync with the server, saving data variables
     int lasttime = 0; // initialized, used to messure time interaval for the disconnect
     // std::map<String,vector<String>> dict;
@@ -68,8 +69,11 @@ private:
     void firebaseInit();
     void firestoreMeshCollectionClear();
     void firestoreMeshCollectionUpdate();
+    void firestoreNetworkDataCollectionUpdate();
     void firestoreReadChanges();
+    bool firestoreReadNetwork(String &changes);
     void firestoreDataUpdate(String plant_id, String sensor_id, String meas_type, String value);
+    bool get_node_changes(String node_id, String &changes);
     vector<String> split(String s, String delimiter);
 
 
