@@ -1,0 +1,230 @@
+{
+    "1": {
+        "mapValue": {
+            "fields": {
+                "Air Humidity": {
+                    "mapValue": {
+                        "fields": {
+                            "samples": {
+                                "arrayValue": {
+                                    "values": [
+                                        {
+                                            "mapValue": {
+                                                "fields": {
+                                                    "time": {
+                                                        "timestampValue": "2022-05-23T21:00:00Z"
+                                                    },
+                                                    "value": {
+                                                        "doubleValue": 0.8
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "mapValue": {
+                                                "fields": {
+                                                    "time": {
+                                                        "timestampValue": "2022-05-23T21:10:00Z"
+                                                    },
+                                                    "value": {
+                                                        "doubleValue": 0.7
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "mapValue": {
+                                                "fields": {
+                                                    "time": {
+                                                        "timestampValue": "2022-05-23T21:20:00Z"
+                                                    },
+                                                    "value": {
+                                                        "doubleValue": 0.6
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "mapValue": {
+                                                "fields": {
+                                                    "time": {
+                                                        "timestampValue": "2022-05-23T21:30:00Z"
+                                                    },
+                                                    "value": {
+                                                        "doubleValue": 0.5
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "mapValue": {
+                                                "fields": {
+                                                    "time": {
+                                                        "timestampValue": "2022-05-23T21:40:00Z"
+                                                    },
+                                                    "value": {
+                                                        "doubleValue": 0.4
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                },
+                "Air Temperature ": {
+                    "mapValue": {
+                        "fields": {
+                            "samples": {
+                                "arrayValue": {
+                                    "values": [
+                                        {
+                                            "mapValue": {
+                                                "fields": {
+                                                    "time": {
+                                                        "timestampValue": "2022-05-23T21:00:00Z"
+                                                    },
+                                                    "value": {
+                                                        "doubleValue": 0.8
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "mapValue": {
+                                                "fields": {
+                                                    "time": {
+                                                        "timestampValue": "2022-05-23T21:10:00Z"
+                                                    },
+                                                    "value": {
+                                                        "doubleValue": 0.7
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "mapValue": {
+                                                "fields": {
+                                                    "time": {
+                                                        "timestampValue": "2022-05-23T21:20:00Z"
+                                                    },
+                                                    "value": {
+                                                        "doubleValue": 0.6
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "mapValue": {
+                                                "fields": {
+                                                    "time": {
+                                                        "timestampValue": "2022-05-23T21:30:00Z"
+                                                    },
+                                                    "value": {
+                                                        "doubleValue": 0.5
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "mapValue": {
+                                                "fields": {
+                                                    "time": {
+                                                        "timestampValue": "2022-05-23T21:40:00Z"
+                                                    },
+                                                    "value": {
+                                                        "doubleValue": 0.4
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "2": {
+        "mapValue": {
+            "fields": {
+                "Soil Moisture": {
+                    "mapValue": {
+                        "fields": {
+                            "samples": {
+                                "arrayValue": {
+                                    "values": [
+                                        {
+                                            "mapValue": {
+                                                "fields": {
+                                                    "time": {
+                                                        "timestampValue": "2022-05-23T21:00:00Z"
+                                                    },
+                                                    "value": {
+                                                        "doubleValue": 0.8
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "mapValue": {
+                                                "fields": {
+                                                    "time": {
+                                                        "timestampValue": "2022-05-23T21:10:00Z"
+                                                    },
+                                                    "value": {
+                                                        "doubleValue": 0.7
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "mapValue": {
+                                                "fields": {
+                                                    "time": {
+                                                        "timestampValue": "2022-05-23T21:20:00Z"
+                                                    },
+                                                    "value": {
+                                                        "doubleValue": 0.6
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "mapValue": {
+                                                "fields": {
+                                                    "time": {
+                                                        "timestampValue": "2022-05-23T21:30:00Z"
+                                                    },
+                                                    "value": {
+                                                        "doubleValue": 0.5
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "mapValue": {
+                                                "fields": {
+                                                    "time": {
+                                                        "timestampValue": "2022-05-23T21:40:00Z"
+                                                    },
+                                                    "value": {
+                                                        "doubleValue": 0.4
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
