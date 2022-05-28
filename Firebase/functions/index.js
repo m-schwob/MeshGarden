@@ -4,6 +4,10 @@ const { DocumentBuilder } = require("firebase-functions/v1/firestore");
 admin.initializeApp();
 
 
+exports.helloWorld = functions.https.onRequest((request, response) => {
+ response.send("Hello from Firebase!");
+});
+
 exports.onNodeWrite = functions.firestore.document('/Nodes/{node_id}').onWrite(async (change, context) => {
     const node_id = context.params.node_id;
     if (change.after.exists) {
