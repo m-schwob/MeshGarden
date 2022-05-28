@@ -2,6 +2,16 @@
 #include <ArduinoJson.h>
 #include <LittleFS.h>
 
+void printIndent(int indent_level, String str)
+{
+    String indent = "";
+    for (int i = 0; i < 4 * indent_level; i++)
+        indent += ' ';
+    indent +=  "- ";
+    Serial.print(indent);
+    Serial.println(str);
+}
+
 void setup()
 {
     Serial.begin(115200);
@@ -18,71 +28,69 @@ void setup()
     Serial.println("reading configuration file");
     File file = LittleFS.open("/config.json", "r");
 
-    // parse json data into variables
-    String nickname;
-    String firmware;
-    String mesh_ssid;
-    String mesh_password;
-    int mesh_port = 0;
-    ArduinoJson sensors;
-    int sensor_id;
-    int sample_interval;
-    ArduinoJson units;
-    String hardware_info;
-    String type;
-    String unit;
+    // init JsonDocument Object //
+
+    // TBD and following check. The capacity calculated by ArduinoJson Assistant on a sample was 869.
+    // Following the FAQ recommendation the choosen capacity is 2048.
+    // It should be reconsider based on real cases and additional code for preventing it from failing
+    // in run time should be added. consider using the file size as base size and them use fit function.
+    // https://arduinojson.org/v6/assistant/
+    // https://arduinojson.org/v6/how-to/determine-the-capacity-of-the-jsondocument/
+    DynamicJsonDocument doc(2048);
+    DeserializationError error = deserializeJson(doc, file);
+    if (error)
+    {
+        Serial.print(F("deserializeJson() failed: "));
+        Serial.println(error.f_str());
+        return;
+    }
 
     Serial.println("Node Configurations:");
-    Serial.print("    - ");
-    Serial.print("Nickname: ");
-    Serial.println(nickname);
-    Serial.print("    - ");
-    Serial.print("Firmware: ");
-    Serial.println(firmware);
-    Serial.print("    - ");
-    Serial.println("Mesh Network: ");
-    Serial.print("        - ");
-    Serial.print("SSID: ");
-    Serial.println(mesh_ssid);
-    Serial.print("        - ");
-    Serial.print("Password: ");
-    Serial.println(mesh_password);
-    Serial.print("        - ");
-    Serial.print("Port: ");
-    Serial.println(mesh_port);
-    Serial.print("    - ");
-    Serial.println("Sensors: ");
 
-    for (size_t i = 0; i < sensors.size(); i++)
+    const char *nickname = doc["nickname"];           // "tester"
+    const char *firmware = doc["firmware"];           // "esp8266_v0.1"
+    const char *mesh_prefix = doc["mesh_prefix"];     // "whateverYouLike"
+    const char *mesh_password = doc["mesh_password"]; // "somethingSneaky"
+    const int mesh_port = doc["mesh_port"];           // 5555
+
+    printIndent(1, "Nickname: " + String(nickname));
+    printIndent(1, "Firmware: " + String(firmware));
+    printIndent(1, "Mesh Network:");
+    printIndent(2, "SSID: " + String(mesh_prefix));
+    printIndent(2, "Password: " + String(mesh_password));
+    printIndent(2, "Port: " + String(mesh_port));
+    printIndent(1, "Sensors:");
+
+    JsonArray sensors = doc["sensors"];
+    for (JsonObject sensor : sensors)
     {
+        const char *hardware_info = sensor["hardware_info"];   // " DHT22"
+        const int sensor_id = sensor["sensor_id"];             // 1
+        const int sample_interval = sensor["sample_interval"]; // 30
 
-        Serial.print("        - ");
-        Serial.print(hardware_info);
-        Serial.println(":");
-        Serial.print("            - ");
-        Serial.print("Id: ");
-        Serial.println(sensor_id);
-        Serial.print("            - ");
-        Serial.print("Types[units]: ");
-        for (size_t i = 0; i < sensor_type.size(); i++)
+        printIndent(2, String(hardware_info) + ':');
+        printIndent(3, "Id: " + String(sensor_id));
+        printIndent(3, "Sample Interval: " + String(sample_interval));
+        printIndent(3, "Measurement Types [units]:");
+
+        JsonArray sensor_type = sensor["sensor_type"];
+        JsonArray units = sensor["units"];
+        for (JsonArray::iterator type = sensor_type.begin(), unit = units.begin();
+             type != sensor_type.end() && unit != units.end(); ++type, ++unit)
         {
-            Serial.print(type);
-            Serial.print("[");
-            Serial.print(unit);
-            Serial.print("], ");
+            (*type).as<String>(); // "Air Humidity"
+            (*unit).as<String>(); // "%"
+            printIndent(4, (*type).as<String>() + " [" + (*unit).as<String>() + ']');
         }
-        Serial.println();
 
-        Serial.print("            - ");
-        Serial.print("Pinout: ");
-        for (size_t i = 0; i < ; i++)
+        printIndent(3, "Pinout:");
+        JsonObject pinout = sensor["pinout"];
+        for (JsonPair pin : pinout)
         {
+            pin.key();   //"DAT"
+            pin.value(); // "D1"
+            printIndent(4, String(pin.key().c_str()) + " --> " + pin.value().as<String>());
         }
-        Serial.println();
-
-        Serial.print("            - ");
-        Serial.print("Samples Interval: ");
-        Serial.println(sample_interval);
     }
 }
 
