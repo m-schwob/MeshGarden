@@ -7,7 +7,7 @@ void printIndent(int indent_level, String str)
     String indent = "";
     for (int i = 0; i < 4 * indent_level; i++)
         indent += ' ';
-    indent +=  "- ";
+    indent += "- ";
     Serial.print(indent);
     Serial.println(str);
 }
@@ -25,18 +25,25 @@ void setup()
     }
 
     // read pre uploaded file
-    Serial.println("reading configuration file");
+    Serial.println("open configuration file");
     File file = LittleFS.open("/config.json", "r");
+    if (!file)
+    {
+        Serial.println("file open failed");
+        return;
+    }
+    Serial.println("open file complete with:");
+    Serial.println("File Size: " + String(file.size()));
 
     // init JsonDocument Object //
 
     // TBD and following check. The capacity calculated by ArduinoJson Assistant on a sample was 869.
-    // Following the FAQ recommendation the choosen capacity is 2048.
+    // Following the FAQ recommendation the choosen capacity is 2048 (instead  the solution below is done, needs following).
     // It should be reconsider based on real cases and additional code for preventing it from failing
-    // in run time should be added. consider using the file size as base size and them use fit function.
+    // in run time should be added. consider (done this solution) using the file size as base size and them use fit function.
     // https://arduinojson.org/v6/assistant/
     // https://arduinojson.org/v6/how-to/determine-the-capacity-of-the-jsondocument/
-    DynamicJsonDocument doc(2048);
+    DynamicJsonDocument doc(file.size());
     DeserializationError error = deserializeJson(doc, file);
     if (error)
     {
@@ -44,6 +51,21 @@ void setup()
         Serial.println(error.f_str());
         return;
     }
+
+    // free space and print memory usage
+    Serial.println("deserializeJson complete with:");
+    Serial.println("Total Capacity: " + String(doc.capacity()));
+    Serial.println("Actual Memory Usage: " + String(doc.memoryUsage()));
+
+    doc.garbageCollect();
+    Serial.println("collecting garbage complete with:");
+    Serial.println("Total Capacity: " + String(doc.capacity()));
+    Serial.println("Actual Memory Usage: " + String(doc.memoryUsage()));
+
+    doc.shrinkToFit();
+    Serial.println("collecting garbage complete with:");
+    Serial.println("Total Capacity: " + String(doc.capacity()));
+    Serial.println("Actual Memory Usage: " + String(doc.memoryUsage()));
 
     Serial.println("Node Configurations:");
 
