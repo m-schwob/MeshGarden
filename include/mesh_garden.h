@@ -30,6 +30,6 @@ class MeshGarden{
         MeshGarden();
         void update();
 
-}
+};
 
 #endif /* _MESHGARDEN_H_ */
