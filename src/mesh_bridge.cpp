@@ -233,13 +233,13 @@ void MeshBridge:: firestoreReadChanges()
             Serial.println(change_log[(*iter)]);   
         }
         // A CODE TO DELETE A CHANGE THAT HAS BEEN READ:: for now its in comment cause the insertion is manual
-        // if (Firebase.Firestore.deleteDocument(&fbdo, FIREBASE_PROJECT_ID, "", documentPath.c_str(), content.raw()))
-        // {
-        //     Serial.printf("deleted \n%s\n\n", fbdo.payload().c_str());
-        //     return;
-        // }else{
-        // Serial.println(fbdo.errorReason());
-        // }
+        if (Firebase.Firestore.deleteDocument(&fbdo, FIREBASE_PROJECT_ID, "", documentPath.c_str(), content.raw()))
+        {
+            Serial.printf("deleted \n%s\n\n", fbdo.payload().c_str());
+            return;
+        }else{
+        Serial.println(fbdo.errorReason());
+        }
         }
 
     }
