@@ -1,0 +1,116 @@
+{
+    "nickname": {
+        "stringValue": "tester"
+    },
+    "sensors": {
+        "arrayValue": {
+            "values": [
+                {
+                    "mapValue": {
+                        "fields": {
+                            "pinout": {
+                                "mapValue": {
+                                    "fields": {
+                                        "DAT": {
+                                            "stringValue": "D1"
+                                        }
+                                    }
+                                }
+                            },
+                            "sensor_type": {
+                                "arrayValue": {
+                                    "values": [
+                                        {
+                                            "stringValue": "Air Humidity"
+                                        },
+                                        {
+                                            "stringValue": "Air Temperature"
+                                        }
+                                    ]
+                                }
+                            },
+                            "sensor_id": {
+                                "integerValue": "1"
+                            },
+                            "sample_interval": {
+                                "integerValue": "30"
+                            },
+                            "units": {
+                                "arrayValue": {
+                                    "values": [
+                                        {
+                                            "stringValue": "%"
+                                        },
+                                        {
+                                            "stringValue": "C"
+                                        }
+                                    ]
+                                }
+                            },
+                            "hardware_info":{
+                                "stringValue" : " DHT22"
+                            }
+                        }
+                    }
+                },
+                {
+                    "mapValue": {
+                        "fields": {
+                            "pinout": {
+                                "mapValue": {
+                                    "fields": {
+                                        "VCC":{
+                                            "stringValue": "D4"
+                                        },
+                                        "DAT": {
+                                            "stringValue": "D1"
+                                        }
+                                    }
+                                }
+                            },
+                            "sensor_type": {
+                                "arrayValue": {
+                                    "values": [
+                                        {
+                                            "stringValue": "Soil Moisture"
+                                        }
+                                    ]
+                                }
+                            },
+                            "sensor_id": {
+                                "integerValue": "2"
+                            },
+                            "sample_interval": {
+                                "integerValue": "30"
+                            },
+                            "units": {
+                                "arrayValue": {
+                                    "values": [
+                                        {
+                                            "stringValue": "%"
+                                        }
+                                    ]
+                                }
+                            },
+                            "hardware_info":{
+                                "stringValue" : " Grove Soil Moisture"
+                            }
+                        }
+                    }
+                }
+            ]
+        }
+    },
+    "firmware": {
+        "stringValue": "esp8266_v0.1"
+    },
+    "mesh_port": {
+        "integerValue": "5555"
+    },
+    "mesh_password": {
+        "stringValue": "somethingSneaky"
+    },
+    "mesh_prefix": {
+        "stringValue": "whateverYouLike"
+    }
+}

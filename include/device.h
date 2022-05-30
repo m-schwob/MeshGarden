@@ -1,8 +1,10 @@
 #ifndef _DEVICE_H_
 #define _DEVICE_H_
 
-#include <vector>
 #include <Arduino.h>
+#include <vector>
+#include <map>
+
 
 /* TODO remove later
     data from memory/server:
@@ -39,6 +41,43 @@ class Device {
         virtual void disable();
         virtual void power_on();
         virtual void power_off();
+        virtual ~Device() {} //not sure if needed. added to follow DeviceFactory original code reference
 };
+
+
+struct DeviceFactory
+{
+    static Device *create(const String &id)
+    { // creates an object from a string
+        const Creators_t::const_iterator iter = static_creators().find(id);
+        if (iter == static_creators().end())
+        {
+            Serial.println("Factory: '" + id + "' does not match any device.");
+            return 0;
+        }
+        else
+            return (*iter->second)(); // if found, execute the creator function pointer
+    }
+
+private:
+    typedef Device *Creator_t();                      // function pointer to create Device
+    typedef std::map<String, Creator_t *> Creators_t; // map from id to creator
+    static Creators_t &static_creators()
+    {
+        static Creators_t s_creators;
+        return s_creators;
+    } // static instance of map
+    template <class T = int>
+    struct Register
+    {
+        static Device *create() { return new T(); };
+        static Creator_t *init_creator(const String &id) { return static_creators()[id] = create; }
+        static Creator_t *creator;
+    };
+};
+
+#define REGISTER_DEVICE(T, STR) template <> \
+                                DeviceFactory::Creator_t *DeviceFactory::Register<T>::creator = DeviceFactory::Register<T>::init_creator(STR)
+
 
 #endif /* _DEVICE_H_ */

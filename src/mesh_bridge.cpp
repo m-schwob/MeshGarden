@@ -4,7 +4,11 @@
 static MeshBridge *node = NULL;
 
 MeshBridge::MeshBridge(){
+    Serial.print("at start heap: ");
+    heap_status();
     init_mesh();
+    Serial.print("after mesh init");
+    heap_status();
     node = this;
 }
 
@@ -146,6 +150,8 @@ void MeshBridge::update()
 {
     // it will run the user scheduler as well
     mesh.update();
+    Serial.print("after update heap: ");
+    heap_status();
 
     // Init and get the time
     if (millis() - lasttime > 10000)

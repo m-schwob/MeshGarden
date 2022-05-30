@@ -1,0 +1,74 @@
+
+FreeHeap 37736
+delete document if exists
+FreeHeap 37072
+read pre uploaded configuration file: sample_measurement
+size: 12212
+FreeHeap 24840
+preparing content for: Measurements/2989123787
+content buffer size: 206
+FreeHeap 28216
+create new document: Measurements/2989123787
+
+
+FreeHeap 37736
+delete document if exists
+FreeHeap 37072
+read pre uploaded configuration file: sample_measurement
+size: 12212
+FreeHeap 24840
+preparing content for: Measurements/2989123788
+content buffer size: 206
+FreeHeap 28216
+create new document: Measurements/2989123788
+
+
+FreeHeap 37760
+delete document if exists
+FreeHeap 37096
+read pre uploaded configuration file: sample_measurement
+size: 12212
+FreeHeap 24864
+preparing content for: Measurements/2989123789
+content buffer size: 206
+FreeHeap 28240
+create new document: Measurements/2989123789
+
+
+FreeHeap 37832
+delete document if exists
+FreeHeap 37168
+read pre uploaded configuration file: sample_node
+size: 4255
+FreeHeap 32904
+preparing content for: Nodes/2989123787
+content buffer size: 886
+FreeHeap 32856
+create new document: Nodes/2989123787
+succeed
+
+
+FreeHeap 36472
+delete document if exists
+FreeHeap 36280
+read pre uploaded configuration file: sample_node
+size: 4255
+FreeHeap 32016
+preparing content for: Nodes/2989123788
+content buffer size: 886
+FreeHeap 31968
+create new document: Nodes/2989123788
+succeed
+
+
+FreeHeap 36224
+delete document if exists
+FreeHeap 35896
+read pre uploaded configuration file: sample_node
+size: 4255
+FreeHeap 31632
+preparing content for: Nodes/2989123789
+content buffer size: 886
+FreeHeap 31584
+create new document: Nodes/2989123789
+succeed

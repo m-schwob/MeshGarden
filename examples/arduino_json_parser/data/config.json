@@ -1,0 +1,40 @@
+{
+    "nickname": "tester",        
+    "sensors": [
+        {
+            "pinout": {
+                "DAT": "D1"      
+            },
+            "sensor_type": [     
+                "Air Humidity",  
+                "Air Temperature"
+            ],
+            "sensor_id": 1,      
+            "sample_interval": 30,
+            "units": [
+                "%",
+                "C"
+            ],
+            "hardware_info": " DHT22"
+        },
+        {
+            "pinout": {
+                "VCC": "D4",
+                "DAT": "D1"
+            },
+            "sensor_type": [
+                "Soil Moisture"
+            ],
+            "sensor_id": 2,
+            "sample_interval": 30,
+            "units": [
+                "%"
+            ],
+            "hardware_info": " Grove Soil Moisture"
+        }
+    ],
+    "firmware": "esp8266_v0.1",
+    "mesh_port": 5555,
+    "mesh_password": "somethingSneaky",
+    "mesh_prefix": "whateverYouLike"
+}
