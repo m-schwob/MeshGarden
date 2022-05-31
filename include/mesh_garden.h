@@ -4,6 +4,7 @@
 #include <Arduino.h>
 #include <painlessMesh.h>
 #include <Firebase_ESP_Client.h>
+#include <ArduinoJson.h>
 #include <LittleFS.h>
 
 #include "device.h"
@@ -24,8 +25,17 @@
 
 class MeshGarden{
     private:
+        DynamicJsonDocument config;
+        std::list<Device*> device_list; 
+        String mesh_prefix;
+        String mesh_password;
+        size_t mesh_port;
+
+    private:
         void save_configuration(String& config);
         bool load_configuration();
+        void parse_config();
+
     public:
         MeshGarden();
         void update();
