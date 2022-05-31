@@ -33,6 +33,7 @@ class MeshNode
 		// friend void sendMessage();
 
 	public:
+		int lasttime = 0;
 		MeshNode();
 		void update();
 		void sendMessage();
@@ -40,6 +41,8 @@ class MeshNode
 		void add_measurement(TaskCallback callable, unsigned long interval, long iterations=TASK_FOREVER);
 		void add_send_values(std::function<Measurement()> callable, unsigned long interval, long iterations=TASK_FOREVER);
 		void remove_task();
+		void heap_status();
+
 };
 
 

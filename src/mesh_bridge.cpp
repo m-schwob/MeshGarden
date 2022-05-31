@@ -150,12 +150,11 @@ void MeshBridge::update()
 {
     // it will run the user scheduler as well
     mesh.update();
-    Serial.print("after update heap: ");
-    heap_status();
-
     // Init and get the time
     if (millis() - lasttime > 10000)
     {
+    Serial.print("after update before entering fb heap: ");
+    heap_status();
         get_mesh_nodes(); // get the working nodes list before quit
         mesh.stop();
         // // Connect to Wi-Fi
@@ -200,6 +199,8 @@ void MeshBridge::update()
         //     Serial.printf("%s\n\n",(*iter).c_str());//FROM HERE WE CAN EXTRACT NIDE ID AND SEND THE JSON AS SINGLE
         // }
         init_mesh();
+    Serial.print("after update after entering fb heap: ");
+    heap_status();
         lasttime = millis();
     }
 }
@@ -355,3 +356,8 @@ bool MeshBridge::firestoreReadNetwork(String &changes){
     Serial.println(fbdo.errorReason());
     return false;
     }
+void MeshBridge:: heap_status()
+{
+    Serial.print(F("FreeHeap "));
+    Serial.println(ESP.getFreeHeap());
+}

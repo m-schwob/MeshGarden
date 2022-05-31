@@ -48,6 +48,8 @@ void nodeTimeAdjustedCallback(int32_t offset)
 
 MeshNode::MeshNode() : counter(0) //, taskSendMessage(TASK_SECOND * 2, TASK_FOREVER, [this](){sendMessage();})
 {
+    Serial.println("at init:");
+    heap_status();
     Serial.println("Init node mesh connection..");
     // mesh.setDebugMsgTypes( ERROR | MESH_STATUS | CONNECTION | SYNC | COMMUNICATION | GENERAL | MSG_TYPES | REMOTE ); // all types on
     mesh.setDebugMsgTypes(ERROR | STARTUP); // set before init() so that you can see startup messages
@@ -61,12 +63,25 @@ MeshNode::MeshNode() : counter(0) //, taskSendMessage(TASK_SECOND * 2, TASK_FORE
     Task taskSendMessage(TASK_SECOND * 2, TASK_FOREVER, [this](){sendMessage();});
     userScheduler.addTask(taskSendMessage);
     taskSendMessage.enable();
+    Serial.println("after mesh creation:");
+    heap_status();
     node = this;
 }
 
 void MeshNode::update()
 {
+    if (millis() - lasttime > 10000)
+    {
+        Serial.println("before first update:");
+        heap_status();
+    }
     mesh.update();
+    if (millis() - lasttime > 10000)
+    {
+        Serial.println("after first update:");
+        heap_status();
+        lasttime = millis();
+    }
 }
 
 void MeshNode::add_measurement(TaskCallback callable, unsigned long interval, long iterations)
@@ -90,3 +105,8 @@ void remove_task()
 }
 
 
+void MeshNode:: heap_status()
+{
+    Serial.print(F("FreeHeap "));
+    Serial.println(ESP.getFreeHeap());
+}

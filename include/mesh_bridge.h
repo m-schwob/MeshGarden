@@ -81,11 +81,7 @@ public:
     MeshBridge();
     void update();
     void get_mesh_nodes();
-    void heap_status()
-{
-    Serial.print(F("FreeHeap "));
-    Serial.println(ESP.getFreeHeap());
-}
+    void heap_status();
 };
 
 #endif /* _BRIDGENODE_H_ */
