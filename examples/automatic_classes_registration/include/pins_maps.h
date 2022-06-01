@@ -17,7 +17,7 @@
 
 #endif
 
-DynamicJsonDocument pins_map(PINS_MAP_SIZE);
+extern DynamicJsonDocument pins_map;
 void _map_pins();
 void map_pins();
 

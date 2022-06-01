@@ -1,5 +1,7 @@
 #include "pins_maps.h"
 
+DynamicJsonDocument pins_map(PINS_MAP_SIZE);
+
 #if defined(ESP8266)
 // esp8266 pinout map builder
 void _map_pins()
