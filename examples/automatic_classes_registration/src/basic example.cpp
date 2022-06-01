@@ -99,7 +99,7 @@ void heap_status()
     Serial.println(ESP.getFreeHeap());
 }
 
-void setup()
+void _setup()//TODO function name changed temporary to prevent multiple definition error
 {
     Serial.begin(115200);
     Serial.println();
@@ -127,7 +127,7 @@ void setup()
     heap_status();
 }
 
-void loop()
+void _loop() //TODO function name changed temporary to prevent multiple definition error
 {
     delay(5000);
 }
