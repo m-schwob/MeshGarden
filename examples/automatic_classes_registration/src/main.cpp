@@ -1,7 +1,6 @@
 #include <Arduino.h>
 #include "mesh_garden.h"
-
-
+    
 /* 
 This documentation will be after use for user instruction and documentation. but for now its here to simplify. 
 
@@ -28,6 +27,7 @@ For the .ino file, he idea is to give the user two way of adding his own sensor:
 
 */
 
+#define BAUD_RATE 115200
 
 MeshGarden garden;
 
@@ -40,8 +40,8 @@ void init_sensor1(){
 Measurement measure_sensor1(){
     // code that do the measurement
     // example of using Arduino 'readDigital' function
-    readDigital(pin("DAT"));
-    
+    digitalRead(pin("DAT"));
+    return Measurement();
 }
 
 void setup()
