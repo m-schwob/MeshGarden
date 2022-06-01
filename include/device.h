@@ -47,20 +47,20 @@ class Device {
 
 struct DeviceFactory
 {
-    static Device *create(const String &id)
+    static Device *create(int id, std::vector<String> device_type, String hardware_info, uint8_t data_pins, uint8_t power_pin)
     { // creates an object from a string
-        const Creators_t::const_iterator iter = static_creators().find(id);
+        const Creators_t::const_iterator iter = static_creators().find(hardware_info);
         if (iter == static_creators().end())
         {
-            Serial.println("Factory: '" + id + "' does not match any device.");
+            Serial.println("Factory: '" + hardware_info + "' does not match any device.");
             return 0;
         }
         else
-            return (*iter->second)(); // if found, execute the creator function pointer
+            return (*iter->second)(id, device_type, hardware_info, data_pins, power_pin); // if found, execute the creator function pointer
     }
 
 private:
-    typedef Device *Creator_t();                      // function pointer to create Device
+    typedef Device *Creator_t(int id, std::vector<String> device_type, String hardware_info, uint8_t data_pins, uint8_t power_pin);                      // function pointer to create Device
     typedef std::map<String, Creator_t *> Creators_t; // map from id to creator
     static Creators_t &static_creators()
     {
@@ -70,7 +70,8 @@ private:
     template <class T = int>
     struct Register
     {
-        static Device *create() { return new T(); };
+        static Device *create(int id, std::vector<String> device_type, String hardware_info, uint8_t data_pins, uint8_t power_pin) 
+        { return new T(id, device_type, hardware_info, data_pins, power_pin); };
         static Creator_t *init_creator(const String &id) { return static_creators()[id] = create; }
         static Creator_t *creator;
     };
