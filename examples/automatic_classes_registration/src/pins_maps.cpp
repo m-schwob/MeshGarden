@@ -86,9 +86,14 @@ void _map_pins()
 void map_pins()
 {
     _map_pins();
-    Serial.println(pins_map.as<String>());
-    Serial.println(String(pins_map.capacity()));
-    Serial.println(String(pins_map.memoryUsage()));
+    size_t capacity_before = pins_map.capacity();
     pins_map.shrinkToFit();
+    Serial.println("pins map created:");
+    Serial.println(pins_map.as<String>());
+    Serial.print("capacity before shrinking: ");
+    Serial.print(String(capacity_before));
+    Serial.print(", capacity after shrinking: ");
+    Serial.print(String(pins_map.capacity()));
+    Serial.print(", actual memory usage: ");
+    Serial.println(String(pins_map.memoryUsage()));
 }
-
