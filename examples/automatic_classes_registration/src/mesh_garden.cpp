@@ -1,16 +1,23 @@
 #include "mesh_garden.h"
 
 
-void MeshGarden::save_configuration(String& config){
-    Serial.println("saving configuration to file");
-    File file = LittleFS.open("/config.json", "w");
-    file.print(config);
-    //delay(1);  check i f helping in case writing fails
-    file.close();
+uint8_t pin(String pin)
+{
+    return 1;//pins_map[pin].as<uint8_t>();
 }
 
 
-bool MeshGarden::load_configuration(){
+void MeshGarden::save_configuration(String &config)
+{
+    Serial.println("saving configuration to file");
+    File file = LittleFS.open("/config.json", "w");
+    file.print(config);
+    // delay(1);  check i f helping in case writing fails
+    file.close();
+}
+
+bool MeshGarden::load_configuration()
+{
     Serial.println("open configuration file");
     File file = LittleFS.open("/config.json", "r");
     if (!file)
@@ -36,18 +43,17 @@ bool MeshGarden::load_configuration(){
         Serial.println(error.f_str());
         return false;
     }
-    
+
     // free space and print memory usage
     size_t capacity_before = doc.memoryUsage();
     doc.garbageCollect();
     doc.shrinkToFit();
     size_t capacity_after = doc.capacity();
     Serial.println("deserializeJson complete with:");
-    Serial.println("Capacity: " + String(capacity_after) + ", reduced by " + String(100*capacity_after/capacity_before));
+    Serial.println("Capacity: " + String(capacity_after) + ", reduced by " + String(100 * capacity_after / capacity_before));
     Serial.println("Actual Memory Usage: " + String(doc.memoryUsage()));
     return true;
 }
-
 
 // TODO move to utils
 void printIndent(int indent_level, String str)
@@ -65,13 +71,13 @@ void MeshGarden::parse_config()
 {
     // TODO consider print here only in debug mode. nickname,firmware needed only for printing. dont print password to console
     Serial.println("Node Configurations:");
-    const char *nickname = config["nickname"];           // "tester"
-    const char *firmware = config["firmware"];           // "esp8266_v0.1"
-    // TODO set it on node/bridge after making set function for it and making inheriting 
+    const char *nickname = config["nickname"]; // "tester"
+    const char *firmware = config["firmware"]; // "esp8266_v0.1"
+    // TODO set it on node/bridge after making set function for it and making inheriting
     mesh_prefix = config["mesh_prefix"].as<String>();     // "whateverYouLike"
     mesh_password = config["mesh_password"].as<String>(); // "somethingSneaky"
-    mesh_port = config["mesh_port"].as<size_t>();           // 5555
-    
+    mesh_port = config["mesh_port"].as<size_t>();         // 5555
+
     printIndent(1, "Nickname: " + String(nickname));
     printIndent(1, "Firmware: " + String(firmware));
     printIndent(1, "Mesh Network:");
@@ -110,14 +116,15 @@ void MeshGarden::parse_config()
             pin.value(); // "D1"
             printIndent(4, String(pin.key().c_str()) + " --> " + pin.value().as<String>());
         }
-        
-            Device* new_device = DeviceFactory::create(String(hardware_info));
-            device_list.insert(new_device);
-    }  
+
+        // Device* new_device = DeviceFactory::create(String(hardware_info));
+        // device_list.insert(new_device);
+    }
     config.~DynamicJsonDocument();
 }
 
-MeshGarden::MeshGarden() : config(0){
+MeshGarden::MeshGarden() : config(0)
+{
     // start file system
     if (!LittleFS.begin())
     {
@@ -125,3 +132,9 @@ MeshGarden::MeshGarden() : config(0){
         return; // exit(1);
     }
 }
+
+void MeshGarden::add_sensor(String hardware_id, InitSensor init_sensor_func, Measure masure_func)
+{
+}
+
+void MeshGarden::update() {}
