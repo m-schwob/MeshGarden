@@ -8,13 +8,13 @@
 
 #if defined(ESP32)
 #include "mesh_bridge.h"
-MeshBridge *meshB = NULL;
+MeshBridge *mesh = NULL;
 
 #elif defined(ESP8266)
 #include "mesh_node.h"
 #include "soil_moisure_sensor_grove_v1.0.h"
 #include "dummy_sensor.h"
-MeshNode *meshB = NULL;
+MeshNode *mesh = NULL;
 SoilMoisureSensorGroveV1 *soil_moisture = NULL;
 DummySensor *dummy_sensor1 = NULL;
 DummySensor *dummy_sensor2 = NULL;
@@ -44,9 +44,9 @@ void setup(void)
     Serial.println();
     Serial.println(); // make lines space in the begining
 #ifdef ESP32
-    meshB = new MeshBridge();
+    mesh = new MeshBridge();
 #else
-    meshB = new MeshNode();
+    mesh = new MeshNode();
     soil_moisture = new SoilMoisureSensorGroveV1(0, 0);
 
     // init single measurement type dummy sensor
@@ -65,17 +65,17 @@ void setup(void)
     dummy_sensor3->enable(true);
 
     Serial.println("adding tasks");
-    meshB->add_measurement(soil_moisture->get_measure_callback(), 2);
-    meshB->add_send_values(soil_moisture->get_values_callback(), 4);
+    mesh->add_measurement(soil_moisture->get_measure_callback(), 2);
+    mesh->add_send_values(soil_moisture->get_values_callback(), 4);
 
-    meshB->add_measurement(dummy_sensor1->get_measure_callback(), 2);
-    meshB->add_send_values(dummy_sensor1->get_values_callback(), 4);
+    mesh->add_measurement(dummy_sensor1->get_measure_callback(), 2);
+    mesh->add_send_values(dummy_sensor1->get_values_callback(), 4);
 
-    meshB->add_measurement(dummy_sensor2->get_measure_callback(), 2);
-    meshB->add_send_values(dummy_sensor2->get_values_callback(), 4);
+    mesh->add_measurement(dummy_sensor2->get_measure_callback(), 2);
+    mesh->add_send_values(dummy_sensor2->get_values_callback(), 4);
 
-    meshB->add_measurement(dummy_sensor3->get_measure_callback(), 2);
-    meshB->add_send_values(dummy_sensor3->get_values_callback(), 4);
+    mesh->add_measurement(dummy_sensor3->get_measure_callback(), 2);
+    mesh->add_send_values(dummy_sensor3->get_values_callback(), 4);
 #endif
     Serial.println("setup done");
 }
