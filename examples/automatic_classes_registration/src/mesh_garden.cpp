@@ -3,7 +3,18 @@
 
 uint8_t pin(String pin)
 {
-    return 1;//pins_map[pin].as<uint8_t>();
+    return pins_map[pin].as<uint8_t>();
+}
+
+
+void MeshGarden::GenericSensor::init_sensor()
+{
+    init_sensor_func();
+}
+
+Measurement MeshGarden::GenericSensor::measure()
+{
+    return measure_func();
 }
 
 
@@ -125,16 +136,23 @@ void MeshGarden::parse_config()
 
 MeshGarden::MeshGarden() : config(0)
 {
+    
+}
+
+void MeshGarden::add_sensor(String hardware_id, InitSensor init_sensor_func, Measure measure_func)
+{
+
+}
+
+void MeshGarden::update() {}
+
+void MeshGarden::begin(){
+    map_pins();
     // start file system
     if (!LittleFS.begin())
     {
         Serial.println("fail to start files system.");
         return; // exit(1);
     }
-}
 
-void MeshGarden::add_sensor(String hardware_id, InitSensor init_sensor_func, Measure masure_func)
-{
 }
-
-void MeshGarden::update() {}
