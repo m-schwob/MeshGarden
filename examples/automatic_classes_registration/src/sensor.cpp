@@ -17,6 +17,6 @@ measure_callback_t Sensor::get_measure_callback(){
     return [this](){measure();};
 }
 
-get_values_callback_t Sensor::get_values_callback(){
-    return [this]()->Measurement{return get_values();};
-}
+// get_values_callback_t Sensor::get_values_callback(){
+//     return [this]()->Measurement{return get_values();};
+// }

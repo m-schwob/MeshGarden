@@ -30,11 +30,12 @@ class Sensor : public Device{
         const std::vector<String> MEASUREMENTS_TYPE; // identifier for what is being measured. e.g. humidity, temperature // TODO should be array 
         const std::vector<String> UNITS; // the units of the measurements. e.g. voltage, percentage, Celsius // TODO should be array 
 
-        virtual void measure() = 0;
-        virtual Measurement get_values() = 0; 
+        virtual Measurement measure() = 0;
+        // virtual void measure() = 0;
+        // virtual Measurement get_values() = 0; 
         virtual void calibrate() = 0;
         virtual measure_callback_t get_measure_callback();
-        virtual get_values_callback_t get_values_callback();
+        // virtual get_values_callback_t get_values_callback();
 
 };
 
