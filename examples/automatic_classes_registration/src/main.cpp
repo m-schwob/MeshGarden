@@ -37,19 +37,25 @@ void init_sensor1(){
     pinMode(pin("DAT"), INPUT);
 }
 
-Measurement measure_sensor1(){
+Measurements measure_sensor1(){
     // code that do the measurement
     // example of using Arduino 'readDigital' function
     digitalRead(pin("DAT"));
-    return Measurement();
+
+    return Measurements(); //temporary for compiling
 }
 
 void setup()
 {   
+    Serial.begin(115200);
+    Serial.println();
+
     garden.add_sensor("example_sensor1", init_sensor1, measure_sensor1);
+    garden.begin();
 }
 
 void loop()
 {
     garden.update();
+    delay(5000);// temporary
 }
