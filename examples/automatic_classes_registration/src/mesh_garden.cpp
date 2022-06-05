@@ -1,22 +1,27 @@
 #include "mesh_garden.h"
 
-
 uint8_t pin(String pin)
 {
     return pins_map[pin].as<uint8_t>();
 }
-
 
 void MeshGarden::GenericSensor::init_sensor()
 {
     init_sensor_func();
 }
 
-Measurement MeshGarden::GenericSensor::measure()
+Measurements MeshGarden::GenericSensor::measure()
 {
     return measure_func();
 }
 
+void MeshGarden::GenericSensor::calibrate() {}
+
+void MeshGarden::GenericSensor::set(Funcs funcs)
+{
+    this->init_sensor_func = funcs.init_sensor_func;
+    this->measure_func = funcs.measure_func;
+}
 
 void MeshGarden::save_configuration(String &config)
 {
@@ -27,6 +32,7 @@ void MeshGarden::save_configuration(String &config)
     file.close();
 }
 
+// load configuration from memory to json object
 bool MeshGarden::load_configuration()
 {
     Serial.println("open configuration file");
@@ -63,7 +69,45 @@ bool MeshGarden::load_configuration()
     Serial.println("deserializeJson complete with:");
     Serial.println("Capacity: " + String(capacity_after) + ", reduced by " + String(100 * capacity_after / capacity_before));
     Serial.println("Actual Memory Usage: " + String(doc.memoryUsage()));
+
     return true;
+}
+
+// parse the config and initialize class members
+void MeshGarden::parse_config()
+{
+    // TODO calling it only in debug mode.
+    log_config();
+
+    // TODO set it on node/bridge after making set function for it and making inheriting
+    mesh_prefix = config["mesh_prefix"].as<String>();
+    mesh_password = config["mesh_password"].as<String>();
+    mesh_port = config["mesh_port"].as<size_t>();
+
+    JsonArray sensors = config["sensors"];
+    for (JsonObject sensor : sensors)
+    {
+        const String hardware_info = sensor["hardware_info"].as<String>();
+        const int sensor_id = sensor["sensor_id"].as<int>();
+        ;
+        const int sample_interval = sensor["sample_interval"];
+
+        DynamicJsonDocument doc(sensor);
+
+        JsonObject pinout = sensor["pinout"];
+
+        Device *new_device = DeviceFactory::create(sensor_id, hardware_info, pinout, doc);
+        // check if the new device is a simple user define sensor
+        std::map<String, Funcs>::const_iterator iter = funcs_map.find(hardware_info);
+        if (iter != funcs_map.end())
+        {
+            if (new_device->DEVICE_TYPE.equals(DEVICE_TYPE_SENSOR))
+            {
+                ((GenericSensor *)new_device)->set((*iter).second);
+            }
+        }
+        device_list.push_front(new_device);
+    }
 }
 
 // TODO move to utils
@@ -77,24 +121,24 @@ void printIndent(int indent_level, String str)
     Serial.println(str);
 }
 
-// parse the config and initialize class members
-void MeshGarden::parse_config()
+// print config file nicely to log
+void MeshGarden::log_config()
 {
-    // TODO consider print here only in debug mode. nickname,firmware needed only for printing. dont print password to console
+    // TODO replace string keys with constants
     Serial.println("Node Configurations:");
-    const char *nickname = config["nickname"]; // "tester"
-    const char *firmware = config["firmware"]; // "esp8266_v0.1"
-    // TODO set it on node/bridge after making set function for it and making inheriting
-    mesh_prefix = config["mesh_prefix"].as<String>();     // "whateverYouLike"
-    mesh_password = config["mesh_password"].as<String>(); // "somethingSneaky"
-    mesh_port = config["mesh_port"].as<size_t>();         // 5555
+
+    const char *nickname = config["nickname"];           // "tester"
+    const char *firmware = config["firmware"];           // "esp8266_v0.1"
+    const char *mesh_prefix = config["mesh_prefix"];     // "whateverYouLike"
+    const char *mesh_password = config["mesh_password"]; // "somethingSneaky"
+    const int mesh_port = config["mesh_port"];           // 5555
 
     printIndent(1, "Nickname: " + String(nickname));
     printIndent(1, "Firmware: " + String(firmware));
     printIndent(1, "Mesh Network:");
-    printIndent(2, "SSID: " + mesh_prefix);
-    printIndent(2, "Password: " + mesh_password);
-    printIndent(2, "Port: " + mesh_port);
+    printIndent(2, "SSID: " + String(mesh_prefix));
+    printIndent(2, "Password: " + String(mesh_password));
+    printIndent(2, "Port: " + String(mesh_port));
     printIndent(1, "Sensors:");
 
     JsonArray sensors = config["sensors"];
@@ -109,7 +153,7 @@ void MeshGarden::parse_config()
         printIndent(3, "Sample Interval: " + String(sample_interval));
         printIndent(3, "Measurement Types [units]:");
 
-        JsonArray sensor_type = sensor["sensor_type"];
+        JsonArray sensor_type = sensor["Measurement_type"];
         JsonArray units = sensor["units"];
         for (JsonArray::iterator type = sensor_type.begin(), unit = units.begin();
              type != sensor_type.end() && unit != units.end(); ++type, ++unit)
@@ -127,32 +171,52 @@ void MeshGarden::parse_config()
             pin.value(); // "D1"
             printIndent(4, String(pin.key().c_str()) + " --> " + pin.value().as<String>());
         }
-
-        // Device* new_device = DeviceFactory::create(String(hardware_info));
-        // device_list.insert(new_device);
     }
-    config.~DynamicJsonDocument();
+}
+
+void MeshGarden::init_mesh_connection()
+{
+    // TODO when adding mesh node/bridge classes
+
+    // TODO init mesh.
+
+    // TODO add devices functions to tasks. pseudo code:
+    // for (Device *device : device_list)
+    // {
+    //     if (device->DEVICE_TYPE.equals(DEVICE_TYPE_SENSOR))
+    //     {
+    //         mesh.add_func(((Sensor*)device)->get_measure_callback, time interval from config);
+    //     }
+    // }
 }
 
 MeshGarden::MeshGarden() : config(0)
 {
-    
-}
-
-void MeshGarden::add_sensor(String hardware_id, InitSensor init_sensor_func, Measure measure_func)
-{
-
-}
-
-void MeshGarden::update() {}
-
-void MeshGarden::begin(){
+    // create a pins map
     map_pins();
+
     // start file system
     if (!LittleFS.begin())
     {
         Serial.println("fail to start files system.");
         return; // exit(1);
     }
-
 }
+
+void MeshGarden::add_sensor(String hardware_info, InitSensor init_sensor_func, Measure measure_func)
+{
+    Funcs funcs;
+    funcs.init_sensor_func = init_sensor_func;
+    funcs.measure_func = measure_func;
+    funcs_map[hardware_info] = funcs;
+}
+
+void MeshGarden::begin()
+{
+
+    load_configuration();
+    parse_config();
+    config.~DynamicJsonDocument();
+}
+
+void MeshGarden::update() {}
