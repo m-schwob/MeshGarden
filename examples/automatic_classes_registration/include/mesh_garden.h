@@ -2,13 +2,18 @@
 #define _MESHGARDEN_H_
 
 #include <Arduino.h>
-#include <LittleFS.h>
 #include <ArduinoJson.h>
 #include <list>
 
 #include "pins_maps.h"
 #include "device.h"
 #include "sensor.h"
+
+#if defined(ESP32)
+    #include <LITTLEFS.h>
+#elif defined(ESP8266)
+    #include <LittleFS.h>
+#endif
 
 
 uint8_t pin(String pin);
