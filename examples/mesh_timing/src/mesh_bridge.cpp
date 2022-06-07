@@ -1,9 +1,18 @@
 #include "mesh_bridge.h"
 
+void printLocalTime(){
+  struct tm timeinfo;
+  if(!getLocalTime(&timeinfo)){
+    Serial.println("Failed to obtain time");
+    return;
+  }
+  Serial.println(&timeinfo, "%A, %B %d %Y %H:%M:%S");
+}
 
 static MeshBridge *node = NULL;
 
 MeshBridge::MeshBridge(){
+    init_clock();
     init_mesh();
     node = this;
 }
@@ -67,24 +76,47 @@ void MeshBridge::update()
     // it will run the user scheduler as well
     if(millis()-myTime >5000)
     {
+    Serial.println("time:");    
+    printLocalTime();
+    struct tm timeinfo;
+    if(!getLocalTime(&timeinfo)){
+        Serial.println("Failed to obtain time");
+        return;
+        }
+    char s[100];
+    
+    int rc = strftime(s,sizeof(s),"%b %d,20%y at %r", &timeinfo);
+    Serial.printf("%d characters written.\n%s\n",rc,s);   
+    mesh.sendBroadcast(String(s));
+
     // Serial.print(mesh.getNodeTime());
     // std::list<uint32_t> nodesList = mesh.getNodeList();
     // for (std::list<uint32_t>::iterator it = nodesList.begin(); it != nodesList.end(); it++){
-    // mesh.sendSingle(*it,"die");
+    // Serial.printf("signals to: %u\n",*it);
+    // bool signaled = mesh.sendSingle(*it,"die");
+    // if(signaled){Serial.println("sent");}
     // }
-    // delay(1000);
-    Serial.print(F("FreeHeap "));
-    Serial.println(ESP.getFreeHeap());
-    mesh.sendBroadcast("stop mesh");
-    mesh.stop();
+    //  delay(1000);
+    // Serial.print(F("FreeHeap "));
+    // Serial.println(ESP.getFreeHeap());
+    // for()
+    // bool broad = mesh.sendBroadcast("stop mesh");
+    // if(broad){
+    //     Serial.print("cool");
+    // }
+    // else{
+    //     Serial.print("error");
+    // }
+    // mesh.stop();
     // Serial.printf("disconnect");  
-    delay(20000);
-    init_mesh();
-    myTime=millis();
+    // delay(20000);
+    // init_mesh();
+     myTime=millis();
+    // }
+    // else{
     }
-    else{
     mesh.update();
-    }
+    // }
     // Init and get the time
     // if (millis() - lasttime >10000)
     // {
@@ -101,3 +133,25 @@ void MeshBridge::update()
     //     lasttime = millis();
     // }
 }
+
+void MeshBridge::init_clock(){
+  Serial.print("Connecting to server to calibrate clock");
+  Serial.println(ssid);
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println("");
+  Serial.println("WiFi connected.");
+  
+  // Init and get the time
+  configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
+  struct tm timeinfo;
+  printLocalTime();
+
+  //disconnect WiFi as it's no longer needed
+  WiFi.disconnect(true);
+  WiFi.mode(WIFI_OFF);
+}
+
