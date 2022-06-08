@@ -1,0 +1,104 @@
+{
+    "Measurements": {
+        "1": {
+            "Air Humidity": {
+                "samples": [
+                    {
+                        "time": "2022-05-23T21:00:00Z",
+                        "value": 0.8
+                    },
+                    {
+                        "time": "2022-05-23T21:10:00Z",
+                        "value": 0.7
+                    },
+                    {}
+                ]
+            },
+            "Air Temperature ": {
+                "samples": []
+            }
+        },
+        "2": {
+            "Soil Moisture": {
+                "samples": []
+            }
+        }
+    },
+    "Nodes": {
+        "nodeId1": {
+            "nickname": "tester",
+            "sensors": [
+                {
+                    "pinout": {
+                        "DAT": "D1"
+                    },
+                    "sensor_type": [
+                        "Air Humidity",
+                        "Air Temperature"
+                    ],
+                    "sensor_id": "1",
+                    "sample_interval": "30",
+                    "units": [
+                        "%",
+                        "C"
+                    ],
+                    "hardware_info": " DHT22"
+                },
+                {
+                    "pinout": {
+                        "VCC": "D4",
+                        "DAT": "D1"
+                    },
+                    "sensor_type": [
+                        "Soil Moisture"
+                    ],
+                    "sensor_id": "2",
+                    "sample_interval": "30",
+                    "units": [
+                        "%"
+                    ],
+                    "hardware_info": " Grove Soil Moisture"
+                }
+            ],
+            "firmware": "esp8266_v0.1"
+        },
+        "nodeId2": {
+            "...": "..."
+        },
+        "...": {
+            "...": "..."
+        }
+    },
+    "NodesNicknames": [
+        {
+            "nodeId": "nickname"
+        },
+        {
+            "nodeId2": "nickname"
+        },
+        {
+            "nodeId3": "nickname"
+        }
+    ],
+    "Network": {
+        "mesh": {
+            "mesh_prefix": "whateverYouLike",
+            "mesh_password": "somethingSneaky",
+            "mesh_port": 5555
+        }
+    },
+    "MeshNetwork": {
+        "nodeId1": "",
+        "nodeId2": "",
+        "...": ""
+    },
+    "Changes": {
+        "nodeId1": {
+            "config": "{\"node_id\": \" ... }"
+        },
+        "nodeId2": {
+            "config": "{\"node_id\": \" ... }"
+        },
+        "...": {}
+    }
+}
