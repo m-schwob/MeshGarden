@@ -1,15 +1,166 @@
 #include "mesh_bridge.h"
 
+void printLocalTime(){
+  struct tm timeinfo;
+  if(!getLocalTime(&timeinfo)){
+    Serial.println("Failed to obtain time");
+    return;
+  }
+  Serial.println(&timeinfo, "%A, %B %d %Y %H:%M:%S");
+}
 
 static MeshBridge *node = NULL;
 
 MeshBridge::MeshBridge(){
-    Serial.print("at start heap: ");
-    heap_status();
+    init_clock();
     init_mesh();
-    Serial.print("after mesh init");
-    heap_status();
     node = this;
+}
+
+// Needed for painless library
+// receivedCallback - when we get a post on the mesh, it will update the dict by the message sent to it
+// the dict will have nodeId as its key, and the Entire message as its value
+void receivedCallback(uint32_t from, String &msg)
+{
+    uint32_t timer = node->mesh.getNodeTime();
+    Serial.printf("message received from %u msg=%s. at time: %u\n", from, msg.c_str(),timer);
+    // node->server_data.push_back(String(from) + "," + msg);
+}
+
+// Needed for mesh, do not change
+void newConnectionCallback(uint32_t nodeId)
+{
+    uint32_t time = node->mesh.getNodeTime();
+    Serial.printf("--> startHere: New Connection, nodeId = %u\n", nodeId);
+    Serial.printf("new node connected at time: %u\n", time);
+    Serial.println("time:");    
+    printLocalTime();
+    struct tm timeinfo;
+    if(!getLocalTime(&timeinfo)){
+        Serial.println("Failed to obtain time");
+        return;
+        }
+    char s[100];
+    
+    int rc = strftime(s,sizeof(s),"%b %d,20%y at %r", &timeinfo);
+    Serial.printf("%d characters written.\n%s\n",rc,s);   
+    node->mesh.sendBroadcast(String(s));
+}
+
+void changedConnectionCallback()
+{  
+    Serial.printf("Changed connections\n");
+}
+
+void nodeTimeAdjustedCallback(int32_t offset)
+{
+    Serial.printf("Adjusted time %u. Offset = %d\n", node->mesh.getNodeTime(), offset);
+}
+
+void MeshBridge::init_mesh()
+{   
+     myTime = millis();
+    // Serial.printf("Mesh node start at time: %d \n", myTime);
+    // mesh.setDebugMsgTypes( ERROR | MESH_STATUS | CONNECTION | SYNC | COMMUNICATION | GENERAL | MSG_TYPES | REMOTE ); // all types on
+    mesh.setDebugMsgTypes(ERROR | STARTUP); // set before init() so that you can see startup messages
+    mesh.init(MESH_PREFIX, MESH_PASSWORD, &userScheduler, MESH_PORT);
+    mesh.onReceive(&receivedCallback);
+    mesh.onNewConnection(&newConnectionCallback);
+    mesh.onChangedConnections(&changedConnectionCallback);
+    mesh.onNodeTimeAdjusted(&nodeTimeAdjustedCallback);
+    mesh.onDroppedConnection([](uint32_t nodeId)
+    {
+   // Do something with the event
+   Serial.print("changed connectio with node" + String(nodeId)+ "at time: "+ node->mesh.getNodeTime());
+    });
+   mesh.onNodeDelayReceived([](uint32_t nodeId, int delay) {
+       // Do something with the event
+       Serial.println(String(delay));
+    });
+    // Bridge node, should (in most cases) be a root node. See [the wiki](https://gitlab.com/painlessMesh/painlessMesh/wikis/Possible-challenges-in-mesh-formation) for some background
+    mesh.setRoot(true);
+    // This node and all other nodes should ideally know the mesh contains a root, so call this on all nodes
+    mesh.setContainsRoot(true);
+}
+
+void MeshBridge::update()
+{
+      // it will run the user scheduler as well
+    mesh.update();
+    // Init and get the time
+    if (millis() - lasttime > 10000)
+    {
+        get_mesh_nodes(); // get the working nodes list before quit
+        String nodeId = String(mesh.getNodeId());
+        mesh.stop();
+        // // Connect to Wi-Fi
+        Serial.print("Connecting to ");
+        Serial.println(ssid);
+        WiFi.begin(ssid, password);
+        while (WiFi.status() != WL_CONNECTED)
+        {
+            delay(500);
+            Serial.print(".");
+        }
+        Serial.println("");
+        Serial.println("WiFi connected.");
+        firebaseInit();
+        Serial.println("got here!");
+        set_in_firebase(nodeId);
+        // //  //pst on the firebase server what was saved on the map
+        // for(std::map<String,vector<String>>::iterator iter = dict.begin(); iter != dict.end(); ++iter){
+        // for(vector<String>::iterator measures_iter = iter->second.begin(); measures_iter!=iter->second.end() ; measures_iter++ ){
+        // firestoreDataUpdate(iter->first, *measures_iter);
+        //}
+        //   }
+        Serial.printf("sending %d cached messages..\n", server_data.size());
+        for (vector<String>::iterator measures_iter = server_data.begin(); measures_iter != server_data.end(); measures_iter++)
+        {
+            Serial.printf("sending message <%s>\n", measures_iter->c_str());
+            std::vector<String> vec = split((*measures_iter), ","); // split the String to vector of Strins by word
+            firestoreDataUpdate(String(vec[0].c_str()),String(vec[1].c_str()), String(vec[2].c_str()), String(vec[3].c_str()));
+        }
+        server_data.clear();
+        //Serial.println("send to server list:");
+        firestoreMeshCollectionClear();
+        firestoreMeshCollectionUpdate();
+        firestoreNetworkDataCollectionUpdate();
+        firestoreReadChanges();	
+
+        mesh_values.clear();
+        Serial.println("send to server end");
+        //  dict.clear(); //clears the map in order to be more space efficient, nodes that did not changed would not be posted again
+        Serial.println("WiFi disconnected. initialize mesh");
+        // initializing the mesh network again
+        // for(list<String>::iterator iter= change_log.begin(); iter!=change_log.end() ; ++iter ){
+        //     Serial.println("change in: ");
+        //     Serial.printf("%s\n\n",(*iter).c_str());//FROM HERE WE CAN EXTRACT NIDE ID AND SEND THE JSON AS SINGLE
+        // }
+        init_mesh();
+    Serial.print("after update after entering fb heap: ");
+        lasttime = millis();
+    }
+}
+
+void MeshBridge::init_clock(){
+  Serial.print("Connecting to server to calibrate clock");
+  Serial.println(ssid);
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println("");
+  Serial.println("WiFi connected.");
+  
+  // Init and get the time
+  configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
+  struct tm timeinfo;
+  printLocalTime();
+
+  //disconnect WiFi as it's no longer needed
+  WiFi.disconnect(true);
+  WiFi.mode(WIFI_OFF);
 }
 
 // a function that parses a string and creates a vector of words
@@ -90,49 +241,6 @@ void MeshBridge::firestoreMeshCollectionUpdate(){
   }
 }
 
-// Needed for painless library
-// receivedCallback - when we get a post on the mesh, it will update the dict by the message sent to it
-// the dict will have nodeId as its key, and the Entire message as its value
-void receivedCallback(uint32_t from, String &msg)
-{
-    Serial.printf("message received from %u msg=%s. saving to cache\n", from, msg.c_str());
-    node->server_data.push_back(String(from) + "," + msg);
-}
-
-// Needed for mesh, do not change
-void newConnectionCallback(uint32_t nodeId)
-{
-    Serial.printf("--> startHere: New Connection, nodeId = %u\n", nodeId);
-}
-
-void changedConnectionCallback()
-{
-    Serial.printf("Changed connections\n");
-}
-
-void nodeTimeAdjustedCallback(int32_t offset)
-{
-    Serial.printf("Adjusted time %u. Offset = %d\n", node->mesh.getNodeTime(), offset);
-}
-
-void MeshBridge::init_mesh()
-{
-    // mesh.setDebugMsgTypes( ERROR | MESH_STATUS | CONNECTION | SYNC | COMMUNICATION | GENERAL | MSG_TYPES | REMOTE ); // all types on
-    mesh.setDebugMsgTypes(ERROR | STARTUP); // set before init() so that you can see startup messages
-    mesh.init(MESH_PREFIX, MESH_PASSWORD, &userScheduler, MESH_PORT);
-    mesh.onReceive(&receivedCallback);
-    mesh.onNewConnection(&newConnectionCallback);
-    mesh.onChangedConnections(&changedConnectionCallback);
-    mesh.onNodeTimeAdjusted(&nodeTimeAdjustedCallback);
-    mesh.onDroppedConnection([](uint32_t nodeId)
-                             {
-   // Do something with the event
-   Serial.println(String(nodeId)); });
-    // Bridge node, should (in most cases) be a root node. See [the wiki](https://gitlab.com/painlessMesh/painlessMesh/wikis/Possible-challenges-in-mesh-formation) for some background
-    mesh.setRoot(true);
-    // This node and all other nodes should ideally know the mesh contains a root, so call this on all nodes
-    mesh.setContainsRoot(true);
-}
 
 void MeshBridge::get_mesh_nodes()
 {
@@ -146,64 +254,6 @@ void MeshBridge::get_mesh_nodes()
     mesh_values.push_back(String(mesh.getNodeId()));
 }
 
-void MeshBridge::update()
-{
-    // it will run the user scheduler as well
-    mesh.update();
-    // Init and get the time
-    if (millis() - lasttime > 10000)
-    {
-    Serial.print("after update before entering fb heap: ");
-    heap_status();
-        get_mesh_nodes(); // get the working nodes list before quit
-        mesh.stop();
-        // // Connect to Wi-Fi
-        Serial.print("Connecting to ");
-        Serial.println(ssid);
-        WiFi.begin(ssid, password);
-        while (WiFi.status() != WL_CONNECTED)
-        {
-            delay(500);
-            Serial.print(".");
-        }
-        Serial.println("");
-        Serial.println("WiFi connected.");
-        firebaseInit();
-        // //  //pst on the firebase server what was saved on the map
-        // for(std::map<String,vector<String>>::iterator iter = dict.begin(); iter != dict.end(); ++iter){
-        // for(vector<String>::iterator measures_iter = iter->second.begin(); measures_iter!=iter->second.end() ; measures_iter++ ){
-        // firestoreDataUpdate(iter->first, *measures_iter);
-        //}
-        //   }
-        Serial.printf("sending %d cached messages..\n", server_data.size());
-        for (vector<String>::iterator measures_iter = server_data.begin(); measures_iter != server_data.end(); measures_iter++)
-        {
-            Serial.printf("sending message <%s>\n", measures_iter->c_str());
-            std::vector<String> vec = split((*measures_iter), ","); // split the String to vector of Strins by word
-            firestoreDataUpdate(String(vec[0].c_str()),String(vec[1].c_str()), String(vec[2].c_str()), String(vec[3].c_str()));
-        }
-        server_data.clear();
-        //Serial.println("send to server list:");
-        firestoreMeshCollectionClear();
-        firestoreMeshCollectionUpdate();
-        firestoreNetworkDataCollectionUpdate();
-        firestoreReadChanges();	
-
-        mesh_values.clear();
-        Serial.println("send to server end");
-        //  dict.clear(); //clears the map in order to be more space efficient, nodes that did not changed would not be posted again
-        Serial.println("WiFi disconnected. initialize mesh");
-        // initializing the mesh network again
-        // for(list<String>::iterator iter= change_log.begin(); iter!=change_log.end() ; ++iter ){
-        //     Serial.println("change in: ");
-        //     Serial.printf("%s\n\n",(*iter).c_str());//FROM HERE WE CAN EXTRACT NIDE ID AND SEND THE JSON AS SINGLE
-        // }
-        init_mesh();
-    Serial.print("after update after entering fb heap: ");
-    heap_status();
-        lasttime = millis();
-    }
-}
 //this function will delete the active mesh nodes before inserting the new mesh network active nodes in
 void MeshBridge::firestoreMeshCollectionClear(){
     if(WiFi.status() == WL_CONNECTED && Firebase.ready()){
@@ -356,8 +406,39 @@ bool MeshBridge::firestoreReadNetwork(String &changes){
     Serial.println(fbdo.errorReason());
     return false;
     }
-void MeshBridge:: heap_status()
-{
-    Serial.print(F("FreeHeap "));
-    Serial.println(ESP.getFreeHeap());
+
+void MeshBridge::set_in_firebase(String nodeId){
+    if(WiFi.status() == WL_CONNECTED && Firebase.ready()){
+        //part1: initializing empty Node in the node list dedicated for the bridge
+        String documentPath = "NodeTest/"+nodeId;
+        FirebaseJson content;
+        bool response;
+        content.set("fields/nickname/stringValue/",nodeId.c_str());
+        content.set("fields/bridge/booleanValue/",true);
+        content.set("fields/active/booleanValue/",true);
+        content.set("fields/configured/booleanValue/",false);
+        if(Firebase.Firestore.createDocument(&fbdo, FIREBASE_PROJECT_ID, "", documentPath.c_str(), content.raw())){
+            Serial.printf("ok\n%s\n\n", fbdo.payload().c_str());
+            Serial.printf("initializing bridge succeed!!!\n\n");
+            return;
+        }
+        else{
+            Serial.println(fbdo.errorReason());
+            Serial.printf("initializing bridge failed!!!\n\n");
+        }
+        //part2: initializing empty Node in the nickname list dedicated for the node
+        String documentPath2 = "NodesNickname/"+nodeId;
+        FirebaseJson content2;
+        bool response2;
+        content2.set("fields/nodeId/stringValue/",nodeId.c_str());
+
+        if(Firebase.Firestore.createDocument(&fbdo, FIREBASE_PROJECT_ID, "", documentPath2.c_str(), content2.raw())){
+            Serial.printf("ok\n%s\n\n", fbdo.payload().c_str());
+            return;
+        }
+        else{
+            Serial.println(fbdo.errorReason());
+        }
+
+    }
 }

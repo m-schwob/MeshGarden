@@ -15,6 +15,7 @@
 #include <list>
 #include <map>
 #include "ArduinoJson.h"
+#include <ESP32Time.h>
 
 using namespace painlessmesh;
 using namespace std;
@@ -29,6 +30,8 @@ using namespace std;
 /***************************
  *  Variables Definitions For the WiFi - Change wifi ssid,password to match yours
  **************************/
+// const char* const ssid = "My_hotspot";
+// const char* const password = "mypassword";
 const char* const ssid = "My_hotspot";
 const char* const password = "mypassword";
 const char* const ntpServer = "pool.ntp.org";
@@ -43,18 +46,25 @@ const int daylightOffset_sec = 7200;
 #define USER_EMAIL "ioadmin@ioadmin.com"
 #define USER_PASSWORD "ioadmin"
 
+/***************************
+ *  Macro Definitions For the RTC and for time management:
+ **************************/
 
 class MeshBridge
 {
 
 private:
+    ESP32Time rtc;
     Scheduler userScheduler; // to control your personal task
     painlessMesh mesh;
+    unsigned long myTime; // timer to check how long it takes to initialize mesh network
+
     // firebase global variables
     FirebaseData fbdo;
     FirebaseAuth auth;
     FirebaseConfig config;
     std::map<String,String> change_log;
+
     // sync with the server, saving data variables
     int lasttime = 0; // initialized, used to messure time interaval for the disconnect
     // std::map<String,vector<String>> dict;
@@ -65,7 +75,7 @@ private:
     friend void changedConnectionCallback();
     friend void nodeTimeAdjustedCallback(int32_t offset);
 
-    void init_mesh();
+    //firebase functions
     void firebaseInit();
     void firestoreMeshCollectionClear();
     void firestoreMeshCollectionUpdate();
@@ -77,11 +87,16 @@ private:
     vector<String> split(String s, String delimiter);
 
 
+
+    void init_mesh();
+    void init_clock();
+    void set_in_firebase(String nodeId);
+
 public:
     MeshBridge();
     void update();
     void get_mesh_nodes();
-    void heap_status();
+
 };
 
 #endif /* _BRIDGENODE_H_ */

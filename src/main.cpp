@@ -82,5 +82,5 @@ void setup(void)
 
 void loop(void)
 {
-    meshB->update();
+    mesh->update();
 }
