@@ -1,0 +1,9 @@
+    "Nodes": {
+        "nodeId1": {
+            "nickname": String(node_id),
+            "bridge": "true",
+            "active": "true",
+            "configured" : "false",
+            "sensors": []
+        }
+    }

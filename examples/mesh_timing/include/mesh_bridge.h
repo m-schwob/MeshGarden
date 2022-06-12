@@ -8,6 +8,7 @@
 // start:
 #include <Arduino.h>
 #include <painlessMesh.h>
+#include <Firebase_ESP_Client.h>
 #include <AsyncTCP.h>
 #include <ESPAsyncWebServer.h>
 #include <vector>
@@ -37,9 +38,18 @@ const char* const ntpServer = "pool.ntp.org";
 const long gmtOffset_sec = 7200;
 const int daylightOffset_sec = 7200;
 
-/****************************
- * Variables Definition for time:
- * **************************/
+/***************************
+ *  Macro Definitions For the FireStore DB
+ **************************/
+#define API_KEY "AIzaSyCpnmHDV7B7oR6pnKXS0VBFoqaF174UzZM"
+#define FIREBASE_PROJECT_ID "meshgarden-iot"
+#define USER_EMAIL "ioadmin@ioadmin.com"
+#define USER_PASSWORD "ioadmin"
+
+/***************************
+ *  Macro Definitions For the RTC and for time management:
+ **************************/
+
 class MeshBridge
 {
 
@@ -48,7 +58,13 @@ private:
     Scheduler userScheduler; // to control your personal task
     painlessMesh mesh;
     unsigned long myTime; // timer to check how long it takes to initialize mesh network
+
+    // firebase global variables
+    FirebaseData fbdo;
+    FirebaseAuth auth;
+    FirebaseConfig config;
     std::map<String,String> change_log;
+
     // sync with the server, saving data variables
     int lasttime = 0; // initialized, used to messure time interaval for the disconnect
     // std::map<String,vector<String>> dict;
@@ -58,12 +74,29 @@ private:
     friend void newConnectionCallback(uint32_t nodeId);
     friend void changedConnectionCallback();
     friend void nodeTimeAdjustedCallback(int32_t offset);
+
+    //firebase functions
+    void firebaseInit();
+    void firestoreMeshCollectionClear();
+    void firestoreMeshCollectionUpdate();
+    void firestoreNetworkDataCollectionUpdate();
+    void firestoreReadChanges();
+    bool firestoreReadNetwork(String &changes);
+    void firestoreDataUpdate(String plant_id, String sensor_id, String meas_type, String value);
+    bool get_node_changes(String node_id, String &changes);
+    vector<String> split(String s, String delimiter);
+
+
+
     void init_mesh();
     void init_clock();
+    void set_in_firebase(String nodeId);
 
 public:
     MeshBridge();
     void update();
+    void get_mesh_nodes();
+
 };
 
 #endif /* _BRIDGENODE_H_ */
