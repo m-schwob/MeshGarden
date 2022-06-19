@@ -35,11 +35,12 @@ void receivedCallback(uint32_t from, String &msg)
         Serial.println("stop mesh");
         node->mesh.stop();
         node->alive = false;
+        return;
     }
+    vector<String> values = node->splitString(msg.c_str());
 
-    else{
+    if (values[0]=="clock"){
         Serial.println(msg);
-        vector<String> values = node->splitString(msg.c_str());
         // Serial.println("printVals");
         // int index = 0;
         // for(vector<String>::iterator it = values.begin(); it != values.end(); ++it ) {
@@ -48,10 +49,13 @@ void receivedCallback(uint32_t from, String &msg)
         //     index++;
         // }
         node->setTimeVal((values[3]).c_str());
-        node->date = values[0] + " " + values[1] +" "+values[2];
-        node->AmPm = values[4];
+        node->date = values[1] + " " + values[2] +" "+values[3];
+        node->AmPm = values[5];
         node->set_time= true;
-
+    }
+    if(values[0] == "Change:"){
+        //new configurations
+        Serial.println("configs got");
     }
 }
 

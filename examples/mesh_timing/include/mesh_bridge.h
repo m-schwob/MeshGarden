@@ -63,7 +63,7 @@ private:
     FirebaseData fbdo;
     FirebaseAuth auth;
     FirebaseConfig config;
-    std::map<String,String> change_log;
+    bool initialized = false;
 
     // sync with the server, saving data variables
     int lasttime = 0; // initialized, used to messure time interaval for the disconnect
@@ -86,13 +86,14 @@ private:
     bool get_node_changes(String node_id, String &changes);
     vector<String> split(String s, String delimiter);
 
-
-
     void init_mesh();
     void init_clock();
     void set_in_firebase(String nodeId);
+    void set_bridge_in_firebase(String nodeId);
+    void set_default_nickname(String nodeId);
 
 public:
+    std::map<String,String> change_log;
     MeshBridge();
     void update();
     void get_mesh_nodes();
