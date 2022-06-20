@@ -4,16 +4,11 @@
 #include <Arduino.h>
 #include <ArduinoJson.h>
 #include <list>
+#include <LittleFS.h>
 
 #include "pins_maps.h"
 #include "device.h"
 #include "sensor.h"
-
-#if defined(ESP32)
-    #include <LITTLEFS.h>
-#elif defined(ESP8266)
-    #include <LittleFS.h>
-#endif
 
 
 uint8_t pin(String pin);
