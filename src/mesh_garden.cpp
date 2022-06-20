@@ -189,6 +189,11 @@ void MeshGarden::log_config()
 
 void MeshGarden::init_mesh_connection()
 {
+    #ifdef ESP32
+        
+    #else
+
+    #endif
     // TODO when adding mesh node/bridge classes
 
     // TODO init mesh.
@@ -229,6 +234,7 @@ void MeshGarden::begin()
     load_configuration();
     parse_config();
     config.~DynamicJsonDocument();
+    init_mesh_connection();
 }
 
 void MeshGarden::update() {}

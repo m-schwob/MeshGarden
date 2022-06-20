@@ -10,12 +10,18 @@
 #include "device.h"
 #include "sensor.h"
 
+#ifdef ESP32
+#include "mesh_bridge.h"
+#else
+#include "mesh_node.h"
+#endif
+
 uint8_t pin(String pin);
 
 class MeshGarden
 {
 public:
-    typedef std::function< void()> InitSensor;
+    typedef std::function<void()> InitSensor;
     typedef std::function<Measurements()> Measure;
     struct Funcs
     {
@@ -39,7 +45,7 @@ public:
 
         void set(Funcs func);
     };
-    #define REGISTER_SENSOR(STR) REGISTER_DEVICE(MeshGarden::GenericSensor, STR);
+#define REGISTER_SENSOR(STR) REGISTER_DEVICE(MeshGarden::GenericSensor, STR);
 
 private:
     DynamicJsonDocument config;
@@ -51,15 +57,22 @@ private:
     String mesh_password;
     size_t mesh_port;
 
-private:
-    void save_configuration(String &config);
+    #ifdef ESP32
+    MeshBridge network;
+    #else
+    MeshNode network;
+    #endif
+        
+
+        private : void
+                  save_configuration(String &config);
     bool load_configuration();
     void parse_config();
     void log_config();
     void init_mesh_connection();
 
 public:
-    std::list<Device*> device_list;
+    std::list<Device *> device_list;
     MeshGarden();
     void add_sensor(String hardware_id, InitSensor init_sensor_func, Measure measure_func);
     void update();
