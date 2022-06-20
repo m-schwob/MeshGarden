@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include <ArduinoJson.h>
 #include "mesh_garden.h"
 
 /*
@@ -33,115 +34,89 @@ For the .ino file, he idea is to give the user two way of adding his own sensor:
 Define sensor using class example.
 Capacitance soil moisture sensor using ADS1X15 ADC extender.
 */
-// #include <SparkFun_VEML6075_Arduino_Library.h>
 
-// VEML6075 uv;
+#include <Adafruit_ADS1X15.h>
+#include "Sensor.h"
 
-// void setup()
-// {
-//   Serial.begin(115200);
+#define _DEVICE_TYPE "Soil Moisture Sensor"
+#define _HARDWARE_INFO "Groove Soil Moisture"
+#define _MEASUREMENTS_TYPE "Soil Moisture"
+#define _UNITS "%"
 
-//   Wire.begin();
+class SoilMoisureSensorGroveV1 : public Sensor
+{
+private:
+    uint8_t analog_pin;
 
-//   if (!uv.begin())
-//   {
-//     Serial.println("Unable to communicate with VEML6075.");
-//     while (1)
-//       ;
-//   }
-// }
+    float C_air = 2.2; // volts
+    float C_water = 1; // volts
 
-// void loop()
-// {
-//   Serial.println(String(uv.a()) + ", " + String(uv.b()) + ", " +
-//                  String(uv.uvComp1()) + ", " + String(uv.uvComp2()) + ", " +
-//                  String(uv.index()));
-//   delay(250);
-// }
+    // ADS1X15 related. TODO make driver for it. check example file
+    Adafruit_ADS1115 ads;
 
-// #include <Adafruit_ADS1X15.h>
-// #include "Sensor.h"
+    void init_adc()
+    {
+        ads.setGain(GAIN_ONE);
+        if (!ads.begin())
+        {
+            Serial.println("Failed to initialize ADS.");
+        }
+        else
+            Serial.println("ADS initialized");
+    }
 
-// #define _DEVICE_TYPE "Soil Moisture Sensor"
-// #define _HARDWARE_INFO "Groove Soil Moisture"
-// #define _MEASUREMENTS_TYPE "Soil Moisture"
-// #define _UNITS "%"
+    float extender_measure(uint16_t pin)
+    {
+        int16_t adc0 = ads.readADC_SingleEnded(pin);
+        float volts0 = ads.computeVolts(adc0);
+        Serial.println("extender measure"); // TODO print value
+        return volts0;
+    }
 
-// class SoilMoisureSensorGroveV1 : public Sensor
-// {
-// private:
-//     uint8_t analog_pin;
+    float percentage(float value, float max, float min = 0)
+    {
+        if (min > value || value > max)
+            return -1;
+        return (value - min) / (max - min);
+    }
 
-//     float C_air = 2.2; // volts
-//     float C_water = 1; // volts
+public:
+    SoilMoisureSensorGroveV1(DEVICE_CONSTRUCTOR_ARGUMENTS)
+        : Sensor(device_id, hardware_info, pinout, envelop)
+    {
+        init_adc();                                             // ADS1X15 related.
+        Serial.printf("%s: initelized", HARDWARE_INFO.c_str()); // add details about pins i.e.
+    }
 
-//     float result = -1; // percentage as 0-1 value
+    Measurements measure()
+    {
+        if (POWER_PIN_CONTROL)
+            digitalWrite(POWER_PIN_CONTROL, HIGH);
 
-//     // ADS1X15 related. TODO make driver for it. check example file
-//     Adafruit_ADS1115 ads;
+        // TODO solve it when solving extender
+        // if(!extender)
+        //     analogRead(pin);
+        // else
+        float volt = extender_measure(analog_pin);
+        // TODO handle the case that the value go off range
+        result = 1 - percentage(volt, C_air, C_water);
+        Serial.printf("%s: measure %f volts, %f/1 range\n", HARDWARE_INFO.c_str(), volt, result);
 
-//     void init_adc()
-//     {
-//         ads.setGain(GAIN_ONE);
-//         if (!ads.begin())
-//         {
-//             Serial.println("Failed to initialize ADS.");
-//         }
-//         else
-//             Serial.println("ADS initialized");
-//     }
+        // power on sensor if power pin is defined
+        if (POWER_PIN_CONTROL)
+            digitalWrite(POWER_PIN, HIGH); // TODO solve it and change to low
+    }
 
-//     float extender_measure(uint16_t pin)
-//     {
-//         int16_t adc0 = ads.readADC_SingleEnded(pin);
-//         float volts0 = ads.computeVolts(adc0);
-//         Serial.println("extender measure"); // TODO print value
-//         return volts0;
-//     }
+    void calibrate() { calibrated = true; }
+};
 
-//     float percentage(float value, float max, float min = 0)
-//     {
-//         if (min > value || value > max)
-//             return -1;
-//         return (value - min) / (max - min);
-//     }
-
-// public:
-//     SoilMoisureSensorGroveV1(int id, uint8_t data_pins, uint8_t power_pin = -1)
-//     {
-//         init_adc();                                             // ADS1X15 related.
-//         Serial.printf("%s: initelized", HARDWARE_INFO.c_str()); // add details about pins i.e.
-//     }
-
-//     Measurements measure()
-//     {
-//         if (POWER_PIN_CONTROL)
-//             digitalWrite(POWER_PIN_CONTROL, HIGH);
-
-//         // TODO solve it when solving extender
-//         // if(!extender)
-//         //     analogRead(pin);
-//         // else
-//         float volt = extender_measure(analog_pin);
-//         // TODO handle the case that the value go off range
-//         result = 1 - percentage(volt, C_air, C_water);
-//         Serial.printf("%s: measure %f volts, %f/1 range\n", HARDWARE_INFO.c_str(), volt, result);
-
-//         // power on sensor if power pin is defined
-//         if (POWER_PIN_CONTROL)
-//             digitalWrite(POWER_PIN_CONTROL, HIGH); // TODO solve it and change to low
-//     }
-
-//     void calibrate() { calibrated = true; }
-// };
-
-// /*****************************************************/
+/*****************************************************/
 
 /****************** FUNCTIONS EXAMPLE ********************* /
 Define sensor using functions example.
 DHT22 air humidity and temperature sensor.
 */
-#include "DHT.h"
+#include <DHT_U.h>
 #define DHTPIN 2
 #define DHTTYPE DHT22
 
@@ -167,7 +142,7 @@ Measurements measure_DHT()
     if (isnan(h) || isnan(t) || isnan(f))
     {
         Serial.println(F("Failed to read from DHT sensor!"));
-        return;
+        // return; TODO handle failed situation
     }
 
     // Compute heat index in Fahrenheit (the default)
