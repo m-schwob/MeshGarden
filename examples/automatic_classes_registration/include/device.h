@@ -4,6 +4,7 @@
 #include <Arduino.h>
 #include <vector>
 #include <map>
+#include <ArduinoJson.h>
 
 
 /* TODO remove later
@@ -14,27 +15,32 @@
     - type of the device.
 */
 
-inline String* arr_end(String* arr){
-    return arr + sizeof(arr)/sizeof(String);
-}
+// inline String* arr_end(String* arr){
+//     return arr + sizeof(arr)/sizeof(String);
+// }
+
+#define DEVICE_CONSTRUCTOR_ARGUMENTS const int device_id, const String hardware_info, const JsonObject pinout, const DynamicJsonDocument envelop
+#define POWER_PIN F("POWER")
+#define DEVICE_TYPE_KEY F("device_type")
 
 class Device {
     private:
         bool enabled = false; // device is disabled when initialized
     public:
-        const unsigned int ID;
-        const std::vector<String> DEVICE_TYPE; // per device type. e.g. 2 UV sensors will have the same type. // TODO enum or list of types
+        const unsigned int DEVICE_ID; // per instance identification
+        const String DEVICE_TYPE; // sensor/actuator ...
         const String HARDWARE_INFO; // per implementation info e.g. 2 different uv sensors can hav different info
-    private:
-        const uint8_t DATA_PINS; // should be an array
-    public:
-        const uint8_t POWER_PIN; // no power control by default.
+    protected:
+        const DynamicJsonDocument PINOUT; 
+        const bool POWER_PIN_CONTROL; //no power control by default.
 
     protected:
         Device() = delete; //since the class isn't pure virtual, that will prevent constracting object of this class 
-        Device(int id, String device_type, String hardware_info, uint8_t data_pins, uint8_t power_pin = -1);
-        Device(int id, String device_type[], String hardware_info, uint8_t data_pins, uint8_t power_pin = -1);
-        Device(int id, std::vector<String> device_type, String hardware_info, uint8_t data_pins, uint8_t power_pin = -1);
+        Device(DEVICE_CONSTRUCTOR_ARGUMENTS);
+        // Device(int id, String device_type[], String hardware_info, DynamicJsonDocument pinout);
+        // Device(int id, std::vector<String> device_type, String hardware_info, DynamicJsonDocument pinout);
+
+        static DynamicJsonDocument create_envelop(String device_type);
 
     public:
         virtual void enable(bool _power_on = false);
@@ -47,7 +53,7 @@ class Device {
 
 struct DeviceFactory
 {
-    static Device *create(int id, std::vector<String> device_type, String hardware_info, uint8_t data_pins, uint8_t power_pin)
+    static Device *create(DEVICE_CONSTRUCTOR_ARGUMENTS)
     { // creates an object from a string
         const Creators_t::const_iterator iter = static_creators().find(hardware_info);
         if (iter == static_creators().end())
@@ -56,11 +62,11 @@ struct DeviceFactory
             return 0;
         }
         else
-            return (*iter->second)(id, device_type, hardware_info, data_pins, power_pin); // if found, execute the creator function pointer
+            return (*iter->second)(device_id, hardware_info, pinout, envelop); // if found, execute the creator function pointer
     }
 
 private:
-    typedef Device *Creator_t(int id, std::vector<String> device_type, String hardware_info, uint8_t data_pins, uint8_t power_pin);                      // function pointer to create Device
+    typedef Device *Creator_t(DEVICE_CONSTRUCTOR_ARGUMENTS);                      // function pointer to create Device
     typedef std::map<String, Creator_t *> Creators_t; // map from id to creator
     static Creators_t &static_creators()
     {
@@ -70,8 +76,8 @@ private:
     template <class T = int>
     struct Register
     {
-        static Device *create(int id, std::vector<String> device_type, String hardware_info, uint8_t data_pins, uint8_t power_pin) 
-        { return new T(id, device_type, hardware_info, data_pins, power_pin); };
+        static Device *create(DEVICE_CONSTRUCTOR_ARGUMENTS) 
+        { return new T(device_id, hardware_info, pinout, envelop); };
         static Creator_t *init_creator(const String &id) { return static_creators()[id] = create; }
         static Creator_t *creator;
     };
