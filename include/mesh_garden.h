@@ -2,44 +2,68 @@
 #define _MESHGARDEN_H_
 
 #include <Arduino.h>
-#include <painlessMesh.h>
-#include <Firebase_ESP_Client.h>
 #include <ArduinoJson.h>
+#include <list>
 #include <LittleFS.h>
 
+#include "pins_maps.h"
 #include "device.h"
 #include "sensor.h"
 
-#if defined(ESP32)
-    #include "mesh_bridge.h"
-    MeshBridge* mesh = NULL;
+uint8_t pin(String pin);
 
-#elif defined(ESP8266)
-    #include "mesh_node.h"
-    #include "soil_moisure_sensor_grove_v1.0.h"
-    #include "dummy_sensor.h"
-#endif
+class MeshGarden
+{
+public:
+    typedef std::function< void()> InitSensor;
+    typedef std::function<Measurements()> Measure;
+    struct Funcs
+    {
+        InitSensor init_sensor_func;
+        Measure measure_func;
+    };
 
-#define BAUD_RATE 115200
-
-
-class MeshGarden{
+    // Generic sensor class that can call 'init_sensor' and 'measure' function from 'MeshGarden' list.
+    // That enables the easy function registration proccess without breaking DeviceFactory initialization proccess
+    class GenericSensor : public Sensor
+    {
     private:
-        DynamicJsonDocument config;
-        std::list<Device*> device_list; 
-        String mesh_prefix;
-        String mesh_password;
-        size_t mesh_port;
-
-    private:
-        void save_configuration(String& config);
-        bool load_configuration();
-        void parse_config();
+        InitSensor init_sensor_func;
+        Measure measure_func;
 
     public:
-        MeshGarden();
-        void update();
+        GenericSensor(DEVICE_CONSTRUCTOR_ARGUMENTS);
+        void init_sensor();
+        Measurements measure();
+        void calibrate();
 
+        void set(Funcs func);
+    };
+    #define REGISTER_SENSOR(STR) REGISTER_DEVICE(MeshGarden::GenericSensor, STR);
+
+private:
+    DynamicJsonDocument config;
+
+    // std::list<Device*> device_list; make private after test
+    std::map<String, Funcs> funcs_map;
+
+    String mesh_prefix;
+    String mesh_password;
+    size_t mesh_port;
+
+private:
+    void save_configuration(String &config);
+    bool load_configuration();
+    void parse_config();
+    void log_config();
+    void init_mesh_connection();
+
+public:
+    std::list<Device*> device_list;
+    MeshGarden();
+    void add_sensor(String hardware_id, InitSensor init_sensor_func, Measure measure_func);
+    void update();
+    void begin();
 };
 
 #endif /* _MESHGARDEN_H_ */
