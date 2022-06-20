@@ -5,6 +5,9 @@ uint8_t pin(String pin)
     return pins_map[pin].as<uint8_t>();
 }
 
+MeshGarden::GenericSensor::GenericSensor(DEVICE_CONSTRUCTOR_ARGUMENTS) 
+    : Sensor(device_id, hardware_info, pinout, envelop) {}
+
 void MeshGarden::GenericSensor::init_sensor()
 {
     init_sensor_func();
@@ -52,8 +55,10 @@ bool MeshGarden::load_configuration()
     // in run time should be added. consider (done this solution) using the file size as base size and them use fit function.
     // https://arduinojson.org/v6/assistant/
     // https://arduinojson.org/v6/how-to/determine-the-capacity-of-the-jsondocument/
-    DynamicJsonDocument doc(file.size());
-    DeserializationError error = deserializeJson(doc, file);
+    config.~BasicJsonDocument();
+    config = DynamicJsonDocument(file.size());
+    // DynamicJsonDocument doc(file.size());
+    DeserializationError error = deserializeJson(config, file);
     if (error)
     {
         Serial.print(F("deserializeJson() failed: "));
@@ -62,13 +67,13 @@ bool MeshGarden::load_configuration()
     }
 
     // free space and print memory usage
-    size_t capacity_before = doc.memoryUsage();
-    doc.garbageCollect();
-    doc.shrinkToFit();
-    size_t capacity_after = doc.capacity();
+    size_t capacity_before = config.memoryUsage();
+    config.garbageCollect();
+    config.shrinkToFit();
+    size_t capacity_after = config.capacity();
     Serial.println("deserializeJson complete with:");
     Serial.println("Capacity: " + String(capacity_after) + ", reduced by " + String(100 * capacity_after / capacity_before));
-    Serial.println("Actual Memory Usage: " + String(doc.memoryUsage()));
+    Serial.println("Actual Memory Usage: " + String(config.memoryUsage()));
 
     return true;
 }
@@ -77,7 +82,7 @@ bool MeshGarden::load_configuration()
 void MeshGarden::parse_config()
 {
     // TODO calling it only in debug mode.
-    log_config();
+    log_config();// TODO check why this function fail (make the the co)
 
     // TODO set it on node/bridge after making set function for it and making inheriting
     mesh_prefix = config["mesh_prefix"].as<String>();
@@ -96,17 +101,25 @@ void MeshGarden::parse_config()
 
         JsonObject pinout = sensor["pinout"];
 
+        Serial.println("create sensor: " + hardware_info);
         Device *new_device = DeviceFactory::create(sensor_id, hardware_info, pinout, doc);
-        // check if the new device is a simple user define sensor
-        std::map<String, Funcs>::const_iterator iter = funcs_map.find(hardware_info);
-        if (iter != funcs_map.end())
+        if (new_device)
         {
-            if (new_device->DEVICE_TYPE.equals(DEVICE_TYPE_SENSOR))
+            // check if the new device is a simple user define sensor
+            std::map<String, Funcs>::const_iterator iter = funcs_map.find(hardware_info);
+            if (iter != funcs_map.end())
             {
-                ((GenericSensor *)new_device)->set((*iter).second);
+                if (new_device->DEVICE_TYPE.equals(DEVICE_TYPE_SENSOR))
+                {
+                    ((GenericSensor *)new_device)->set((*iter).second);
+                }
             }
+            device_list.push_front(new_device);
         }
-        device_list.push_front(new_device);
+        else // if null, means create fails
+        {
+            Serial.println("fail to initialize sensor " + hardware_info);
+        }
     }
 }
 
@@ -213,7 +226,6 @@ void MeshGarden::add_sensor(String hardware_info, InitSensor init_sensor_func, M
 
 void MeshGarden::begin()
 {
-
     load_configuration();
     parse_config();
     config.~DynamicJsonDocument();

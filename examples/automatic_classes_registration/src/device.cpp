@@ -13,7 +13,8 @@ Device::Device(DEVICE_CONSTRUCTOR_ARGUMENTS)
 }
 
 DynamicJsonDocument Device::create_envelop(String device_type){
-    DynamicJsonDocument doc(JSON_OBJECT_SIZE(1) + JSON_STRING_SIZE(10));
+    DynamicJsonDocument doc(2*(JSON_OBJECT_SIZE(1) + device_type.length()+1)); //TODO how to calculate it right? maybe needs to make the key const* 
+    // Serial.println(device_type + " " + String(device_type.length()) + " "+ String(doc.capacity()));
     doc[DEVICE_TYPE_KEY] = device_type;
     if(doc.overflowed())
         Serial.println("ERROR: device_type string overflow"); // think how to handle this case. exit? just log?

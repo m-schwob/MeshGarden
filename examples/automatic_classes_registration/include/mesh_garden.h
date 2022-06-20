@@ -26,24 +26,26 @@ public:
 
     // Generic sensor class that can call 'init_sensor' and 'measure' function from 'MeshGarden' list.
     // That enables the easy function registration proccess without breaking DeviceFactory initialization proccess
-    class GenericSensor : Sensor
+    class GenericSensor : public Sensor
     {
     private:
         InitSensor init_sensor_func;
         Measure measure_func;
 
     public:
+        GenericSensor(DEVICE_CONSTRUCTOR_ARGUMENTS);
         void init_sensor();
         Measurements measure();
         void calibrate();
 
         void set(Funcs func);
     };
+    #define REGISTER_SENSOR(STR) REGISTER_DEVICE(MeshGarden::GenericSensor, STR);
 
 private:
     DynamicJsonDocument config;
 
-    std::list<Device*> device_list;
+    // std::list<Device*> device_list; make private after test
     std::map<String, Funcs> funcs_map;
 
     String mesh_prefix;
@@ -58,6 +60,7 @@ private:
     void init_mesh_connection();
 
 public:
+    std::list<Device*> device_list;
     MeshGarden();
     void add_sensor(String hardware_id, InitSensor init_sensor_func, Measure measure_func);
     void update();

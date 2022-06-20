@@ -36,6 +36,7 @@ Capacitance soil moisture sensor using ADS1X15 ADC extender.
 */
 
 #include <Adafruit_ADS1X15.h>
+#include <SPI.h>
 #include "Sensor.h"
 
 #define _DEVICE_TYPE "Soil Moisture Sensor"
@@ -85,30 +86,29 @@ public:
         : Sensor(device_id, hardware_info, pinout, envelop)
     {
         init_adc();                                             // ADS1X15 related.
-        Serial.printf("%s: initelized", HARDWARE_INFO.c_str()); // add details about pins i.e.
+        Serial.printf("%s: initalized\n", HARDWARE_INFO.c_str()); // add details about pins i.e.
     }
 
     Measurements measure()
     {
-        if (POWER_PIN_CONTROL)
-            digitalWrite(POWER_PIN_CONTROL, HIGH);
-
-        // TODO solve it when solving extender
-        // if(!extender)
-        //     analogRead(pin);
-        // else
+        power_on();
+        Measurements measurements(1);
+        Measurement moisture;
+        moisture.type = "Soil Moisture";
+        
         float volt = extender_measure(analog_pin);
         // TODO handle the case that the value go off range
-        result = 1 - percentage(volt, C_air, C_water);
-        Serial.printf("%s: measure %f volts, %f/1 range\n", HARDWARE_INFO.c_str(), volt, result);
-
-        // power on sensor if power pin is defined
-        if (POWER_PIN_CONTROL)
-            digitalWrite(POWER_PIN, HIGH); // TODO solve it and change to low
+        moisture.value = 1 - percentage(volt, C_air, C_water);
+        measurements.push_back(moisture);
+        Serial.printf("%s: measure %f volts, %f/1 range\n", HARDWARE_INFO.c_str(), volt, moisture.value );
+        power_off();
+        return measurements;
     }
 
     void calibrate() { calibrated = true; }
 };
+
+REGISTER_DEVICE(SoilMoisureSensorGroveV1, "Grove Soil Moisture Sensor v1");
 
 /*****************************************************/
 
@@ -145,10 +145,10 @@ Measurements measure_DHT()
         // return; TODO handle failed situation
     }
 
-    // Compute heat index in Fahrenheit (the default)
-    float hif = dht.computeHeatIndex(f, h);
-    // Compute heat index in Celsius (isFahreheit = false)
-    float hic = dht.computeHeatIndex(t, h, false);
+    // // Compute heat index in Fahrenheit (the default)
+    // float hif = dht.computeHeatIndex(f, h);
+    // // Compute heat index in Celsius (isFahreheit = false)
+    // float hic = dht.computeHeatIndex(t, h, false);
 
     Measurements measurements(2);
     Measurement temperature;
@@ -169,17 +169,25 @@ Measurements measure_DHT()
 
 MeshGarden garden;
 
+REGISTER_SENSOR("DHT22 Sensor"); // TODO solve registering using add_sensor function
+
 void setup()
 {
     Serial.begin(115200);
     Serial.println();
 
-    garden.add_sensor("DHT22", init_DHT, measure_DHT);
+    garden.add_sensor("DHT22 Sensor", init_DHT, measure_DHT);
     garden.begin();
+
+    Serial.println("printing device list");
+    for(Device* device : garden.device_list){
+        Serial.println(device->HARDWARE_INFO);
+    }
 }
 
 void loop()
 {
     garden.update();
+    
     delay(5000); // temporary
 }
