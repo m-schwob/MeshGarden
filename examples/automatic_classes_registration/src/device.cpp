@@ -3,7 +3,7 @@
 
 Device::Device(DEVICE_CONSTRUCTOR_ARGUMENTS)
     : DEVICE_ID(device_id), DEVICE_TYPE(envelop[DEVICE_TYPE_KEY].as<String>()), 
-        HARDWARE_INFO(hardware_info), PINOUT(pinout), POWER_PIN_CONTROL(pinout.containsKey(POWER_PIN)? true:false)
+        HARDWARE_INFO(hardware_info), PINOUT(pinout), POWER_PIN_CONTROL(pinout.containsKey(POWER_PIN))
 {
     if (POWER_PIN_CONTROL)
     {
@@ -37,11 +37,11 @@ DynamicJsonDocument Device::create_envelop(String device_type){
 
 void Device::power_on(){
     if(POWER_PIN_CONTROL)
-        digitalWrite(POWER_PIN_CONTROL, HIGH);
+        digitalWrite(PINOUT[POWER_PIN], HIGH);
 }
 void Device::power_off(){
     if(POWER_PIN_CONTROL)
-        digitalWrite(POWER_PIN_CONTROL, LOW);
+        digitalWrite(PINOUT[POWER_PIN], LOW);
 }
 
 // by default enabling the device does not power it on. 
