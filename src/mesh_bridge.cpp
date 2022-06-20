@@ -97,6 +97,7 @@ void MeshBridge::update()
     {
         get_mesh_nodes(); // get the working nodes list before quit
         String nodeId = String(mesh.getNodeId());
+        mesh.sendBroadcast("die");
         mesh.stop();
         // // Connect to Wi-Fi
         Serial.print("Connecting to ");

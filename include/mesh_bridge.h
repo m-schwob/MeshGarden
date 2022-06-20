@@ -86,8 +86,6 @@ private:
     bool get_node_changes(String node_id, String &changes);
     vector<String> split(String s, String delimiter);
 
-
-
     void init_mesh();
     void init_clock();
     void set_in_firebase(String nodeId);

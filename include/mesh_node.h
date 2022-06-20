@@ -10,7 +10,6 @@
 #include "time.h"
 
 using namespace std;
-
 #define MESH_PREFIX "whateverYouLike"
 #define MESH_PASSWORD "somethingSneaky"
 #define MESH_PORT 5555
@@ -38,6 +37,7 @@ class MeshNode
 
 	public:
 		int lasttime = 0;
+		bool dead = false;
 		MeshNode();
 		void update();
 		void sendMessage();
@@ -61,7 +61,7 @@ class MeshNode
 	int correctedToday = 1; // do not change this variable, one means that the time has already been corrected today for the error in your boards crystal. This is true for the first day because you just set the time when you uploaded the sketch.  
 	void time_update();
 	void printLocalTime();
-
+    void init_mesh();
 };
 
 
