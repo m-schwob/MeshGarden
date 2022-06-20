@@ -38,6 +38,7 @@ class Sensor : public Device{
         const std::vector<String> MEASUREMENTS_TYPE; // identifier for what is being measured. e.g. humidity, temperature // TODO should be array 
         const std::vector<String> UNITS; // the units of the measurements. e.g. voltage, percentage, Celsius // TODO should be array 
 
+        Measurements measure_wrapper();
         virtual Measurements measure() = 0;
         // virtual void measure() = 0;
         // virtual Measurement get_values() = 0; 
