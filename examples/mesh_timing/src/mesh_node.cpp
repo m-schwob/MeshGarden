@@ -41,14 +41,14 @@ void receivedCallback(uint32_t from, String &msg)
 
     if (values[0]=="clock"){
         Serial.println(msg);
-        // Serial.println("printVals");
-        // int index = 0;
-        // for(vector<String>::iterator it = values.begin(); it != values.end(); ++it ) {
-        //     Serial.printf("at index: %d\n",index);
-        //     Serial.println(*it); // prints d.
-        //     index++;
-        // }
-        node->setTimeVal((values[3]).c_str());
+        Serial.println("printVals");
+        int index = 0;
+        for(vector<String>::iterator it = values.begin(); it != values.end(); ++it ) {
+            Serial.printf("at index: %d\n",index);
+            Serial.println(*it); // prints d.
+            index++;
+        }
+        node->setTimeVal((values[4]).c_str());
         node->date = values[1] + " " + values[2] +" "+values[3];
         node->AmPm = values[5];
         node->set_time= true;
@@ -107,6 +107,10 @@ MeshNode::MeshNode() : counter(0) //, taskSendMessage(TASK_SECOND * 2, TASK_FORE
 void MeshNode::update()
 {   
     time_update();
+    if(!alive){
+        ESP.deepSleep(3e6);
+        init_mesh();
+    }
     if(millis()-counter > 1000 && set_time){
         Serial.print("got here");
         printLocalTime();
@@ -178,6 +182,7 @@ vector<String> MeshNode::splitString(string str, string delimiter)
 
 void MeshNode::setTimeVal(string str, string delimiter)
 {
+    Serial.println("setTimeVal function got:");
     vector<int> ret;
     int start = 0;
     int end = str.find(delimiter);
@@ -196,3 +201,29 @@ void MeshNode::setTimeVal(string str, string delimiter)
     minutes= ret[1];
     seconds = ret[2];
 }
+
+    void MeshNode:: init_mesh(){
+
+        timer= millis();
+        Serial.printf("Init node mesh connection:%d\n",timer);
+        // mesh.setDebugMsgTypes( ERROR | MESH_STATUS | CONNECTION | SYNC | COMMUNICATION | GENERAL | MSG_TYPES | REMOTE ); // all types on
+        mesh.setDebugMsgTypes(ERROR | STARTUP); // set before init() so that you can see startup messages
+        mesh.init(MESH_PREFIX, MESH_PASSWORD, &userScheduler, MESH_PORT);
+        mesh.onReceive(&receivedCallback);
+        mesh.onNewConnection(&newConnectionCallback);
+        mesh.onChangedConnections(&changedConnectionCallback);
+        mesh.onNodeTimeAdjusted(&nodeTimeAdjustedCallback);
+        mesh.onDroppedConnection([](uint32_t nodeId)
+                             {
+        Serial.printf("node dropped:%u, at time: %u",nodeId,node->mesh.getNodeTime());}
+                            );
+        Task taskSendMessage(TASK_SECOND * 2, TASK_FOREVER, [this](){sendMessage();});
+        userScheduler.addTask(taskSendMessage);
+        taskSendMessage.enable();
+        Serial.print(mesh.getNodeTime());
+        int timer2 = millis();
+        Serial.printf("after mesh init difference: %d\n",timer2-timer);
+        timer=timer2;
+        node = this;
+        alive = true;
+    }
