@@ -4,18 +4,8 @@
 #include <Arduino.h>
 #include <ArduinoJson.h>
 
-//     PINS MAPPING     //
-#if defined(ESP8266)
-
-// esp8266 pinout map builder
-#define PINS_MAP_SIZE 1 * JSON_OBJECT_SIZE(19) + 19 * JSON_OBJECT_SIZE(1) + 14 * JSON_STRING_SIZE(2) + 2 * JSON_STRING_SIZE(3) + 2 * JSON_STRING_SIZE(4) + 1 * JSON_STRING_SIZE(11)
-
-#elif defined(ESP32)
-
-// esp32 pinout map builder
-#define PINS_MAP_SIZE 1 * JSON_OBJECT_SIZE(41) + 39 * JSON_OBJECT_SIZE(1) + 22 * JSON_STRING_SIZE(2) + 12 * JSON_STRING_SIZE(3) + 4 * JSON_STRING_SIZE(4) + 1 * JSON_STRING_SIZE(11)
-
-#endif
+// pins can digital and analog. in that case, the capacity size will be grater then needed and will be shrink later
+#define PINS_MAP_SIZE JSON_OBJECT_SIZE(NUM_DIGITAL_PINS + NUM_ANALOG_INPUTS + 1) //+1 for LED_BUILTIN 
 
 extern DynamicJsonDocument pins_map;
 void _map_pins();
