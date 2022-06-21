@@ -188,6 +188,5 @@ void setup()
 void loop()
 {
     garden.update();
-    
-    delay(5000); // temporary
+    // delay(5000); // temporary
 }

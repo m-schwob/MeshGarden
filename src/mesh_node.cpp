@@ -15,7 +15,6 @@ Serial.print(" ");
 Serial.println(AmPm);
 }
 
-
 // for Now the message simply contains the nodeId and a counter
 void MeshNode::sendMessage()
 {
@@ -37,8 +36,8 @@ void receivedCallback(uint32_t from, String &msg)
         node->alive = false;
         return;
     }
-    vector<String> values = node->splitString(msg.c_str());
 
+    vector<String> values = node->splitString(msg.c_str());
     if (values[0]=="clock"){
         Serial.println(msg);
         Serial.println("printVals");
@@ -53,6 +52,7 @@ void receivedCallback(uint32_t from, String &msg)
         node->AmPm = values[5];
         node->set_time= true;
     }
+
     if(values[0] == "Change:"){
         //new configurations
         Serial.println("configs got");
@@ -75,15 +75,14 @@ void nodeTimeAdjustedCallback(int32_t offset)
 {
     Serial.printf("Adjusted time %u. Offset = %d\n", node->mesh.getNodeTime(), offset);
     node->mesh.sendBroadcast(" node Adjusted time: %u\n" ,node->mesh.getNodeTime());
-
 }
 
 MeshNode::MeshNode() : counter(0) //, taskSendMessage(TASK_SECOND * 2, TASK_FOREVER, [this](){sendMessage();})
 {
     timer= millis();
     Serial.printf("Init node mesh connection:%d\n",timer);
-    // mesh.setDebugMsgTypes( ERROR | MESH_STATUS | CONNECTION | SYNC | COMMUNICATION | GENERAL | MSG_TYPES | REMOTE ); // all types on
-    mesh.setDebugMsgTypes(ERROR | STARTUP); // set before init() so that you can see startup messages
+    mesh.setDebugMsgTypes( ERROR | MESH_STATUS | CONNECTION | SYNC | COMMUNICATION | GENERAL | MSG_TYPES | REMOTE ); // all types on
+    //mesh.setDebugMsgTypes(ERROR | STARTUP); // set before init() so that you can see startup messages
     mesh.init(MESH_PREFIX, MESH_PASSWORD, &userScheduler, MESH_PORT);
     mesh.onReceive(&receivedCallback);
     mesh.onNewConnection(&newConnectionCallback);
@@ -110,6 +109,7 @@ void MeshNode::update()
     if(!alive){
         ESP.deepSleep(3e6);
         init_mesh();
+        alive = true;
     }
     if(millis()-counter > 1000 && set_time){
         Serial.print("got here");
@@ -202,7 +202,7 @@ void MeshNode::setTimeVal(string str, string delimiter)
     seconds = ret[2];
 }
 
-    void MeshNode:: init_mesh(){
+void MeshNode:: init_mesh(){
 
         timer= millis();
         Serial.printf("Init node mesh connection:%d\n",timer);

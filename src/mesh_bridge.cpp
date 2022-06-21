@@ -12,8 +12,7 @@ void printLocalTime(){
 static MeshBridge *node = NULL;
 
 MeshBridge::MeshBridge(){
-    init_clock();
-    init_mesh();
+    Serial.println("initialize new mesh bridge:");
     node = this;
 }
 
@@ -37,7 +36,7 @@ void newConnectionCallback(uint32_t nodeId)
     printLocalTime();
     struct tm timeinfo;
     if(!getLocalTime(&timeinfo)){
-        Serial.println("Failed to obtain time");
+        Serial.println("Failed to obtain time try again");
         return;
         }
     char s[100];
@@ -55,6 +54,20 @@ void newConnectionCallback(uint32_t nodeId)
 void changedConnectionCallback()
 {  
     Serial.printf("Changed connections\n");
+    // uint32_t time = node->mesh.getNodeTime();
+    // Serial.printf("new node connected at time: %u\n", time);
+    // Serial.println("time:");    
+    // printLocalTime();
+    // struct tm timeinfo;
+    // if(!getLocalTime(&timeinfo)){
+    //     Serial.println("Failed to obtain time");
+    //     return;
+    //     }
+    // char s[100];
+    
+    // int rc = strftime(s,sizeof(s),"%b %d,20%y at %r", &timeinfo);
+    // Serial.printf("%d characters written.\n%s\n",rc,s);   
+    // node->mesh.sendBroadcast("clock " + String(s));
 }
 // event driven functions for the mesh
 void nodeTimeAdjustedCallback(int32_t offset)
@@ -64,10 +77,11 @@ void nodeTimeAdjustedCallback(int32_t offset)
 
 void MeshBridge::init_mesh()
 {   
+    Serial.println("initializeing the mesh network");
      myTime = millis();
     // Serial.printf("Mesh node start at time: %d \n", myTime);
-    // mesh.setDebugMsgTypes( ERROR | MESH_STATUS | CONNECTION | SYNC | COMMUNICATION | GENERAL | MSG_TYPES | REMOTE ); // all types on
-    mesh.setDebugMsgTypes(ERROR | STARTUP); // set before init() so that you can see startup messages
+    mesh.setDebugMsgTypes( ERROR | MESH_STATUS | CONNECTION | SYNC | COMMUNICATION | GENERAL | MSG_TYPES | REMOTE ); // all types on
+    //mesh.setDebugMsgTypes(ERROR | STARTUP); // set before init() so that you can see startup messages
     mesh.init(MESH_PREFIX, MESH_PASSWORD, &userScheduler, MESH_PORT);
     mesh.onReceive(&receivedCallback);
     mesh.onNewConnection(&newConnectionCallback);
@@ -97,6 +111,7 @@ void MeshBridge::update()
     {
         get_mesh_nodes(); // get the working nodes list before quit
         String nodeId = String(mesh.getNodeId());
+        Serial.println("sending killing cast");
         mesh.sendBroadcast("die");
         mesh.stop();
         // // Connect to Wi-Fi
@@ -270,6 +285,7 @@ void MeshBridge::firestoreMeshCollectionUpdate(){
 
 void MeshBridge::get_mesh_nodes()
 {
+    Serial.println("mesh nodes:");
     list<uint32_t>::iterator i;
     list<uint32_t> map_node = mesh.getNodeList();
     for(i=map_node.begin() ; i!= map_node.end(); ++i){

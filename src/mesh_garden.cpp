@@ -190,10 +190,14 @@ void MeshGarden::log_config()
 void MeshGarden::init_mesh_connection()
 {
     #ifdef ESP32
-        
+    network=new MeshBridge();
+    network->init_clock();
     #else
-
+    network =new  MeshNode();
     #endif
+    network->init_mesh();
+
+    Serial.println("configgured done!");
     // TODO when adding mesh node/bridge classes
 
     // TODO init mesh.
@@ -219,6 +223,8 @@ MeshGarden::MeshGarden() : config(0)
         Serial.println("fail to start files system.");
         return; // exit(1);
     }
+
+
 }
 
 void MeshGarden::add_sensor(String hardware_info, InitSensor init_sensor_func, Measure measure_func)
@@ -237,4 +243,6 @@ void MeshGarden::begin()
     init_mesh_connection();
 }
 
-void MeshGarden::update() {}
+void MeshGarden::update() {
+    network->update();
+}
