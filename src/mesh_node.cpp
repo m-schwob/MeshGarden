@@ -30,33 +30,52 @@ void MeshNode::sendMessage()
 void receivedCallback(uint32_t from, String &msg)
 {
     Serial.printf("startHere: Received from %u msg=%s\n", from, msg.c_str());
-    if(msg == "die"){
-        Serial.println("stop mesh");
-        node->mesh.stop();
-        node->alive = false;
-        return;
+    // if(msg == "die"){
+    //     Serial.println("stop mesh");
+    //     node->mesh.stop();
+    //     node->alive = false;
+    //     return;
+    // }
+    DynamicJsonDocument message(msg.length()+64);
+    DeserializationError error = deserializeJson(message, msg);
+    Serial.println("\nJSON DESERIALIZED");
+    Serial.println(message.as<String>());
+    Serial.println("JSON DESERIALIZED end\n\n");
+    if (error)
+    {
+        Serial.print(F("deserializeJson() failed: "));
+        Serial.println(error.f_str());
     }
 
-    vector<String> values = node->splitString(msg.c_str());
-    if (values[0]=="clock"){
+    if(message.containsKey("clock")){
         Serial.println(msg);
-        Serial.println("printVals");
+        Serial.println("message:");
+        Serial.println(message["clock"].as<String>());
+
         int index = 0;
+        vector<String> values = node->splitString(message["clock"].as<String>().c_str());
+        Serial.println("clock message string:");
+        Serial.println(message["clock"].as<String>());
+        Serial.println("clock message end\n");
+        
         for(vector<String>::iterator it = values.begin(); it != values.end(); ++it ) {
             Serial.printf("at index: %d\n",index);
             Serial.println(*it); // prints d.
             index++;
         }
-        node->setTimeVal((values[4]).c_str());
-        node->date = values[1] + " " + values[2] +" "+values[3];
-        node->AmPm = values[5];
+
+        node->setTimeVal((values[3]).c_str());
+        node->date = values[0] + " " + values[1] +" "+values[2];
+        node->AmPm = values[4];
         node->set_time= true;
     }
-
-    if(values[0] == "Change:"){
+    if(message.containsKey("change")){
         //new configurations
-        Serial.println("configs got");
-        node->config_string = values[1];
+        Serial.println("\nread confugires:");
+        node->config_string = message["change"].as<String>();
+        // node->configure_ready=false;
+        Serial.println(message["change"].as<String>());
+        Serial.println("end read confugires:\n");
         node->configure_ready=true;
     }
 }
@@ -81,6 +100,7 @@ void nodeTimeAdjustedCallback(int32_t offset)
 
 MeshNode::MeshNode() : counter(0) //, taskSendMessage(TASK_SECOND * 2, TASK_FOREVER, [this](){sendMessage();})
 {
+    Serial.begin(115200);
     timer= millis();
     Serial.printf("Init node mesh connection:%d\n",timer);
     mesh.setDebugMsgTypes( ERROR | MESH_STATUS | CONNECTION | SYNC | COMMUNICATION | GENERAL | MSG_TYPES | REMOTE ); // all types on

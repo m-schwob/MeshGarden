@@ -81,9 +81,10 @@ bool MeshGarden::load_configuration()
 // parse the config and initialize class members
 void MeshGarden::parse_config()
 {
-    Serial.println("parse configures:");
+    Serial.println("start of parse config, the log config is:");
     // TODO calling it only in debug mode.
     log_config();// TODO check why this function fail (make the the co)
+    Serial.println("log config done");
 
     // TODO set it on node/bridge after making set function for it and making inheriting
 
@@ -123,6 +124,11 @@ void MeshGarden::parse_config()
             Serial.println("fail to initialize sensor " + hardware_info);
         }
     }
+
+        Serial.println("end of parse config, the log config is:");
+    // TODO calling it only in debug mode.
+    log_config();// TODO check why this function fail (make the the co)
+    Serial.println("log config done");
 }
 
 // TODO move to utils
@@ -215,6 +221,7 @@ void MeshGarden::init_mesh_connection()
 
 MeshGarden::MeshGarden() : config(0)
 {
+    // Serial.begin(115200);
     // create a pins map
     map_pins();
 
@@ -223,6 +230,9 @@ MeshGarden::MeshGarden() : config(0)
     {
         Serial.println("fail to start files system.");
         return; // exit(1);
+    }
+    else {
+    Serial.println("started the file system");
     }
 
 
@@ -241,18 +251,84 @@ void MeshGarden::begin()
     load_configuration();
     parse_config();
     config.~DynamicJsonDocument();
+    Serial.println("serialization done, now init mesh");
     init_mesh_connection();
 }
 
 void MeshGarden::update() {
     if(network->configure_ready){
         Serial.println("configure ready");
+        update_got_configs();
         save_configuration(network->config_string);
         network->configure_ready = false;
         Serial.println("entring delay");
-        delay(2000);
+        delay(5000);
         Serial.println("reset");
         ESP.restart();
     }
     network->update();
+}
+
+void MeshGarden::update_got_configs()
+{
+    if(network->configure_ready){
+    Serial.println("the change we will insert is:");
+    DynamicJsonDocument doc(network->config_string.length());
+    DeserializationError error = deserializeJson(doc, network->config_string);
+        if (error)
+        {
+            Serial.print(F("deserializeJson() failed: "));
+            Serial.println(error.f_str());
+        }
+    Serial.println("the change json is:");
+    Serial.println(doc.as<String>());
+    }
+    Serial.println("start of parse config, the log config is:");
+    // TODO calling it only in debug mode.
+    log_config();// TODO check why this function fail (make the the co)
+    Serial.println("log config done");
+
+    // TODO set it on node/bridge after making set function for it and making inheriting
+
+    mesh_prefix = config["mesh_prefix"].as<String>();
+    mesh_password = config["mesh_password"].as<String>();
+    mesh_port = config["mesh_port"].as<size_t>();
+
+    JsonArray sensors = config["sensors"]["1"]; //for now
+    for (JsonObject sensor : sensors)
+    {
+        const String hardware_info = sensor["hardware_info"].as<String>();
+        const int sensor_id = sensor["sensor_id"].as<int>();
+        ;
+        const int sample_interval = sensor["sample_interval"];
+
+        DynamicJsonDocument doc(sensor);
+
+        JsonObject pinout = sensor["1"]["pinout"]; //for now
+
+        Serial.println("create sensor: " + hardware_info);
+        Device *new_device = DeviceFactory::create(sensor_id, hardware_info, pinout, doc);
+        if (new_device)
+        {
+            // check if the new device is a simple user define sensor
+            std::map<String, Funcs>::const_iterator iter = funcs_map.find(hardware_info);
+            if (iter != funcs_map.end())
+            {
+                if (new_device->DEVICE_TYPE.equals(DEVICE_TYPE_SENSOR))
+                {
+                    ((GenericSensor *)new_device)->set((*iter).second);
+                }
+            }
+            device_list.push_front(new_device);
+        }
+        else // if null, means create fails
+        {
+            Serial.println("fail to initialize sensor " + hardware_info);
+        }
+    }
+
+        Serial.println("end of parse config, the log config is:");
+    // TODO calling it only in debug mode.
+    log_config();// TODO check why this function fail (make the the co)
+    Serial.println("log config done");
 }
