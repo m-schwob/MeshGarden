@@ -7,3 +7,4 @@ const String ConfigScreenRoute = '/Config';
 const String LoadingScreenRoute = '/Loading';
 const String SensorsScreenRoute = '/Sensors';
 const String AddSensorScreenRoute = '/AddSensor';
+const String MeasurementsScreenRoute = '/Measures';

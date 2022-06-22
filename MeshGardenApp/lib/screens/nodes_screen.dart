@@ -11,7 +11,7 @@ import 'package:iot_firestore_flutter_app/screens/config_screen.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 //import 'package:iot_firestore_flutter_app/widgets/my_sensor_card.dart';
 import 'package:iot_firestore_flutter_app/widgets/node_card.dart';
-
+import 'package:iot_firestore_flutter_app/screens/measurements_screen.dart';
 import '../const/custom_colors.dart';
 
 class NodesScreen extends StatefulWidget {
@@ -32,8 +32,13 @@ class NodesScreen extends StatefulWidget {
 //   );
 
 class _NodesScreenState extends State<NodesScreen> {
+
   final Stream<QuerySnapshot> _nodesStream =
       FirebaseFirestore.instance.collection('Nodes').snapshots();
+
+  // final Stream<QuerySnapshot> _documentStream =
+  // FirebaseFirestore.instance.collection('Test2').snapshots();
+
   String user_email = AuthHelper.currentUser()?.email ?? "";
 
   // User? user;
@@ -96,6 +101,17 @@ class _NodesScreenState extends State<NodesScreen> {
                           elevation: 10,
                           color: kTextFieldFill,
                           child: ListTile(
+                            onTap: (){
+                              bool has_sensors = node_data['sensors'] !=null? true:false;
+                              // var sensorMesureDoc = FirebaseFirestore.instance.collection('Test2').doc("30497375570").snapshots();
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      MeasurementsScreen(nodeId: node_document.id),
+                                ),
+                              );
+                            },
                             leading: node_data['active']? FaIcon(FontAwesomeIcons.circleCheck, color: Colors.green)
                                 : FaIcon(FontAwesomeIcons.circleXmark, color: Colors.red),
                             // leading: Icon(Icons.circle,

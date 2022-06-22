@@ -15,7 +15,6 @@ import 'package:iot_firestore_flutter_app/route/routing_constants.dart';
 //import 'package:iot_firestore_flutter_app/widgets/my_sensor_card.dart';
 // import 'package:flutter_hooks/flutter_hooks.dart';
 
-//TODO : add error massage if sensor id is already taken
 
 class AddSensorScreen extends StatefulWidget {
   const AddSensorScreen(
@@ -579,7 +578,7 @@ class _AddSensorScreenState extends State<AddSensorScreen> {
                       children: [
                         Flexible(
                           child: TextFormField(
-                            keyboardType: TextInputType.name,
+                            // keyboardType: TextInputType.name,
                             style: kSensorInputText,
                             decoration: InputDecoration(
                               border: UnderlineInputBorder(),
