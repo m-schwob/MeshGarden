@@ -91,7 +91,7 @@ void MeshGarden::parse_config()
     mesh_password = config["mesh_password"].as<String>();
     mesh_port = config["mesh_port"].as<size_t>();
 
-    JsonArray sensors = config["sensors"]["1"]; //for now
+    JsonArray sensors = config["sensors"]
     for (JsonObject sensor : sensors)
     {
         const String hardware_info = sensor["hardware_info"].as<String>();
@@ -101,7 +101,7 @@ void MeshGarden::parse_config()
 
         DynamicJsonDocument doc(sensor);
 
-        JsonObject pinout = sensor["1"]["pinout"]; //for now
+        JsonObject pinout = sensor["pinout"]; 
 
         Serial.println("create sensor: " + hardware_info);
         Device *new_device = DeviceFactory::create(sensor_id, hardware_info, pinout, doc);
@@ -156,9 +156,11 @@ void MeshGarden::log_config()
     printIndent(2, "Port: " + String(mesh_port));
     printIndent(1, "Sensors:");
 
-    JsonArray sensors = config["sensors"];
-    for (JsonObject sensor : sensors)
+    JsonObject sensors = config["sensors"];
+    for (JsonPair s : sensors)
     {
+        // Serial.println(sensors.as<String>());
+        JsonObject sensor = s.value().as<JsonObject>();
         const char *hardware_info = sensor["hardware_info"];   // " DHT22"
         const int sensor_id = sensor["sensor_id"];             // 1
         const int sample_interval = sensor["sample_interval"]; // 30
