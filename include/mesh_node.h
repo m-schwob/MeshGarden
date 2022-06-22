@@ -8,6 +8,7 @@
 #include <vector>
 #include <iostream>
 #include "time.h"
+#include "sensor.h"
 
 using namespace std;
 #define MESH_PREFIX "whateverYouLike"
@@ -17,7 +18,6 @@ using namespace std;
 class MeshNode
 {
 	private:
-		painlessMesh mesh;
 		Scheduler userScheduler; // to control your personal task
 		// Task taskSendMessage; 
 		// TODO should be list or set of tasks here
@@ -36,8 +36,11 @@ class MeshNode
 		// friend void sendMessage();
 
 	public:
+		painlessMesh mesh;
 		int lasttime = 0;
 		bool dead = false;
+		bool configure_ready = false;
+		String config_string;
 		MeshNode();
 		void update();
 		void sendMessage();
@@ -62,7 +65,15 @@ class MeshNode
 	void time_update();
 	void printLocalTime();
     void init_mesh();
+
+	//measurment settings:
+	void send_values(std::function<Measurement()> get_values_callback);
 };
 
 
 #endif /* _MESHNODE_H_ */
+
+/*past code:
+
+
+*/

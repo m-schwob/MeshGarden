@@ -56,6 +56,8 @@ void receivedCallback(uint32_t from, String &msg)
     if(values[0] == "Change:"){
         //new configurations
         Serial.println("configs got");
+        node->config_string = values[1];
+        node->configure_ready=true;
     }
 }
 
@@ -93,7 +95,9 @@ MeshNode::MeshNode() : counter(0) //, taskSendMessage(TASK_SECOND * 2, TASK_FORE
         Serial.printf("node dropped:%u, at time: %u",nodeId,node->mesh.getNodeTime());}
                             );
     Task taskSendMessage(TASK_SECOND * 2, TASK_FOREVER, [this](){sendMessage();});
+
     userScheduler.addTask(taskSendMessage);
+    
     taskSendMessage.enable();
     Serial.print(mesh.getNodeTime());
     int timer2 = millis();
@@ -111,7 +115,7 @@ void MeshNode::update()
         init_mesh();
         alive = true;
     }
-    if(millis()-counter > 1000 && set_time){
+    if(millis()-counter > 10000 && set_time){
         Serial.print("got here");
         printLocalTime();
         counter = millis();
@@ -223,7 +227,29 @@ void MeshNode:: init_mesh(){
         Serial.print(mesh.getNodeTime());
         int timer2 = millis();
         Serial.printf("after mesh init difference: %d\n",timer2-timer);
+        Serial.println("node id:");
+        Serial.println(mesh.getNodeId());
         timer=timer2;
         node = this;
         alive = true;
     }
+
+void MeshNode::send_values(std::function<Measurement()> get_values_callback){
+    Serial.println("sending values");
+    //add it when we will have a sensor
+    Measurement meas;
+    do {
+        meas = get_values_callback();
+        mesh.sendBroadcast(mesh.getNodeId() + "," + meas.type + "," + meas.value);
+    } while(!meas.last);
+    mesh.sendBroadcast(mesh.getNodeId() + ",soil measure , 10" );
+}
+
+void MeshNode::add_measurement(TaskCallback callable, unsigned long interval, long iterations)
+{
+Serial.println("adding measurement task");
+measure.set(TASK_SECOND*interval, iterations, callable);
+userScheduler.addTask(measure);
+measure.enable();
+}
+

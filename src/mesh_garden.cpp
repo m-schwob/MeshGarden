@@ -196,7 +196,6 @@ void MeshGarden::init_mesh_connection()
     network =new  MeshNode();
     #endif
     network->init_mesh();
-
     Serial.println("configgured done!");
     // TODO when adding mesh node/bridge classes
 
@@ -244,5 +243,14 @@ void MeshGarden::begin()
 }
 
 void MeshGarden::update() {
+    if(network->configure_ready){
+        Serial.println("configure ready");
+        save_configuration(network->config_string);
+        network->configure_ready = false;
+        Serial.println("entring delay");
+        delay(2000);
+        Serial.println("reset");
+        ESP.restart();
+    }
     network->update();
 }

@@ -44,11 +44,14 @@ void newConnectionCallback(uint32_t nodeId)
     int rc = strftime(s,sizeof(s),"%b %d,20%y at %r", &timeinfo);
     Serial.printf("%d characters written.\n%s\n",rc,s);   
     node->mesh.sendBroadcast("clock " + String(s));
-
-    if (node->change_log[String(nodeId)]){
-        Serial.println("sending update to node " + String(nodeId));
-        node->mesh.sendSingle(nodeId,"Change: " +node-> change_log[String(nodeId)]);
+    if (node->change_log.find(String(nodeId)) != node->change_log.end()){
+        Serial.println("sending update to node " + String(nodeId) + "\n" + String(node->change_log[String(nodeId)]));
+        String signaled = "Change: " + node->change_log[String(nodeId)];
+        if(signaled != "Change: " )
+            node->mesh.sendSingle(nodeId,signaled);
+            node->change_log.erase(String(nodeId));
     }
+
 }
 // event driven functions for the mesh
 void changedConnectionCallback()
@@ -77,11 +80,14 @@ void nodeTimeAdjustedCallback(int32_t offset)
 
 void MeshBridge::init_mesh()
 {   
+    Serial.println("changes for node: 3049689558");
+    Serial.println(change_log["3049689558"]);
     Serial.println("initializeing the mesh network");
      myTime = millis();
     // Serial.printf("Mesh node start at time: %d \n", myTime);
-    mesh.setDebugMsgTypes( ERROR | MESH_STATUS | CONNECTION | SYNC | COMMUNICATION | GENERAL | MSG_TYPES | REMOTE ); // all types on
-    //mesh.setDebugMsgTypes(ERROR | STARTUP); // set before init() so that you can see startup messages
+    // mesh.setDebugMsgTypes( ERROR | CONNECTION | COMMUNICATION ); // all types on
+    //mesh.setDebugMsgTypes( ERROR | MESH_STATUS | CONNECTION | SYNC | COMMUNICATION | GENERAL | MSG_TYPES | REMOTE ); // all types on
+    mesh.setDebugMsgTypes(ERROR | STARTUP); // set before init() so that you can see startup messages
     mesh.init(MESH_PREFIX, MESH_PASSWORD, &userScheduler, MESH_PORT);
     mesh.onReceive(&receivedCallback);
     mesh.onNewConnection(&newConnectionCallback);
@@ -107,7 +113,7 @@ void MeshBridge::update()
       // it will run the user scheduler as well
     mesh.update();
     // Init and get the time
-    if (millis() - lasttime > 30000)
+    if (millis() - lasttime > 10000)
     {
         get_mesh_nodes(); // get the working nodes list before quit
         String nodeId = String(mesh.getNodeId());
@@ -242,12 +248,12 @@ void MeshBridge::firestoreDataUpdate(String plant_id, String sensor_id ,String m
         content.set("fields/" + plant_id + "/mapValue/fields/" + meas_type.c_str()+ "/doubleValue/", value.c_str());
         // check if node has a document nad create new if not exists
         if (Firebase.Firestore.getDocument(&fbdo, FIREBASE_PROJECT_ID, "", document_path.c_str(), plant_id.c_str())){
-            Serial.printf("node document found\n%s\n\n", fbdo.payload().c_str());
+            // Serial.printf("node document found\n%s\n\n", fbdo.payload().c_str());
             response = Firebase.Firestore.patchDocument(&fbdo, FIREBASE_PROJECT_ID, "", document_path.c_str(), content.raw(), "last_message");
         }
         if (response)
         {
-            Serial.printf("ok\n%s\n\n", fbdo.payload().c_str());
+            // Serial.printf("ok\n%s\n\n", fbdo.payload().c_str());
         }
         else
         {
@@ -270,14 +276,14 @@ void MeshBridge::firestoreMeshCollectionUpdate(){
         bool response;
 
         for(list<String>:: iterator map_iter = mesh_values.begin(); map_iter!= mesh_values.end(); ++map_iter){
-            Serial.println("send to server " + (*map_iter));
+            // Serial.println("send to server " + (*map_iter));
             content.set("fields/" + (*map_iter)+ "/nullValue");
         }
         if(Firebase.Firestore.createDocument(&fbdo, FIREBASE_PROJECT_ID, "", documentPath.c_str(), content.raw())){
-            Serial.printf("ok\n%s\n\n", fbdo.payload().c_str());
+            // Serial.printf("ok\n%s\n\n", fbdo.payload().c_str());
             return;
         }else{
-            Serial.println(fbdo.errorReason());
+            // Serial.println(fbdo.errorReason());
         }
     }
 }
@@ -312,22 +318,45 @@ void MeshBridge::firestoreMeshCollectionClear(){
     }
     }
 
+
+
+
 void MeshBridge:: firestoreReadChanges()
 {
+    Serial.println("Start to read changes");
     if(WiFi.status() == WL_CONNECTED && Firebase.ready()){
         for(list<String>::iterator iter= mesh_values.begin(); iter!=mesh_values.end() ; ++iter ){
             String documentPath = "/Changes/"+ (*iter);
             FirebaseJson content;
+            FirebaseJson json;
             bool response;
+            FirebaseJsonData data;
             Serial.printf("check change for %s\n",documentPath.c_str());
         //if we get a document here hence the node_id has gone through changes.
         if(Firebase.Firestore.getDocument(&fbdo, FIREBASE_PROJECT_ID, "", documentPath.c_str(), content.raw())){
+            Serial.println();
             //now we will scan the Nodes collection in order to retrieve all changes: 
             Serial.printf("recieved %s\n", fbdo.payload().c_str());
+            // json.setJsonData(fbdo.payload());
+            Serial.println("JSON entire doc");
+            // json.get(data, "fields");
+            // Serial.println(data.stringValue);
+            DynamicJsonDocument doc(fbdo.payload().length());
+            DeserializationError error = deserializeJson(doc, fbdo.payload());
+            if (error)
+            {
+                Serial.print(F("deserializeJson() failed: "));
+                Serial.println(error.f_str());
+            }
+            String changeLog1 =doc["fields"]["config"]["stringValue"].as<String>();
+            Serial.println(changeLog1);
+
             String changeid;
             String network_data;
             if( get_node_changes((*iter), changeid) && firestoreReadNetwork(network_data))
-                change_log[(*iter)] = changeid + network_data;
+                change_log[(*iter)] = changeLog1 + network_data;
+
+
             Serial.println("done retrieving:\n\n");
             Serial.println(change_log[(*iter)]);   
         }

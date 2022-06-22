@@ -68,7 +68,7 @@ private:
     // sync with the server, saving data variables
     int lasttime = 0; // initialized, used to messure time interaval for the disconnect
     // std::map<String,vector<String>> dict;
-    std::list<String> mesh_values ; 
+    std::list<String> mesh_values; 
     std::vector<String> server_data;
     friend void receivedCallback(uint32_t from, String &msg);
     friend void newConnectionCallback(uint32_t nodeId);
@@ -97,6 +97,8 @@ public:
     void get_mesh_nodes();
     void init_clock();
     void init_mesh();
+    bool configure_ready = false;
+	String config_string;
 
 
 };

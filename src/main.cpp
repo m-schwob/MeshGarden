@@ -47,7 +47,7 @@ Capacitance soil moisture sensor using ADS1X15 ADC extender.
 class SoilMoisureSensorGroveV1 : public Sensor
 {
 private:
-    uint8_t analog_pin;
+    uint8_t analog_pin = 0;
 
     float C_air = 2.2; // volts
     float C_water = 1; // volts
