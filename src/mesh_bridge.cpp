@@ -353,8 +353,8 @@ void MeshBridge:: firestoreReadChanges()
 
             String changeid;
             String network_data;
-            if( get_node_changes((*iter), changeid) && firestoreReadNetwork(network_data))
-                change_log[(*iter)] = changeLog1 + network_data;
+            // if( get_node_changes((*iter), changeid) && firestoreReadNetwork(network_data))
+            change_log[(*iter)] = changeLog1;
 
 
             Serial.println("done retrieving:\n\n");
@@ -373,47 +373,47 @@ void MeshBridge:: firestoreReadChanges()
     }
 }
 
-bool MeshBridge::get_node_changes(String node_id, String &changes)
-{
-    if (WiFi.status() == WL_CONNECTED && Firebase.ready())
-    {
-        String document_path = "Changes/" + node_id;
-        FirebaseJson json;
-        FirebaseData fbdo;
-        FirebaseJsonData data;
-        int response_size = 2048;
-        bool succeed;
-        do
-        {
-            response_size *= 2;
-            Serial.println(String(response_size));
-            fbdo.setResponseSize(response_size);
-            if(!Firebase.Firestore.getDocument(&fbdo, FIREBASE_PROJECT_ID, "", document_path.c_str())){
-                break;
-            }
-            // succeed = json.setJsonData(fbdo.payload()) && json.get(data, "fields") && data.getJSON(json);
-            Serial.println(succeed);
-            if(!json.setJsonData(fbdo.payload())){
-                Serial.println("set json fail");
-                continue;
-            }
-            succeed = json.setJsonData(fbdo.payload());
-            Serial.println(succeed);
-            succeed =  json.get(data, "fields") ;
-            Serial.println(succeed);
-            succeed =  data.getJSON(json);
-            Serial.println(succeed);
-            //Serial.println(json.raw());
-            if(succeed){
-                changes = json.raw();
-                return true;
-            }
-        } while (!succeed && response_size < 16384); // TODO consider this number again
-    }
-    Serial.println("data failed");
-    Serial.println(fbdo.errorReason());
-    return false;
-}
+//bool MeshBridge::get_node_changes(String node_id, String &changes){}
+// {
+//     if (WiFi.status() == WL_CONNECTED && Firebase.ready())
+//     {
+//         String document_path = "Changes/" + node_id;
+//         FirebaseJson json;
+//         FirebaseData fbdo;
+//         FirebaseJsonData data;
+//         int response_size = 2048;
+//         bool succeed;
+//         do
+//         {
+//             response_size *= 2;
+//             Serial.println(String(response_size));
+//             fbdo.setResponseSize(response_size);
+//             if(!Firebase.Firestore.getDocument(&fbdo, FIREBASE_PROJECT_ID, "", document_path.c_str())){
+//                 break;
+//             }
+//             // succeed = json.setJsonData(fbdo.payload()) && json.get(data, "fields") && data.getJSON(json);
+//             Serial.println(succeed);
+//             if(!json.setJsonData(fbdo.payload())){
+//                 Serial.println("set json fail");
+//                 continue;
+//             }
+//             succeed = json.setJsonData(fbdo.payload());
+//             Serial.println(succeed);
+//             succeed =  json.get(data, "fields") ;
+//             Serial.println(succeed);
+//             succeed =  data.getJSON(json);
+//             Serial.println(succeed);
+//             //Serial.println(json.raw());
+//             if(succeed){
+//                 changes = json.raw();
+//                 return true;
+//             }
+//         } while (!succeed && response_size < 16384); // TODO consider this number again
+//     }
+//     Serial.println("data failed");
+//     Serial.println(fbdo.errorReason());
+//     return false;
+// }
 
 void MeshBridge::firestoreNetworkDataCollectionUpdate(){
 

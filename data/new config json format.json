@@ -1,0 +1,20 @@
+{
+"nickname":"new plant",
+"sensors":  {
+            "1":{
+                "hardware_info":"Grove Soil Moisture Sensor v1",
+                "pinout":{"VCC":"D5"},
+                "sample_interval":30,
+                "sensor_id":1,
+                "sensor_type":["Soil Moisture"],
+                "units":["%"]
+                }
+            },
+"mesh_port": 5555,
+"mesh_password": "somethingSneaky",
+"mesh_prefix": "whateverYouLike",
+"firmware": "esp8266_v0.1"
+}
+
+    
+    

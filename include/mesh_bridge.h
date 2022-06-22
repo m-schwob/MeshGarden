@@ -83,7 +83,7 @@ private:
     void firestoreReadChanges();
     bool firestoreReadNetwork(String &changes);
     void firestoreDataUpdate(String plant_id, String sensor_id, String meas_type, String value);
-    bool get_node_changes(String node_id, String &changes);
+    //bool get_node_changes(String node_id, String &changes);
     vector<String> split(String s, String delimiter);
 
     void set_in_firebase(String nodeId);

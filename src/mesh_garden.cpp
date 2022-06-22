@@ -81,15 +81,17 @@ bool MeshGarden::load_configuration()
 // parse the config and initialize class members
 void MeshGarden::parse_config()
 {
+    Serial.println("parse configures:");
     // TODO calling it only in debug mode.
     log_config();// TODO check why this function fail (make the the co)
 
     // TODO set it on node/bridge after making set function for it and making inheriting
+
     mesh_prefix = config["mesh_prefix"].as<String>();
     mesh_password = config["mesh_password"].as<String>();
     mesh_port = config["mesh_port"].as<size_t>();
 
-    JsonArray sensors = config["sensors"];
+    JsonArray sensors = config["sensors"]["1"]; //for now
     for (JsonObject sensor : sensors)
     {
         const String hardware_info = sensor["hardware_info"].as<String>();
@@ -99,7 +101,7 @@ void MeshGarden::parse_config()
 
         DynamicJsonDocument doc(sensor);
 
-        JsonObject pinout = sensor["pinout"];
+        JsonObject pinout = sensor["1"]["pinout"]; //for now
 
         Serial.println("create sensor: " + hardware_info);
         Device *new_device = DeviceFactory::create(sensor_id, hardware_info, pinout, doc);
