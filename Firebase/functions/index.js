@@ -32,6 +32,7 @@ async function update_measurements_collection(change, node_id) {
     }
     functions.logger.log(`node ${node_id} document sensors list: [${node_sensors_ids}]`);
 
+    // get sensors ids from node measurements document if exist
     const meas_doc = await admin.firestore().collection('Measurements').doc(node_id).get();
     var meas_sensors_ids = [];
     if (meas_doc.exists) {
@@ -41,10 +42,53 @@ async function update_measurements_collection(change, node_id) {
         }
     }
     functions.logger.log(`node ${node_id} measurements document sensors list: [${meas_sensors_ids}]`);
+
+    //get differences
+    const added = node_sensors_ids.filter(x => meas_sensors_ids.includes(x) === false)
+    const deleted = meas_sensors_ids.filter(x => node_sensors_ids.includes(x) === false)
+    functions.logger.log(`sensors to add: [${added}]`);
+    functions.logger.log(`sensors to delete [${deleted}]`);
+
+    //update measurements collection
+    if (meas_sensors_ids.length && !node_sensors_ids.length) {
+        //remove node measurements document if it exist and node does not have any sensors 
+        await meas_doc.ref.delete();
+        functions.logger.log(`node ${node_id} measurements document has been deleted`);
+    }
+    else {
+        //remove deleted sensors from node measurements document
+        for (var sensor_id of deleted) {
+            await meas_doc.ref.update({ [sensor_id]: admin.firestore.FieldValue.delete() });
+            functions.logger.log(`sensor ${sensor_id} of node ${node_id} measurements has been removed.`);
+        }
+
+        // add added sensors to node measurements document
+        for (var sensor_id of added) {
+            const sensor = await change.after.get(`sensors.${sensor_id}`);
+            try {
+                for (var [type, units] of sensor.sensor_type.map((e, i) => [e, sensor.units[i]])) {
+                    // console.log(`${sensor_id} ${type} ${units}`);
+                    // console.log({ [`${sensor_id}.${type}`]: { 'units': units } });
+                    // console.log(`${sensor_id}.${type}`);
+                    // console.log(meas_doc.set(`${sensor_id}.${type}`));
+                    await meas_doc.ref.update({ [sensor_id]: { [type]: { 'units': units } } });
+                    // await meas_doc.set({ [sensor_id]: { [type]: { 'units': units } } }, { merge: true });
+                    // await meas_doc.update({ [`${sensor_id}.${type}`]: { 'units': units } });
+                }
+            }
+            catch (e) {
+                if (e instanceof TypeError) {
+                    functions.logger.log(`sensor ${sensor_id} of node ${node_id} data corruption. measurement document cannot be completely updated`);
+                }
+                continue;
+            }
+            functions.logger.log(`sensor ${sensor_id} has been added to node ${node_id} measurements `);
+        }
+    }
 }
 
 
-// get keys array of document field. 
+// get keys array of document field.
 // @input: field getter function, DocumentData object
 // @return: array of keys. return empty array if document or data does not exists
 //usage:     meas_sensors_ids = get_keys_array(meas_doc, async ()=> {meas_doc.data()});
