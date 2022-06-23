@@ -37,9 +37,26 @@ async function update_measurements_collection(change, node_id) {
     console.log(node_sensors_ids);
     functions.logger.log(`node ${node_id} document sensors list: [${node_sensors_ids}]`);
 
-    const doc = admin.firestore().collection('Nodes').doc(node_id);
-    const config = await doc.get();
-    console.log(config.data());
+    const meas_doc = await admin.firestore().collection('Measurements').doc(node_id).get();
+    // const doc = admin.firestore().collection('Measurements').doc(node_id);
+    // const meas_doc = await doc.get();
+    console.log(meas_doc.data());
+    var meas_sensors_ids = [];
+    console.log(node_id);
+    console.log(meas_doc.exists);
+    // console.log(meas_doc);
+    if (meas_doc.exists) {
+        console.log('?');
+        node_sensors = meas_doc.data();
+        console.log(node_sensors);
+        if (node_sensors) {
+            console.log('??');
+            meas_sensors_ids = Object.keys(node_sensors);
+        }
+    }
+    console.log(meas_sensors_ids);
+    functions.logger.log(`node ${node_id} document sensors list: [${meas_sensors_ids}]`);
+
 }
 
 
