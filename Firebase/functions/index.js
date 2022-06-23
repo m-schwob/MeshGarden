@@ -67,13 +67,8 @@ async function update_measurements_collection(change, node_id) {
             const sensor = await change.after.get(`sensors.${sensor_id}`);
             try {
                 for (var [type, units] of sensor.sensor_type.map((e, i) => [e, sensor.units[i]])) {
-                    // console.log(`${sensor_id} ${type} ${units}`);
-                    // console.log({ [`${sensor_id}.${type}`]: { 'units': units } });
-                    // console.log(`${sensor_id}.${type}`);
-                    // console.log(meas_doc.set(`${sensor_id}.${type}`));
-                    await meas_doc.ref.update({ [sensor_id]: { [type]: { 'units': units } } });
-                    // await meas_doc.set({ [sensor_id]: { [type]: { 'units': units } } }, { merge: true });
-                    // await meas_doc.update({ [`${sensor_id}.${type}`]: { 'units': units } });
+                    await meas_doc.ref.set({ [sensor_id]: { [type]: { 'units': units } } }, { merge: true });
+                    // await meas_doc.ref.update({ [`${sensor_id}.${type}`]: { 'units': units } }); //also works. keep for future reference
                 }
             }
             catch (e) {
