@@ -2,7 +2,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:iot_firestore_flutter_app/const/custom_styles.dart';
 import 'package:iot_firestore_flutter_app/route/routing_constants.dart';
 import 'package:flutter/material.dart';
-
+import 'dart:async';
+import 'package:iot_firestore_flutter_app/screens/loading_screen.dart';
 import '../auth_helper.dart';
 
 class SplashScreen extends StatelessWidget {
@@ -18,8 +19,11 @@ class SplashScreen extends StatelessWidget {
           User? user = AuthHelper.currentUser();
           if (user != null) {
             Future.delayed(Duration.zero, () async {
-              Navigator.pushNamedAndRemoveUntil(context, DashboardScreenRoute,
+              // Navigator.pushNamedAndRemoveUntil(context, DashboardScreenRoute,
+              Navigator.pushNamedAndRemoveUntil(context, NodesScreenRoute,
                   (Route<dynamic> route) => false);
+              // Navigator.pushNamedAndRemoveUntil(context, LoadingScreenRoute,
+              //         (Route<dynamic> route) => false);
             });
           } else {
             return _getScreen(context);
@@ -27,10 +31,22 @@ class SplashScreen extends StatelessWidget {
         }
         return Center(
           child: CircularProgressIndicator(),
+          // child: LoadingScreen()
         );
       },
     ));
   }
+
+  // _getLoading(BuildContext context){
+  //   return Container(
+  //     padding: const EdgeInsets.all(50),
+  //     child: Image(
+  //       image: AssetImage(
+  //         'assets/images/logo.png',
+  //       ),
+  //       // child:FlutterLogo(size:MediaQuery.of(context).size.height)
+  //     ),);
+  // }
 
   _getScreen(BuildContext context) {
     return Padding(
@@ -44,9 +60,9 @@ class SplashScreen extends StatelessWidget {
                   child: Container(
                     child: Image(
                       image: AssetImage(
-                        'assets/images/iot_image.png',
+                        'assets/images/logo.png',
                       ),
-                      color: Colors.white,
+                      //color: Colors.white,
                     ),
                   ),
                 ),
@@ -54,7 +70,7 @@ class SplashScreen extends StatelessWidget {
                   height: 20,
                 ),
                 Text(
-                  "Firebase\nCloud Firestore",
+                  "Mesh Garden",
                   style: kHeadline,
                   textAlign: TextAlign.left,
                 ),
@@ -64,7 +80,7 @@ class SplashScreen extends StatelessWidget {
                 Container(
                   width: MediaQuery.of(context).size.width * 0.8,
                   child: Text(
-                    "This is a project that connects to hardware devices via Firebase and gets the readings from sensors. For detail, you can check out my channel.",
+                    "Make your plants happy\nStart your Mesh Garden now",
                     style: kBodyText,
                     textAlign: TextAlign.center,
                   ),

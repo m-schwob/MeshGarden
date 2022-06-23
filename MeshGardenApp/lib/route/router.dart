@@ -1,9 +1,12 @@
 import 'package:iot_firestore_flutter_app/route/routing_constants.dart';
-import 'package:iot_firestore_flutter_app/screens/dashboard_screen.dart';
+// import 'package:iot_firestore_flutter_app/screens/dashboard_screen.dart';
 import 'package:iot_firestore_flutter_app/screens/signin_screen.dart';
 import 'package:iot_firestore_flutter_app/screens/signup_screen.dart';
 import 'package:iot_firestore_flutter_app/screens/splash_screen.dart';
 import 'package:iot_firestore_flutter_app/screens/undefined_screen.dart';
+import 'package:iot_firestore_flutter_app/screens/nodes_screen.dart';
+import 'package:iot_firestore_flutter_app/screens/config_screen.dart';
+import 'package:iot_firestore_flutter_app/screens/loading_screen.dart';
 import 'package:flutter/material.dart';
 
 Route<dynamic> generateRoute(RouteSettings settings) {
@@ -17,8 +20,17 @@ Route<dynamic> generateRoute(RouteSettings settings) {
     case SignUpScreenRoute:
       return MaterialPageRoute(builder: (context) => SignUpScreen());
 
-    case DashboardScreenRoute:
-      return MaterialPageRoute(builder: (context) => DashboardScreen());
+    // case DashboardScreenRoute:
+    //   return MaterialPageRoute(builder: (context) => DashboardScreen());
+
+    case NodesScreenRoute:
+      return MaterialPageRoute(builder: (context) => NodesScreen());
+
+    case LoadingScreenRoute:
+      return MaterialPageRoute(builder: (context) => LoadingScreen());
+
+    // case NodesScreenRoute:
+    //   return MaterialPageRoute(builder: (context) => ConfigScreen(nodeId : nodeId));
 
     default:
       return MaterialPageRoute(

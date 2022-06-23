@@ -70,6 +70,7 @@ private :
     void parse_config();
     void log_config();
     void init_mesh_connection();
+    void update_got_configs();
 
 public:
     std::list<Device *> device_list;

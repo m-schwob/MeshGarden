@@ -42,14 +42,25 @@ void newConnectionCallback(uint32_t nodeId)
     char s[100];
     
     int rc = strftime(s,sizeof(s),"%b %d,20%y at %r", &timeinfo);
-    Serial.printf("%d characters written.\n%s\n",rc,s);   
-    node->mesh.sendBroadcast("clock " + String(s));
+    Serial.printf("%d characters written.\n%s\n",rc,s);
+    
+    DynamicJsonDocument timer(String(s).length()+32);
+    timer["clock"] = s;
+    Serial.println("created clock json");
+    serializeJson(timer, Serial);
+    node->mesh.sendBroadcast(timer.as<String>());
+
     if (node->change_log.find(String(nodeId)) != node->change_log.end()){
         Serial.println("sending update to node " + String(nodeId) + "\n" + String(node->change_log[String(nodeId)]));
-        String signaled = "Change: " + node->change_log[String(nodeId)];
-        if(signaled != "Change: " )
-            node->mesh.sendSingle(nodeId,signaled);
-            node->change_log.erase(String(nodeId));
+        
+        if(node->change_log[String(nodeId)] != ""){
+            DynamicJsonDocument doc(node->change_log[String(nodeId)].length()+32);
+            doc["change"] = node->change_log[String(nodeId)];
+            Serial.println("created changeJson");
+            serializeJson(doc, Serial);
+            node->mesh.sendSingle(nodeId,doc.as<String>());
+            node->change_log.erase(String(nodeId)); 
+        }
     }
 
 }
@@ -117,8 +128,8 @@ void MeshBridge::update()
     {
         get_mesh_nodes(); // get the working nodes list before quit
         String nodeId = String(mesh.getNodeId());
-        Serial.println("sending killing cast");
-        mesh.sendBroadcast("die");
+        // Serial.println("sending killing cast");
+        // mesh.sendBroadcast("die");
         mesh.stop();
         // // Connect to Wi-Fi
         Serial.print("Connecting to ");

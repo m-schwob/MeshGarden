@@ -14,7 +14,7 @@ class MySensorCard extends StatelessWidget {
       required this.linePoint})
       : super(key: key);
 
-  final double value;
+  final num value;
   final String name;
   final String unit;
   final List<double> trendData;
@@ -66,8 +66,10 @@ class MySensorCard extends StatelessWidget {
                     data: trendData,
                     lineWidth: 5.0,
                     lineColor: Colors.white,
-                    averageLine: true,
-                    fillMode: FillMode.above,
+                    averageLine: false,
+                    enableGridLines: true,
+                    gridLineLabelPrecision: 3,
+                    fillMode: FillMode.none,
                     sharpCorners: false,
                     pointsMode: PointsMode.last,
                     pointSize: 20,
