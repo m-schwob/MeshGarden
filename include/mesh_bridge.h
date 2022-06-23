@@ -58,12 +58,13 @@ private:
     Scheduler userScheduler; // to control your personal task
     painlessMesh mesh;
     unsigned long myTime; // timer to check how long it takes to initialize mesh network
-
+    Task taskSendMessage;
     // firebase global variables
     FirebaseData fbdo;
     FirebaseAuth auth;
     FirebaseConfig config;
     bool initialized = false;
+    bool init_death= false;
 
     // sync with the server, saving data variables
     int lasttime = 0; // initialized, used to messure time interaval for the disconnect
@@ -82,7 +83,7 @@ private:
     void firestoreNetworkDataCollectionUpdate();
     void firestoreReadChanges();
     bool firestoreReadNetwork(String &changes);
-    void firestoreDataUpdate(String plant_id, String sensor_id, String meas_type, String value);
+    void firestoreDataUpdate(String jsonVal);
     //bool get_node_changes(String node_id, String &changes);
     vector<String> split(String s, String delimiter);
 
@@ -92,15 +93,16 @@ private:
 
 public:
     std::map<String,String> change_log;
+    void firebaseGetT();
     MeshBridge();
     void update();
     void get_mesh_nodes();
     void init_clock();
     void init_mesh();
+    void exit_mesh_connect_server();
     bool configure_ready = false;
 	String config_string;
-
-
+    vector<String> meassures;
 };
 
 #endif /* _BRIDGENODE_H_ */

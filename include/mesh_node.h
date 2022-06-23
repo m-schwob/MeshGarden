@@ -9,6 +9,7 @@
 #include <iostream>
 #include "time.h"
 #include "sensor.h"
+// #include "mesh_garden.h"
 
 using namespace std;
 #define MESH_PREFIX "whateverYouLike"
@@ -44,7 +45,6 @@ class MeshNode
 		MeshNode();
 		void update();
 		void sendMessage();
-		void add_measurement(TaskCallback callable, unsigned long interval, long iterations=TASK_FOREVER);
 		void remove_task();
 		vector<String> splitString(string str, string delimiter = " ");
 		void setTimeVal(string str, string delimiter = ":");
@@ -65,9 +65,11 @@ class MeshNode
 	void time_update();
 	void printLocalTime();
     void init_mesh();
-
+	uint32_t bridgeId = 0 ;
 	//measurment settings:
-	void send_values(std::function<Measurement()> get_values_callback);
+	void add_measurement(std::function<Measurements()> callable, unsigned long interval, long iterations);
+	void send_values(std::function<Measurements()> get_values_callback);
+
 };
 
 

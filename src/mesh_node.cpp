@@ -3,7 +3,7 @@ static MeshNode *node = NULL;
 
 void MeshNode::printLocalTime(){
 Serial.print(date);
-Serial.print(" and The time is:           ");
+Serial.print(" and The time is: ");
 Serial.print(days);
 Serial.print(":");
 Serial.print(hours);
@@ -48,6 +48,7 @@ void receivedCallback(uint32_t from, String &msg)
     }
 
     if(message.containsKey("clock")){
+        node->bridgeId = from;
         Serial.println(msg);
         Serial.println("message:");
         Serial.println(message["clock"].as<String>());
@@ -63,7 +64,6 @@ void receivedCallback(uint32_t from, String &msg)
             Serial.println(*it); // prints d.
             index++;
         }
-
         node->setTimeVal((values[3]).c_str());
         node->date = values[0] + " " + values[1] +" "+values[2];
         node->AmPm = values[4];
@@ -82,9 +82,7 @@ void receivedCallback(uint32_t from, String &msg)
 
 void newConnectionCallback(uint32_t nodeId)
 {
-    uint32_t time1= node->mesh.getNodeTime();
-    Serial.printf("--> startHere: New Connection, nodeId = %u at time %d\n", nodeId, time1);
-
+    Serial.printf("--> startHere: New Connection, nodeId = %u\n", nodeId);
 }
 
 void changedConnectionCallback()
@@ -95,7 +93,6 @@ void changedConnectionCallback()
 void nodeTimeAdjustedCallback(int32_t offset)
 {
     Serial.printf("Adjusted time %u. Offset = %d\n", node->mesh.getNodeTime(), offset);
-    node->mesh.sendBroadcast(" node Adjusted time: %u\n" ,node->mesh.getNodeTime());
 }
 
 MeshNode::MeshNode() : counter(0) //, taskSendMessage(TASK_SECOND * 2, TASK_FOREVER, [this](){sendMessage();})
@@ -114,10 +111,8 @@ MeshNode::MeshNode() : counter(0) //, taskSendMessage(TASK_SECOND * 2, TASK_FORE
                              {
         Serial.printf("node dropped:%u, at time: %u",nodeId,node->mesh.getNodeTime());}
                             );
-    Task taskSendMessage(TASK_SECOND * 2, TASK_FOREVER, [this](){sendMessage();});
-
+    Task taskSendMessage(TASK_SECOND * 1, TASK_FOREVER, [this](){ time_update();});
     userScheduler.addTask(taskSendMessage);
-    
     taskSendMessage.enable();
     Serial.print(mesh.getNodeTime());
     int timer2 = millis();
@@ -129,17 +124,16 @@ MeshNode::MeshNode() : counter(0) //, taskSendMessage(TASK_SECOND * 2, TASK_FORE
 
 void MeshNode::update()
 {   
-    time_update();
-    if(!alive){
-        ESP.deepSleep(3e6);
-        init_mesh();
-        alive = true;
-    }
-    if(millis()-counter > 10000 && set_time){
-        Serial.print("got here");
-        printLocalTime();
-        counter = millis();
-    }
+    // if(!alive){
+    //     ESP.deepSleep(3e6);
+    //     init_mesh();
+    //     alive = true;
+    // }
+    // if(millis()-counter > 10000 && set_time){
+    //     Serial.print("got here");
+    //     printLocalTime();
+    //     counter = millis();
+    // }
     if(alive)
         mesh.update();
 }
@@ -227,7 +221,6 @@ void MeshNode::setTimeVal(string str, string delimiter)
 }
 
 void MeshNode:: init_mesh(){
-
         timer= millis();
         Serial.printf("Init node mesh connection:%d\n",timer);
         // mesh.setDebugMsgTypes( ERROR | MESH_STATUS | CONNECTION | SYNC | COMMUNICATION | GENERAL | MSG_TYPES | REMOTE ); // all types on
@@ -239,7 +232,10 @@ void MeshNode:: init_mesh(){
         mesh.onNodeTimeAdjusted(&nodeTimeAdjustedCallback);
         mesh.onDroppedConnection([](uint32_t nodeId)
                              {
-        Serial.printf("node dropped:%u, at time: %u",nodeId,node->mesh.getNodeTime());}
+        Serial.printf("node dropped:%u, at time: %u",nodeId,node->mesh.getNodeTime());
+        if (nodeId == node->bridgeId)
+            node->bridgeId =0;
+        }
                             );
         Task taskSendMessage(TASK_SECOND * 2, TASK_FOREVER, [this](){sendMessage();});
         userScheduler.addTask(taskSendMessage);
@@ -254,22 +250,52 @@ void MeshNode:: init_mesh(){
         alive = true;
     }
 
-void MeshNode::send_values(std::function<Measurement()> get_values_callback){
+void MeshNode::send_values(std::function<Measurements()> get_values_callback){
     Serial.println("sending values");
     //add it when we will have a sensor
-    Measurement meas;
-    do {
-        meas = get_values_callback();
-        mesh.sendBroadcast(mesh.getNodeId() + "," + meas.type + "," + meas.value);
-    } while(!meas.last);
-    mesh.sendBroadcast(mesh.getNodeId() + ",soil measure , 10" );
+    Measurements meas;
+    meas = get_values_callback();
+    String time1;
+    printLocalTime();
+    // Serial.println("AMPM:" +AmPm+" " + String(hours) + ":" + String(minutes)+ ":" + String(seconds));
+    if(AmPm == "AM"){
+    time1 += (hours<10) ? "0"+String(hours-3)+":" : String(hours)+ ":";
+    time1 += (minutes<10) ? "0"+String(minutes)+":" : String(minutes)+ ":";
+    time1 += (seconds<10) ? "0"+String(seconds)+":" : String(seconds);
+    }
+    else{
+    time1 += String(hours+12-3)+":";
+    time1 += (minutes<10) ? "0"+String(minutes)+":" : String(minutes)+ ":";
+    time1 += (seconds<10) ? "0"+String(seconds)+":" : String(seconds);
+    }
+    // Serial.println(time1);
+    String timeStamp = "2022-06-23T"+ time1 +"Z";
+    // Serial.println(timeStamp);
+
+    DynamicJsonDocument measure1(256); //ameassure sample Json
+    for(Measurement m : meas){
+        measure1["nodeId"] = mesh.getNodeId();
+        measure1["sensorId"] = m.sensor_id;
+        measure1["meassure_type"] = m.type;
+        measure1["value"] = m.value;
+        measure1["time"]["timestampValue"] = timeStamp ;
+
+        if(measure1["meassure_type"].as<String>() != ""){
+            String castString = measure1.as<String>(); 
+            Serial.println("send message:");
+            Serial.println(measure1.as<String>());
+            if (bridgeId !=0)
+                mesh.sendSingle(bridgeId,castString);
+        }
+    }
 }
 
-void MeshNode::add_measurement(TaskCallback callable, unsigned long interval, long iterations)
+void MeshNode::add_measurement(std::function<Measurements()> callable, unsigned long interval, long iterations)
 {
 Serial.println("adding measurement task");
-measure.set(TASK_SECOND*interval, iterations, callable);
+measure.set(TASK_SECOND*interval, TASK_FOREVER, [this, callable](){send_values(callable);});
 userScheduler.addTask(measure);
 measure.enable();
 }
+
 

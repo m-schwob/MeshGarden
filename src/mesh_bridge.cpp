@@ -21,9 +21,15 @@ MeshBridge::MeshBridge(){
 // the dict will have nodeId as its key, and the Entire message as its value
 void receivedCallback(uint32_t from, String &msg)
 {
-    uint32_t timer = node->mesh.getNodeTime();
-    Serial.printf("message received from %u msg=%s. at time: %u\n", from, msg.c_str(),timer);
-    // node->server_data.push_back(String(from) + "," + msg);
+    Serial.printf("startHere: Received from %u msg=%s\n", from, msg.c_str());
+    
+    DynamicJsonDocument doc(256);
+    DeserializationError error = deserializeJson(doc, msg);
+    node->server_data.push_back(doc.as<String>());
+    Serial.println("serialized");
+    serializeJson(doc, Serial);
+    Serial.println("num of meassures read:");
+    Serial.println(node->server_data.size());
 }
 
 // event driven function for the mesh
@@ -32,6 +38,7 @@ void newConnectionCallback(uint32_t nodeId)
     uint32_t time = node->mesh.getNodeTime();
     Serial.printf("--> startHere: New Connection, nodeId = %u\n", nodeId);
     Serial.printf("new node connected at time: %u\n", time);
+
     Serial.println("time:");    
     printLocalTime();
     struct tm timeinfo;
@@ -91,8 +98,6 @@ void nodeTimeAdjustedCallback(int32_t offset)
 
 void MeshBridge::init_mesh()
 {   
-    Serial.println("changes for node: 3049689558");
-    Serial.println(change_log["3049689558"]);
     Serial.println("initializeing the mesh network");
      myTime = millis();
     // Serial.printf("Mesh node start at time: %d \n", myTime);
@@ -117,80 +122,22 @@ void MeshBridge::init_mesh()
     mesh.setRoot(true);
     // This node and all other nodes should ideally know the mesh contains a root, so call this on all nodes
     mesh.setContainsRoot(true);
+    // taskSendMessage.set(TASK_SECOND * 30, TASK_FOREVER, [this](){exit_mesh_connect_server();});
+    // userScheduler.addTask(taskSendMessage);
+    // if(!init_death){
+    //     taskSendMessage.enable();
+    //     init_death=true;
+    // }
 }
 
 void MeshBridge::update()
 {
       // it will run the user scheduler as well
+    if(millis()-lasttime >=30000){
+        exit_mesh_connect_server();
+        lasttime=millis();
+    }  
     mesh.update();
-    // Init and get the time
-    if (millis() - lasttime > 10000)
-    {
-        get_mesh_nodes(); // get the working nodes list before quit
-        String nodeId = String(mesh.getNodeId());
-        // Serial.println("sending killing cast");
-        // mesh.sendBroadcast("die");
-        mesh.stop();
-        // // Connect to Wi-Fi
-        Serial.print("Connecting to ");
-        Serial.println(ssid);
-        WiFi.begin(ssid, password);
-        while (WiFi.status() != WL_CONNECTED)
-        {
-            delay(500);
-            Serial.print(".");
-        }
-        Serial.println("");
-        Serial.println("WiFi connected.");
-        firebaseInit();
-
-        //set initialized values for the mesh network config and the bridge
-        if(!initialized){
-            set_in_firebase(nodeId);
-            firestoreNetworkDataCollectionUpdate();
-        }
-
-        // //  //pst on the firebase server what was saved on the map
-        // for(std::map<String,vector<String>>::iterator iter = dict.begin(); iter != dict.end(); ++iter){
-        // for(vector<String>::iterator measures_iter = iter->second.begin(); measures_iter!=iter->second.end() ; measures_iter++ ){
-        // firestoreDataUpdate(iter->first, *measures_iter);
-        //}
-        //   }
-
-        //refresh the MeshNetwork and initializes the New Nodes in the network
-        Serial.println("update connections");
-        firestoreMeshCollectionClear();
-        firestoreMeshCollectionUpdate();
-        
-        //go through the nodes in the system and will set uninitialized nodes in the NodesDocument:
-        Serial.println("initialize:");
-        for(list<String>:: iterator map_iter = mesh_values.begin(); map_iter!= mesh_values.end(); ++map_iter){
-            Serial.println("we want to initialize the node: " + String(*map_iter));
-            set_in_firebase(*map_iter);
-        }
-
-        //sending to the firstore the meassures:
-        Serial.printf("sending %d cached messages..\n", server_data.size());
-        for (vector<String>::iterator measures_iter = server_data.begin(); measures_iter != server_data.end(); measures_iter++)
-        {
-            Serial.printf("sending message <%s>\n", measures_iter->c_str());
-            std::vector<String> vec = split((*measures_iter), ","); // split the String to vector of Strins by word
-            firestoreDataUpdate(String(vec[0].c_str()),String(vec[1].c_str()), String(vec[2].c_str()), String(vec[3].c_str()));
-        }
-        
-        server_data.clear();
-        //Serial.println("send to server list:");
-        firestoreReadChanges();	
-
-        mesh_values.clear();
-        Serial.println("send to server end");
-        Serial.println("WiFi disconnected. initialize mesh");
-        
-        // initializing the mesh network again
-        init_mesh();
-    Serial.print("after update after entering fb heap: ");
-        lasttime = millis();
-    }
 }
 
 void MeshBridge::init_clock(){
@@ -241,38 +188,152 @@ void MeshBridge::firebaseInit()
     Firebase.begin(&config, &auth);
 }
 
+
+void MeshBridge::firebaseGetT()
+{
+    Serial.print("Connecting to ");
+    Serial.println(ssid);
+    WiFi.begin(ssid, password);
+    while (WiFi.status() != WL_CONNECTED)
+    {
+        delay(500);
+        Serial.print(".");
+    }
+    Serial.println("");
+    Serial.println("WiFi connected.");
+    firebaseInit();
+    //  Serial.println("Read time from server:");
+    if(WiFi.status() == WL_CONNECTED && Firebase.ready()){
+    String document_path = "Measurements/2989123789";
+
+    FirebaseJson json;       // or constructor with contents e.g. FirebaseJson json("{\"a\":true}");
+    FirebaseJsonArray arr;   // or constructor with contents e.g. FirebaseJsonArray arr("[1,2,true,\"test\"]");
+    FirebaseJsonData result; // object that keeps the deserializing result
+
+    FirebaseJson content;
+    bool response;
+    
+
+    json.setJsonData("{\"mapValue\": {\"fields\": {\"time\": {\"timestampValue\": \"2022-05-23T21:00:00Z\"},\"value\": {\"doubleValue\": 0.53}}}}");
+    arr.add(json);
+    String n_path = "/fields/sensor1/mapValue/fields/Air Temperature/mapValue/fields/samples/arrayValue/values/";
+    content.set(n_path , arr);
+
+
+
+    // if(Firebase.Firestore.getDocument(&fbdo, FIREBASE_PROJECT_ID, "", document_path.c_str(), content.raw())){
+    //         Serial.println();
+    //         //now we will scan the Nodes collection in order to retrieve all changes: 
+    //         Serial.printf("recieved %s\n", fbdo.payload().c_str());
+    // }
+    // content.toString(Serial, true /* prettify option */);
+    if(Firebase.Firestore.patchDocument(&fbdo, FIREBASE_PROJECT_ID, "", document_path.c_str(), content.raw(), "sensor1")){
+        Serial.printf("ok\n%s\n\n", fbdo.payload().c_str());
+        return;
+    }
+    else{
+        Serial.println(fbdo.errorReason());
+    }
+
+    // Serial.println("Success");
+    // arr.setJsonArrayData("[1,2,3]");
+
+    // // To add data to json
+    // json.add("b" /* key or name only */, 123 /* value of any type */);
+
+    // // To set data to json
+    // json.set("a/b/c" /* key or relative path */, "hello" /* value */);
+
+    // // To add value to array
+    // arr.add("\"time\"").add("test").add(99); // or arr.add("hello", "test", 99);
+
+    // // To add json into array
+    // FirebaseJson json2("{\"d\":888,\"e\":false}");
+    // arr.add(json2);
+
+        }
+  //disconnect WiFi as it's no longer needed
+  WiFi.disconnect(true);
+  WiFi.mode(WIFI_OFF);
+}
+
 // fireBase update Function For moisture and humidity sensor, will receive 3 Values
 //  (Have to fix temp- for now its the nodeId), and post them on the firebase
 // under the plant_id
 
 // Todo- check option for sensor to sand Json message on mesh, and firestore will decode it
 // declare Strings in each sensor class
-void MeshBridge::firestoreDataUpdate(String plant_id, String sensor_id ,String meas_type, String value) //TEMP parameters edited have measurement type and value 
+void MeshBridge::firestoreDataUpdate(String jsonVal) //TEMP parameters edited have measurement type and value 
 {
     if (WiFi.status() == WL_CONNECTED && Firebase.ready())
     {
-        Serial.printf("updating firebase with data: %s:%s\n", meas_type.c_str(), value.c_str());
-        String document_path = "Measurements/" + plant_id +"/"+ sensor_id +"/meassurments";
+        DynamicJsonDocument doc(1028);
+        DeserializationError error = deserializeJson(doc, jsonVal);
+            if (error)
+            {
+                Serial.print(F("deserializeJson() failed: "));
+                Serial.println(error.f_str());
+            }
+        // String documentPath = "TestMeasurements/" + doc["nodeId"].as<String>() +"/" + doc["sensor_id"].as<String>() +"/" + doc["meassure_type"].as<String>() + "/samples";
+        String documentPath = "Measurements/" + doc["nodeId"].as<String>();
+        
+        FirebaseJson json;       // or constructor with contents e.g. FirebaseJson json("{\"a\":true}");
+        FirebaseJsonArray arr;   // or constructor with contents e.g. FirebaseJsonArray arr("[1,2,true,\"test\"]");
+        FirebaseJsonData result; // object that keeps the deserializing result
+
         FirebaseJson content;
         bool response;
+        
+        json.setJsonData("{\"mapValue\": {\"fields\": {\"time\": {\"timestampValue\": \"2022-05-23T21:00:00Z\"},\"value\": {\"doubleValue\": 0.53}}}}");
+        arr.add(json);
+        String n_path = "/fields/sensor1/mapValue/fields/Air Temperature/mapValue/fields/samples/arrayValue/values/";
+        content.set(n_path , arr);
 
-        content.set("fields/" + plant_id + "/mapValue/fields/" + meas_type.c_str()+ "/doubleValue/", value.c_str());
-        // check if node has a document nad create new if not exists
-        if (Firebase.Firestore.getDocument(&fbdo, FIREBASE_PROJECT_ID, "", document_path.c_str(), plant_id.c_str())){
-            // Serial.printf("node document found\n%s\n\n", fbdo.payload().c_str());
-            response = Firebase.Firestore.patchDocument(&fbdo, FIREBASE_PROJECT_ID, "", document_path.c_str(), content.raw(), "last_message");
-        }
-        if (response)
-        {
-            // Serial.printf("ok\n%s\n\n", fbdo.payload().c_str());
-        }
-        else
-        {
-            Serial.println(fbdo.errorReason());
-        }
+
+
+    // if(Firebase.Firestore.getDocument(&fbdo, FIREBASE_PROJECT_ID, "", document_path.c_str(), content.raw())){
+    //         Serial.println();
+    //         //now we will scan the Nodes collection in order to retrieve all changes: 
+    //         Serial.printf("recieved %s\n", fbdo.payload().c_str());
+    // }
+    // content.toString(Serial, true /* prettify option */);
+    if(Firebase.Firestore.patchDocument(&fbdo, FIREBASE_PROJECT_ID, "", document_path.c_str(), content.raw(), "sensor1")){
+        Serial.printf("ok\n%s\n\n", fbdo.payload().c_str());
+        return;
     }
-}
+    else{
+        Serial.println(fbdo.errorReason());
+    }
+    //     DynamicJsonDocument measure1(564); //ameassure sample Json
+    //     String path_to_array = "1"
 
+        
+    //     // FirebaseJson content= "{1:{Soil Moisture:{samples:[{value: 45}]}}}";
+    //     FirebaseJson content;
+    //     bool response;
+    //     FirebaseJsonData measureArray;
+    //     // String path1 = "/"
+    //     // content.get(measureArray,path1);
+    //     // Serial.println("get Json");
+    //     // Serial.println(measureArray.getArray[0]);
+    //     FirebaseJsonArray meas = "{}";
+    //     ArduinoJson content_set = {}
+    //     content.set("fields/"+doc["sensorId"].as<String>()+"/mapValue/"+doc["meassure_type"].as<String>()+"/mapValue/samples/arrayValue/",meas);
+        
+    //     // content.set("fields/value/doubleValue/",doc["value"].as<double>());
+    //     // content.set("fields/nodeId/stringValue/",doc["nodeId"].as<String>());
+    //     // content.set("fields/sesorId/integerValue/",doc["sensorId"].as<int>());
+    //     // content.set("fields/sensor_type/stringValue/",doc["meassure_type"].as<String>());
+    // // //     // check if node has a document nad create new if not exists
+    //     if(Firebase.Firestore.patchDocument(&fbdo, FIREBASE_PROJECT_ID, "", documentPath.c_str(), content.raw())){
+    //         Serial.printf("ok\n%s\n\n", fbdo.payload().c_str());
+    //         return;
+    //     }
+    //     else{
+    //         Serial.println(fbdo.errorReason());
+    //     }
+    // }
+}
 
 //this function will first change the network document in the DB, 
 //it will switch the active node according to the nodes that are alive on the system
@@ -329,9 +390,6 @@ void MeshBridge::firestoreMeshCollectionClear(){
     }
     }
 
-
-
-
 void MeshBridge:: firestoreReadChanges()
 {
     Serial.println("Start to read changes");
@@ -383,48 +441,6 @@ void MeshBridge:: firestoreReadChanges()
 
     }
 }
-
-//bool MeshBridge::get_node_changes(String node_id, String &changes){}
-// {
-//     if (WiFi.status() == WL_CONNECTED && Firebase.ready())
-//     {
-//         String document_path = "Changes/" + node_id;
-//         FirebaseJson json;
-//         FirebaseData fbdo;
-//         FirebaseJsonData data;
-//         int response_size = 2048;
-//         bool succeed;
-//         do
-//         {
-//             response_size *= 2;
-//             Serial.println(String(response_size));
-//             fbdo.setResponseSize(response_size);
-//             if(!Firebase.Firestore.getDocument(&fbdo, FIREBASE_PROJECT_ID, "", document_path.c_str())){
-//                 break;
-//             }
-//             // succeed = json.setJsonData(fbdo.payload()) && json.get(data, "fields") && data.getJSON(json);
-//             Serial.println(succeed);
-//             if(!json.setJsonData(fbdo.payload())){
-//                 Serial.println("set json fail");
-//                 continue;
-//             }
-//             succeed = json.setJsonData(fbdo.payload());
-//             Serial.println(succeed);
-//             succeed =  json.get(data, "fields") ;
-//             Serial.println(succeed);
-//             succeed =  data.getJSON(json);
-//             Serial.println(succeed);
-//             //Serial.println(json.raw());
-//             if(succeed){
-//                 changes = json.raw();
-//                 return true;
-//             }
-//         } while (!succeed && response_size < 16384); // TODO consider this number again
-//     }
-//     Serial.println("data failed");
-//     Serial.println(fbdo.errorReason());
-//     return false;
-// }
 
 void MeshBridge::firestoreNetworkDataCollectionUpdate(){
 
@@ -548,6 +564,71 @@ void MeshBridge::set_in_firebase(String nodeId){
             Serial.printf("initializing Node failed!!!\n\n");
         }
     }
+}
+
+void MeshBridge::exit_mesh_connect_server(){
+        get_mesh_nodes(); // get the working nodes list before quit
+        String nodeId = String(mesh.getNodeId());
+        // Serial.println("sending killing cast");
+        // mesh.sendBroadcast("die");
+        mesh.stop();
+        // // Connect to Wi-Fi
+        Serial.print("Connecting to ");
+        Serial.println(ssid);
+        WiFi.begin(ssid, password);
+        while (WiFi.status() != WL_CONNECTED)
+        {
+            delay(500);
+            Serial.print(".");
+        }
+        Serial.println("");
+        Serial.println("WiFi connected.");
+        firebaseInit();
+
+        //set initialized values for the mesh network config and the bridge
+        if(!initialized){
+            set_in_firebase(nodeId);
+            firestoreNetworkDataCollectionUpdate();
+        }
+
+        // //  //pst on the firebase server what was saved on the map
+        // for(std::map<String,vector<String>>::iterator iter = dict.begin(); iter != dict.end(); ++iter){
+        // for(vector<String>::iterator measures_iter = iter->second.begin(); measures_iter!=iter->second.end() ; measures_iter++ ){
+        // firestoreDataUpdate(iter->first, *measures_iter);
+        //}
+        //   }
+
+        //refresh the MeshNetwork and initializes the New Nodes in the network
+        Serial.println("update connections");
+        firestoreMeshCollectionClear();
+        firestoreMeshCollectionUpdate();
+        
+        //go through the nodes in the system and will set uninitialized nodes in the NodesDocument:
+        Serial.println("initialize:");
+        for(list<String>:: iterator map_iter = mesh_values.begin(); map_iter!= mesh_values.end(); ++map_iter){
+            Serial.println("we want to initialize the node: " + String(*map_iter));
+            set_in_firebase(*map_iter);
+        }
+
+        //sending to the firstore the meassures:
+        Serial.printf("sending %d cached messages..\n", server_data.size());
+        for (vector<String>::iterator measures_iter = server_data.begin(); measures_iter != server_data.end(); measures_iter++)
+        {
+            Serial.printf("sending message <%s>\n", measures_iter->c_str());
+            std::vector<String> vec = split((*measures_iter), ","); // split the String to vector of Strins by word
+            firestoreDataUpdate(*measures_iter);
+        }
+        
+        server_data.clear();
+        //Serial.println("send to server list:");
+        firestoreReadChanges();	
+
+        mesh_values.clear();
+        Serial.println("send to server end");
+        Serial.println("WiFi disconnected. initialize mesh");
+        
+        // initializing the mesh network again
+        init_mesh();
 }
 
 void MeshBridge::set_default_nickname(String nodeId){
