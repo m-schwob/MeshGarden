@@ -44,3 +44,17 @@ async function update_measurements_collection(change, node_id) {
 }
 
 
+// get keys array of document field. 
+// @input: field getter function, DocumentData object
+// @return: array of keys. return empty array if document or data does not exists
+//usage:     meas_sensors_ids = get_keys_array(meas_doc, async ()=> {meas_doc.data()});
+//usage:     meas_sensors_ids = get_keys_array(change.after, async ()=> {change.after.get('sensors')});
+// async function get_keys_array(document_data, field_getter){
+//     if (document_data.exists) {
+//         node_sensors = field_getter();
+//         if (node_sensors) {
+//             return Object.keys(node_sensors);
+//         }
+//     }
+//     return [];
+// }
