@@ -4,8 +4,18 @@
     "indexes": "firestore.indexes.json"
   },
   "functions": {
-    "predeploy": [
-      
-    ]
+    "predeploy": [],
+    "source": "functions"
+  },
+  "emulators": {
+    "functions": {
+      "port": 8081
+    },
+    "firestore": {
+      "port": 8080
+    },
+    "ui": {
+      "enabled": true
+    }
   }
 }
