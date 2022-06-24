@@ -5,7 +5,7 @@ admin.initializeApp();
 
 exports.onNodeWrite = functions.firestore.document('/Nodes/{node_id}').onWrite(async (change, context) => {
     // skip if trigger by change in active field 
-    if (await change.before.get('active') == await change.before.get('active')) {
+    if (await change.before.get('active') != await change.before.get('active')) {
         const node_id = context.params.node_id;
         if (change.after.exists) {
             const global_config = await get_global_config();
@@ -38,21 +38,20 @@ exports.onActivityChanged = functions.firestore.document('/MeshNetwork/active').
     //get differences
     const to_activate = active_after.filter(x => active_before.includes(x) === false);
     const to_deactivate = active_before.filter(x => active_after.includes(x) === false);
-    functions.logger.log(
-        `active nodes before: [${active_before}]\n` +
-        `active nodes after: [${active_after}]\n` +
-        `nodes to activate: [${to_activate}]\n` +
-        `nodes to deactivate [${to_deactivate}]`);
+    functions.logger.log(`active nodes before: [${active_before}]`);
+    functions.logger.log(`active nodes after: [${active_after}]`);
+    functions.logger.log(`nodes to activate: [${to_activate}]`);
+    functions.logger.log(`nodes to deactivate [${to_deactivate}]`);
 
     // set nodes to active
     for (var node of to_activate) {
-        nodes_collection.doc(node).set({ 'active': true });
+        nodes_collection.doc(node).update({ 'active': true });
         functions.logger.log(`node ${node} has been activated`);
     }
 
     // set nodes to not active
     for (var node of to_deactivate) {
-        nodes_collection.doc(node).set({ 'active': false });
+        nodes_collection.doc(node).update({ 'active': false });
         functions.logger.log(`node ${node} has been deactivated`);
     }
 });
@@ -68,7 +67,7 @@ async function update_changes_collection(node_document_ref, global_config) {
 
     // set config to changes collections
     const doc = admin.firestore().collection('Changes').doc(node_doc.id);
-    doc.set({ 'config': JSON.stringify({ ...node_doc.data(), ...global_config }) });
+    doc.set({ 'config': JSON.stringify({ ...node_doc.data(), ...{ network_config: global_config } }) });
 }
 
 async function update_measurements_collection(change, node_id) {
