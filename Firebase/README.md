@@ -34,6 +34,7 @@ $env:FIRESTORE_EMULATOR_HOST = "0.0.0.0:8080"
 firestore-import --accountCredentials meshgarden-iot-firebase-adminsdk-o9fjg-0ca4c4061f.json --backupFile firestore_seed.json
 firebase emulators:export emulator_ex_data_db
 
+
 ### kill port tool
 npm install --global kill-port
 kill-port --port 8080

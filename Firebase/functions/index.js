@@ -5,20 +5,40 @@ admin.initializeApp();
 
 exports.onNodeWrite = functions.firestore.document('/Nodes/{node_id}').onWrite(async (change, context) => {
     const node_id = context.params.node_id;
-
-    await update_changes_collection(change, node_id);
-    await update_measurements_collection(change, node_id);
-});
-
-async function update_changes_collection(change, node_id) {
     if (change.after.exists) {
-        const data = change.after.data();
-        const doc = admin.firestore().collection('Changes').doc(node_id);
-        doc.set({ 'config': JSON.stringify(data) });
+        const global_config = await get_global_config();
+        await update_changes_collection(change.after.ref, global_config);
+        await update_measurements_collection(change, node_id);
         functions.logger.log("node " + node_id + " changed");
     } else {
         functions.logger.log("node " + node_id + " deleted");
     }
+});
+
+
+exports.onConfigWrite = functions.firestore.document('/Network/{doc}').onWrite(async (change, context) => {
+    const global_config = await get_global_config();
+    const nodes = admin.firestore().collection('/Nodes');
+    for (doc of await nodes.listDocuments()) {
+        await update_changes_collection(doc, global_config);
+    }
+    functions.logger.log("nodes configuration changed");
+});
+
+
+async function get_global_config() {
+    const global_config = await admin.firestore().collection('/Network').get();
+    return Object.assign({}, ...global_config.docs.map(doc => ({ [doc.id]: doc.data() })));
+}
+
+// async function 
+async function update_changes_collection(node_document_ref, global_config) {
+    // get nodes config data
+    const node_doc = await node_document_ref.get();
+
+    // set config to changes collections
+    const doc = admin.firestore().collection('Changes').doc(node_doc.id);
+    doc.set({ 'config': JSON.stringify({ ...node_doc.data(), ...global_config }) });
 }
 
 async function update_measurements_collection(change, node_id) {
