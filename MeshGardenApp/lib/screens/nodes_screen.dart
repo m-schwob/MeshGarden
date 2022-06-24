@@ -81,6 +81,8 @@ class _NodesScreenState extends State<NodesScreen> {
                     .map((DocumentSnapshot node_document) {
                       Map<String, dynamic> node_data =
                           node_document.data()! as Map<String, dynamic>;
+                      bool is_active = node_data['active'];
+                      bool is_bridge = node_data['bridge'];
                       // return ListTile(
                       //     shape: RoundedRectangleBorder(
                       //       borderRadius: BorderRadius.circular(18),
@@ -102,17 +104,26 @@ class _NodesScreenState extends State<NodesScreen> {
                           color: kTextFieldFill,
                           child: ListTile(
                             onTap: (){
-                              bool has_sensors = node_data['sensors'] !=null? true:false;
-                              // var sensorMesureDoc = FirebaseFirestore.instance.collection('Test2').doc("30497375570").snapshots();
+                              bool has_measurements = true;
+                              if(node_data['sensors'] ==null){
+                                has_measurements = false;
+                              }
+                              else {
+                                Map<String, dynamic> check_sensors_map =
+                                node_data["sensors"] as Map<String, dynamic>;
+                                if(check_sensors_map.isEmpty){
+                                  has_measurements = false;
+                                }
+                              }
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) =>
-                                      MeasurementsScreen(nodeId: node_document.id),
+                                      MeasurementsScreen(nodeId: node_document.id, hasMeasurements: has_measurements),
                                 ),
                               );
                             },
-                            leading: node_data['active']? FaIcon(FontAwesomeIcons.circleCheck, color: Colors.green)
+                            leading: is_active? FaIcon(FontAwesomeIcons.circleCheck, color: Colors.green)
                                 : FaIcon(FontAwesomeIcons.circleXmark, color: Colors.red),
                             // leading: Icon(Icons.circle,
                             //     color: node_data['active']
@@ -120,7 +131,29 @@ class _NodesScreenState extends State<NodesScreen> {
                             //         : Colors.red),
                             title:
                                 Text(node_data['nickname'], style: kBodyText2),
-                            trailing: IconButton(
+                            trailing: is_bridge?
+                            Wrap(
+                              crossAxisAlignment: WrapCrossAlignment.center,
+                              // alignment: WrapAlignment.spaceEvenly,
+                              spacing: 12, // space between two icons
+                              children: <Widget>[
+                                FaIcon(FontAwesomeIcons.wifi, color: Colors.blueAccent), // icon-1
+                                IconButton(
+                                  icon: Icon(Icons.settings),
+                                  color: Colors.white,
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            ConfigScreen(nodeId: node_document.id),
+                                      ),
+                                    );
+                                  },
+                                ), // icon-2
+                              ],
+                            ):
+                            IconButton(
                               icon: Icon(Icons.settings),
                               color: Colors.white,
                               onPressed: () {

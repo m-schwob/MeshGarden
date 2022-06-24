@@ -1,45 +1,66 @@
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class SensorMeasurements {
-  String? hardware_info;
-  Map<String, String>? pinout;
-  int? sample_interval;
-  int? sensor_id;
-  List<String>? sensor_type;
-  List<String>? units;
+  String? type;
+  List<Sample>? samples;
+  String? units;
+  Sample? newSample;
 
   SensorMeasurements({
-    this.hardware_info,
-    this.pinout,
-    this.sample_interval,
-    this.sensor_id,
-    this.sensor_type,
+    this.type,
+    this.samples,
     this.units,
+    this.newSample,
   });
 
-  SensorMeasurements.fromJson(Map<String, Object?> json)
+  SensorMeasurements.fromJson(Map<String, Object?> json, String type)
       : this(
-    hardware_info: json['hardware_info'] as String,
-    pinout:(json['pinout']! as Map).cast<String,String>(),
-    // pinout: json['pinout'] as Map<String,String>,
-    sample_interval: json['sample_interval'] as int,
-    sensor_id: json['sensor_id'] as int,
-    sensor_type:(json['sensor_type']! as List).cast<String>(),
-    // sensor_type: json['sensor_type'] as List<String>,
-    units:(json['units']! as List).cast<String>(),
-    // units: json['units'] as List<String>,
+    type: type,
+    samples: Sample.fromJsonArray(json['samples']! as List<dynamic>),
+    units: SensorMeasurements.modify_units(json['units'] as String),
+    newSample: Sample.fromNewSample(json['newSample']! as Map<String, Object?>),
   );
 
-  Map<String, Object?> toJson() {
-    return {
-      'hardware_info': hardware_info,
-      'pinout': pinout,
-      'sample_interval': sample_interval,
-      'sensor_id': sensor_id,
-      'sensor_type': sensor_type,
-      'units': units,
-    };
+  static String modify_units(String units){
+    String pretty_units = units.trim();
+    if(units == "C"){
+      pretty_units = "\'" + pretty_units;
+    }
+    return pretty_units;
+  }
+}
+
+
+  class Sample {
+    Timestamp? time;
+    num? value;
+
+    Sample({
+      this.time,
+      this.value,
+    });
+
+    Sample.fromJson(Map<String, Object?> json)
+        : this(
+      time: json['time'] as Timestamp,
+      value: json['value'] as num,
+    );
+
+    static List<Sample> fromJsonArray(List<dynamic> jsonArray){
+      List<Sample> samplesList= [];
+
+      jsonArray.forEach((data) {
+        samplesList.add(Sample.fromJson(data));
+      });
+
+      return samplesList;
+    }
+
+    static Sample fromNewSample(Map<String, Object?> sample_map){
+      return Sample.fromJson(sample_map);
+    }
   }
 
-}

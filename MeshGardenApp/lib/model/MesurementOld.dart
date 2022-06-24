@@ -1,13 +1,13 @@
 import 'package:flutter/foundation.dart';
 
 @immutable
-class Measurement {
-  Measurement({
+class MeasurementOld {
+  MeasurementOld({
     required this.humidity,
     required this.temperature,
   });
 
-  Measurement.fromJson(Map<String, Object?> json)
+  MeasurementOld.fromJson(Map<String, Object?> json)
       : this(
           humidity: json['humidity']! as double,
           temperature: json['temperature']! as double,
