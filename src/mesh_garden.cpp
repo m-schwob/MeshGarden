@@ -201,7 +201,6 @@ void MeshGarden::init_mesh_connection()
 {
     #ifdef ESP32
     network=new MeshBridge();
-    network->firebaseGetT(); //to delete after success writing to firebase
     network->init_clock();
     #else
     network =new  MeshNode();

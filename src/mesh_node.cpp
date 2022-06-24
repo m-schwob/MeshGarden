@@ -64,9 +64,9 @@ void receivedCallback(uint32_t from, String &msg)
             Serial.println(*it); // prints d.
             index++;
         }
-        node->setTimeVal((values[3]).c_str());
-        node->date = values[0] + " " + values[1] +" "+values[2];
-        node->AmPm = values[4];
+        node->setTimeVal((values[2]).c_str());
+        node->date = values[0];
+        node->AmPm = values[3];
         node->set_time= true;
     }
     if(message.containsKey("change")){
@@ -250,6 +250,7 @@ void MeshNode:: init_mesh(){
         alive = true;
     }
 
+
 void MeshNode::send_values(std::function<Measurements()> get_values_callback){
     Serial.println("sending values");
     //add it when we will have a sensor
@@ -257,9 +258,10 @@ void MeshNode::send_values(std::function<Measurements()> get_values_callback){
     meas = get_values_callback();
     String time1;
     printLocalTime();
-    // Serial.println("AMPM:" +AmPm+" " + String(hours) + ":" + String(minutes)+ ":" + String(seconds));
+    Serial.println("AMPM:" +AmPm+" " + String(hours) + ":" + String(minutes)+ ":" + String(seconds));
     if(AmPm == "AM"){
-    time1 += (hours<10) ? "0"+String(hours-3)+":" : String(hours)+ ":";
+    time1 += (hours<10) ? "0"+String(hours-3)+":" : "0"+String(hours-3)+ ":";
+    
     time1 += (minutes<10) ? "0"+String(minutes)+":" : String(minutes)+ ":";
     time1 += (seconds<10) ? "0"+String(seconds)+":" : String(seconds);
     }
@@ -269,13 +271,14 @@ void MeshNode::send_values(std::function<Measurements()> get_values_callback){
     time1 += (seconds<10) ? "0"+String(seconds)+":" : String(seconds);
     }
     // Serial.println(time1);
-    String timeStamp = "2022-06-23T"+ time1 +"Z";
+
+    String timeStamp = date+"T"+ time1 +"Z";
     // Serial.println(timeStamp);
 
     DynamicJsonDocument measure1(256); //ameassure sample Json
     for(Measurement m : meas){
         measure1["nodeId"] = mesh.getNodeId();
-        measure1["sensorId"] = m.sensor_id;
+        measure1["sensorId"] = "sensor" + String(m.sensor_id);
         measure1["meassure_type"] = m.type;
         measure1["value"] = m.value;
         measure1["time"]["timestampValue"] = timeStamp ;

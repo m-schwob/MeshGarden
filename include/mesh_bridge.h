@@ -93,7 +93,6 @@ private:
 
 public:
     std::map<String,String> change_log;
-    void firebaseGetT();
     MeshBridge();
     void update();
     void get_mesh_nodes();

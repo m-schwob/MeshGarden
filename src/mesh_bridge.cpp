@@ -48,11 +48,19 @@ void newConnectionCallback(uint32_t nodeId)
         }
     char s[100];
     
-    int rc = strftime(s,sizeof(s),"%b %d,20%y at %r", &timeinfo);
+    int rc = strftime(s,sizeof(s),"20%y--%d at %r", &timeinfo);
     Serial.printf("%d characters written.\n%s\n",rc,s);
-    
-    DynamicJsonDocument timer(String(s).length()+32);
-    timer["clock"] = s;
+
+    String firebaseReadyDate =  String(s);
+    int monthId = timeinfo.tm_mon+1;
+    Serial.println(monthId);
+    if (monthId<10)
+        firebaseReadyDate = firebaseReadyDate.substring(0,5)+ "0" +String(monthId) + firebaseReadyDate.substring(5);
+    else
+        firebaseReadyDate = firebaseReadyDate.substring(0,5)+String(monthId) + firebaseReadyDate.substring(5);
+
+    DynamicJsonDocument timer(firebaseReadyDate.length()+32);
+    timer["clock"] = firebaseReadyDate;
     Serial.println("created clock json");
     serializeJson(timer, Serial);
     node->mesh.sendBroadcast(timer.as<String>());
@@ -188,75 +196,6 @@ void MeshBridge::firebaseInit()
     Firebase.begin(&config, &auth);
 }
 
-
-void MeshBridge::firebaseGetT()
-{
-    Serial.print("Connecting to ");
-    Serial.println(ssid);
-    WiFi.begin(ssid, password);
-    while (WiFi.status() != WL_CONNECTED)
-    {
-        delay(500);
-        Serial.print(".");
-    }
-    Serial.println("");
-    Serial.println("WiFi connected.");
-    firebaseInit();
-    //  Serial.println("Read time from server:");
-    if(WiFi.status() == WL_CONNECTED && Firebase.ready()){
-    String document_path = "Measurements/2989123789";
-
-    FirebaseJson json;       // or constructor with contents e.g. FirebaseJson json("{\"a\":true}");
-    FirebaseJsonArray arr;   // or constructor with contents e.g. FirebaseJsonArray arr("[1,2,true,\"test\"]");
-    FirebaseJsonData result; // object that keeps the deserializing result
-
-    FirebaseJson content;
-    bool response;
-    
-
-    json.setJsonData("{\"mapValue\": {\"fields\": {\"time\": {\"timestampValue\": \"2022-05-23T21:00:00Z\"},\"value\": {\"doubleValue\": 0.53}}}}");
-    arr.add(json);
-    String n_path = "/fields/sensor1/mapValue/fields/Air Temperature/mapValue/fields/samples/arrayValue/values/";
-    content.set(n_path , arr);
-
-
-
-    // if(Firebase.Firestore.getDocument(&fbdo, FIREBASE_PROJECT_ID, "", document_path.c_str(), content.raw())){
-    //         Serial.println();
-    //         //now we will scan the Nodes collection in order to retrieve all changes: 
-    //         Serial.printf("recieved %s\n", fbdo.payload().c_str());
-    // }
-    // content.toString(Serial, true /* prettify option */);
-    if(Firebase.Firestore.patchDocument(&fbdo, FIREBASE_PROJECT_ID, "", document_path.c_str(), content.raw(), "sensor1")){
-        Serial.printf("ok\n%s\n\n", fbdo.payload().c_str());
-        return;
-    }
-    else{
-        Serial.println(fbdo.errorReason());
-    }
-
-    // Serial.println("Success");
-    // arr.setJsonArrayData("[1,2,3]");
-
-    // // To add data to json
-    // json.add("b" /* key or name only */, 123 /* value of any type */);
-
-    // // To set data to json
-    // json.set("a/b/c" /* key or relative path */, "hello" /* value */);
-
-    // // To add value to array
-    // arr.add("\"time\"").add("test").add(99); // or arr.add("hello", "test", 99);
-
-    // // To add json into array
-    // FirebaseJson json2("{\"d\":888,\"e\":false}");
-    // arr.add(json2);
-
-        }
-  //disconnect WiFi as it's no longer needed
-  WiFi.disconnect(true);
-  WiFi.mode(WIFI_OFF);
-}
-
 // fireBase update Function For moisture and humidity sensor, will receive 3 Values
 //  (Have to fix temp- for now its the nodeId), and post them on the firebase
 // under the plant_id
@@ -274,7 +213,6 @@ void MeshBridge::firestoreDataUpdate(String jsonVal) //TEMP parameters edited ha
                 Serial.print(F("deserializeJson() failed: "));
                 Serial.println(error.f_str());
             }
-        // String documentPath = "TestMeasurements/" + doc["nodeId"].as<String>() +"/" + doc["sensor_id"].as<String>() +"/" + doc["meassure_type"].as<String>() + "/samples";
         String documentPath = "Measurements/" + doc["nodeId"].as<String>();
         
         FirebaseJson json;       // or constructor with contents e.g. FirebaseJson json("{\"a\":true}");
@@ -284,55 +222,20 @@ void MeshBridge::firestoreDataUpdate(String jsonVal) //TEMP parameters edited ha
         FirebaseJson content;
         bool response;
         
-        json.setJsonData("{\"mapValue\": {\"fields\": {\"time\": {\"timestampValue\": \"2022-05-23T21:00:00Z\"},\"value\": {\"doubleValue\": 0.53}}}}");
+        json.setJsonData("{\"mapValue\": {\"fields\": {\"time\": {\"timestampValue\": \" " +doc["time"]["timestampValue"].as<String>() + "\"},\"value\": {\"doubleValue\":" + doc["value"].as<String>() +"}}}}");
         arr.add(json);
-        String n_path = "/fields/sensor1/mapValue/fields/Air Temperature/mapValue/fields/samples/arrayValue/values/";
+        String n_path = "/fields/" +doc["sensorId"].as<String>()+"/mapValue/fields/" +doc["meassure_type"].as<String>()+"/mapValue/fields/samples/arrayValue/values/";
         content.set(n_path , arr);
-
-
-
-    // if(Firebase.Firestore.getDocument(&fbdo, FIREBASE_PROJECT_ID, "", document_path.c_str(), content.raw())){
-    //         Serial.println();
-    //         //now we will scan the Nodes collection in order to retrieve all changes: 
-    //         Serial.printf("recieved %s\n", fbdo.payload().c_str());
-    // }
-    // content.toString(Serial, true /* prettify option */);
-    if(Firebase.Firestore.patchDocument(&fbdo, FIREBASE_PROJECT_ID, "", document_path.c_str(), content.raw(), "sensor1")){
-        Serial.printf("ok\n%s\n\n", fbdo.payload().c_str());
-        return;
+    
+        String sensor_name = doc["sensorId"].as<String>();
+        if(Firebase.Firestore.patchDocument(&fbdo, FIREBASE_PROJECT_ID, "", documentPath.c_str(), content.raw(), sensor_name)){
+            Serial.printf("ok\n%s\n\n", fbdo.payload().c_str());
+            return;
+        }
+        else{
+            Serial.println(fbdo.errorReason());
+        }
     }
-    else{
-        Serial.println(fbdo.errorReason());
-    }
-    //     DynamicJsonDocument measure1(564); //ameassure sample Json
-    //     String path_to_array = "1"
-
-        
-    //     // FirebaseJson content= "{1:{Soil Moisture:{samples:[{value: 45}]}}}";
-    //     FirebaseJson content;
-    //     bool response;
-    //     FirebaseJsonData measureArray;
-    //     // String path1 = "/"
-    //     // content.get(measureArray,path1);
-    //     // Serial.println("get Json");
-    //     // Serial.println(measureArray.getArray[0]);
-    //     FirebaseJsonArray meas = "{}";
-    //     ArduinoJson content_set = {}
-    //     content.set("fields/"+doc["sensorId"].as<String>()+"/mapValue/"+doc["meassure_type"].as<String>()+"/mapValue/samples/arrayValue/",meas);
-        
-    //     // content.set("fields/value/doubleValue/",doc["value"].as<double>());
-    //     // content.set("fields/nodeId/stringValue/",doc["nodeId"].as<String>());
-    //     // content.set("fields/sesorId/integerValue/",doc["sensorId"].as<int>());
-    //     // content.set("fields/sensor_type/stringValue/",doc["meassure_type"].as<String>());
-    // // //     // check if node has a document nad create new if not exists
-    //     if(Firebase.Firestore.patchDocument(&fbdo, FIREBASE_PROJECT_ID, "", documentPath.c_str(), content.raw())){
-    //         Serial.printf("ok\n%s\n\n", fbdo.payload().c_str());
-    //         return;
-    //     }
-    //     else{
-    //         Serial.println(fbdo.errorReason());
-    //     }
-    // }
 }
 
 //this function will first change the network document in the DB, 
