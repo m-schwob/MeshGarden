@@ -12,7 +12,6 @@ void printLocalTime(){
 static MeshBridge *node = NULL;
 
 MeshBridge::MeshBridge(){
-    Serial.println("initialize new mesh bridge:");
     node = this;
 }
 
@@ -63,6 +62,7 @@ void newConnectionCallback(uint32_t nodeId)
     timer["clock"] = firebaseReadyDate;
     Serial.println("created clock json");
     serializeJson(timer, Serial);
+    Serial.printf("node time: %u \n",node->mesh.getNodeTime());
     node->mesh.sendBroadcast(timer.as<String>());
 
     if (node->change_log.find(String(nodeId)) != node->change_log.end()){
@@ -141,7 +141,9 @@ void MeshBridge::init_mesh()
 void MeshBridge::update()
 {
       // it will run the user scheduler as well
-    if(millis()-lasttime >=30000){
+    if(millis()-lasttime >=20000){
+        get_mesh_nodes(); // get the working nodes list before quit
+        mesh.setContainsRoot(false);
         exit_mesh_connect_server();
         lasttime=millis();
     }  
@@ -331,15 +333,16 @@ void MeshBridge:: firestoreReadChanges()
 
             Serial.println("done retrieving:\n\n");
             Serial.println(change_log[(*iter)]);   
+
+                    // A CODE TO DELETE A CHANGE THAT HAS BEEN READ:: for now its in comment cause the insertion is manual
+            if (Firebase.Firestore.deleteDocument(&fbdo, FIREBASE_PROJECT_ID, "", documentPath.c_str(), content.raw()))
+            {
+                Serial.printf("deleted \n%s\n\n", fbdo.payload().c_str());
+                return;
+            }else{
+            Serial.println(fbdo.errorReason());
+            }
         }
-        // A CODE TO DELETE A CHANGE THAT HAS BEEN READ:: for now its in comment cause the insertion is manual
-        // if (Firebase.Firestore.deleteDocument(&fbdo, FIREBASE_PROJECT_ID, "", documentPath.c_str(), content.raw()))
-        // {
-        //     Serial.printf("deleted \n%s\n\n", fbdo.payload().c_str());
-        //     return;
-        // }else{
-        // Serial.println(fbdo.errorReason());
-        // }
         }
 
     }
@@ -470,11 +473,9 @@ void MeshBridge::set_in_firebase(String nodeId){
 }
 
 void MeshBridge::exit_mesh_connect_server(){
-        get_mesh_nodes(); // get the working nodes list before quit
         String nodeId = String(mesh.getNodeId());
-        // Serial.println("sending killing cast");
-        // mesh.sendBroadcast("die");
         mesh.stop();
+
         // // Connect to Wi-Fi
         Serial.print("Connecting to ");
         Serial.println(ssid);

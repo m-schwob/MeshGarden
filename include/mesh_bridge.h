@@ -35,8 +35,8 @@ using namespace std;
 const char* const ssid = "My_hotspot";
 const char* const password = "mypassword";
 const char* const ntpServer = "pool.ntp.org";
-const long gmtOffset_sec = 7200;
-const int daylightOffset_sec = 7200;
+const long gmtOffset_sec = 3600;
+const int daylightOffset_sec = 3600;
 
 /***************************
  *  Macro Definitions For the FireStore DB
@@ -63,9 +63,7 @@ private:
     FirebaseData fbdo;
     FirebaseAuth auth;
     FirebaseConfig config;
-    bool initialized = false;
-    bool init_death= false;
-
+    
     // sync with the server, saving data variables
     int lasttime = 0; // initialized, used to messure time interaval for the disconnect
     // std::map<String,vector<String>> dict;

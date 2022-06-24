@@ -48,6 +48,7 @@ class MeshNode
 		void remove_task();
 		vector<String> splitString(string str, string delimiter = " ");
 		void setTimeVal(string str, string delimiter = ":");
+		void init_mesh();
 	//time variables:
 	unsigned long timeNow = 0;
 	unsigned long timeLast = 0;
@@ -64,7 +65,6 @@ class MeshNode
 	int correctedToday = 1; // do not change this variable, one means that the time has already been corrected today for the error in your boards crystal. This is true for the first day because you just set the time when you uploaded the sketch.  
 	void time_update();
 	void printLocalTime();
-    void init_mesh();
 	uint32_t bridgeId = 0 ;
 	//measurment settings:
 	void add_measurement(std::function<Measurements()> callable, unsigned long interval, long iterations);

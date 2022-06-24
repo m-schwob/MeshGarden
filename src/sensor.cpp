@@ -30,8 +30,6 @@ std::vector<String> Sensor::from_envelop(DynamicJsonDocument envelop, String key
 Measurements Sensor::measure_wrapper(){
     Measurements measurements = measure();
     for(Measurement &meas : measurements){
-        Serial.println("set the device id to the measurement:");
-        Serial.println(DEVICE_ID);
         meas.sensor_id = DEVICE_ID;
     }
     return measurements;

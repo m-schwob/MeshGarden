@@ -30,12 +30,6 @@ void MeshNode::sendMessage()
 void receivedCallback(uint32_t from, String &msg)
 {
     Serial.printf("startHere: Received from %u msg=%s\n", from, msg.c_str());
-    // if(msg == "die"){
-    //     Serial.println("stop mesh");
-    //     node->mesh.stop();
-    //     node->alive = false;
-    //     return;
-    // }
     DynamicJsonDocument message(msg.length()+64);
     DeserializationError error = deserializeJson(message, msg);
     Serial.println("\nJSON DESERIALIZED");
@@ -49,26 +43,20 @@ void receivedCallback(uint32_t from, String &msg)
 
     if(message.containsKey("clock")){
         node->bridgeId = from;
-        Serial.println(msg);
-        Serial.println("message:");
         Serial.println(message["clock"].as<String>());
-
-        int index = 0;
+        
+        // int index = 0;
         vector<String> values = node->splitString(message["clock"].as<String>().c_str());
         Serial.println("clock message string:");
         Serial.println(message["clock"].as<String>());
         Serial.println("clock message end\n");
         
-        for(vector<String>::iterator it = values.begin(); it != values.end(); ++it ) {
-            Serial.printf("at index: %d\n",index);
-            Serial.println(*it); // prints d.
-            index++;
-        }
         node->setTimeVal((values[2]).c_str());
         node->date = values[0];
         node->AmPm = values[3];
         node->set_time= true;
     }
+    
     if(message.containsKey("change")){
         //new configurations
         Serial.println("\nread confugires:");
@@ -96,50 +84,19 @@ void nodeTimeAdjustedCallback(int32_t offset)
 }
 
 MeshNode::MeshNode() : counter(0) //, taskSendMessage(TASK_SECOND * 2, TASK_FOREVER, [this](){sendMessage();})
-{
-    Serial.begin(115200);
-    timer= millis();
-    Serial.printf("Init node mesh connection:%d\n",timer);
-    mesh.setDebugMsgTypes( ERROR | MESH_STATUS | CONNECTION | SYNC | COMMUNICATION | GENERAL | MSG_TYPES | REMOTE ); // all types on
-    //mesh.setDebugMsgTypes(ERROR | STARTUP); // set before init() so that you can see startup messages
-    mesh.init(MESH_PREFIX, MESH_PASSWORD, &userScheduler, MESH_PORT);
-    mesh.onReceive(&receivedCallback);
-    mesh.onNewConnection(&newConnectionCallback);
-    mesh.onChangedConnections(&changedConnectionCallback);
-    mesh.onNodeTimeAdjusted(&nodeTimeAdjustedCallback);
-    mesh.onDroppedConnection([](uint32_t nodeId)
-                             {
-        Serial.printf("node dropped:%u, at time: %u",nodeId,node->mesh.getNodeTime());}
-                            );
-    Task taskSendMessage(TASK_SECOND * 1, TASK_FOREVER, [this](){ time_update();});
-    userScheduler.addTask(taskSendMessage);
-    taskSendMessage.enable();
-    Serial.print(mesh.getNodeTime());
-    int timer2 = millis();
-    Serial.printf("after mesh init difference: %d\n",timer2-timer);
-    timer=timer2;
-    node = this;
-    alive = true;
-}
+{}
 
 void MeshNode::update()
 {   
-    // if(!alive){
-    //     ESP.deepSleep(3e6);
-    //     init_mesh();
-    //     alive = true;
-    // }
-    // if(millis()-counter > 10000 && set_time){
-    //     Serial.print("got here");
-    //     printLocalTime();
-    //     counter = millis();
-    // }
+    if(millis()-lasttime>=1000){
+        time_update();
+        lasttime=millis();
+    }
     if(alive)
         mesh.update();
 }
 
 void MeshNode::time_update(){
-    
     timeNow = millis()/1000; // the number of milliseconds that have passed since boot
     seconds = timeNow - timeLast;//the number of seconds that have passed since the last time 60 seconds was reached.
 
@@ -200,29 +157,26 @@ vector<String> MeshNode::splitString(string str, string delimiter)
 
 void MeshNode::setTimeVal(string str, string delimiter)
 {
-    Serial.println("setTimeVal function got:");
+    Serial.println("set Time:");
     vector<int> ret;
     int start = 0;
     int end = str.find(delimiter);
     int index = 0;
     while (end != -1) {
-        Serial.printf("to index %d , we put: %s\n",index,str.substr(start, end - start).c_str());
         ret.push_back(atoi(str.substr(start, end - start).c_str()));
         start = end + delimiter.size();
         end = str.find(delimiter, start);
         index++;
     }
     ret.push_back(atoi(str.substr(start, end - start).c_str()));
-    Serial.printf("to index %d , we put: %s",index,str.substr(start, end - start).c_str());
     startingHour = ret[0];
     hours= ret[0];
     minutes= ret[1];
     seconds = ret[2];
+    printLocalTime();
 }
 
 void MeshNode:: init_mesh(){
-        timer= millis();
-        Serial.printf("Init node mesh connection:%d\n",timer);
         // mesh.setDebugMsgTypes( ERROR | MESH_STATUS | CONNECTION | SYNC | COMMUNICATION | GENERAL | MSG_TYPES | REMOTE ); // all types on
         mesh.setDebugMsgTypes(ERROR | STARTUP); // set before init() so that you can see startup messages
         mesh.init(MESH_PREFIX, MESH_PASSWORD, &userScheduler, MESH_PORT);
@@ -231,34 +185,30 @@ void MeshNode:: init_mesh(){
         mesh.onChangedConnections(&changedConnectionCallback);
         mesh.onNodeTimeAdjusted(&nodeTimeAdjustedCallback);
         mesh.onDroppedConnection([](uint32_t nodeId)
-                             {
+        {
         Serial.printf("node dropped:%u, at time: %u",nodeId,node->mesh.getNodeTime());
         if (nodeId == node->bridgeId)
-            node->bridgeId =0;
+            ESP.deepSleep(10e6);
         }
-                            );
+        );
+        Task update_time(TASK_SECOND * 1, TASK_FOREVER, [this](){time_update();});
         Task taskSendMessage(TASK_SECOND * 2, TASK_FOREVER, [this](){sendMessage();});
+        userScheduler.addTask(update_time);
+        update_time.enable();
         userScheduler.addTask(taskSendMessage);
         taskSendMessage.enable();
+
         Serial.print(mesh.getNodeTime());
-        int timer2 = millis();
-        Serial.printf("after mesh init difference: %d\n",timer2-timer);
-        Serial.println("node id:");
-        Serial.println(mesh.getNodeId());
-        timer=timer2;
+        Serial.println("node id: " + String(mesh.getNodeId()));
         node = this;
         alive = true;
     }
 
-
 void MeshNode::send_values(std::function<Measurements()> get_values_callback){
-    Serial.println("sending values");
     //add it when we will have a sensor
     Measurements meas;
     meas = get_values_callback();
     String time1;
-    printLocalTime();
-    Serial.println("AMPM:" +AmPm+" " + String(hours) + ":" + String(minutes)+ ":" + String(seconds));
     if(AmPm == "AM"){
     time1 += (hours<10) ? "0"+String(hours-3)+":" : "0"+String(hours-3)+ ":";
     
@@ -273,7 +223,7 @@ void MeshNode::send_values(std::function<Measurements()> get_values_callback){
     // Serial.println(time1);
 
     String timeStamp = date+"T"+ time1 +"Z";
-    // Serial.println(timeStamp);
+    Serial.println("sendValues");
 
     DynamicJsonDocument measure1(256); //ameassure sample Json
     for(Measurement m : meas){
@@ -282,13 +232,11 @@ void MeshNode::send_values(std::function<Measurements()> get_values_callback){
         measure1["meassure_type"] = m.type;
         measure1["value"] = m.value;
         measure1["time"]["timestampValue"] = timeStamp ;
-
-        if(measure1["meassure_type"].as<String>() != ""){
+        if(measure1["meassure_type"].as<String>() != "" && mesh.isConnected(bridgeId)){
             String castString = measure1.as<String>(); 
             Serial.println("send message:");
             Serial.println(measure1.as<String>());
-            if (bridgeId !=0)
-                mesh.sendSingle(bridgeId,castString);
+            mesh.sendSingle(bridgeId,castString);
         }
     }
 }
