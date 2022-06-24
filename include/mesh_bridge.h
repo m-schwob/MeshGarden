@@ -68,9 +68,9 @@ private:
     String MESH_PASSWORD;
     unsigned int MESH_PORT;
 
-    const char* ssid;
-    const char* password;
-    const char* ntp_server;
+    const char *ssid;
+    const char *password;
+    const char *ntp_server;
     long gmt_offset_sec;
     int daylight_offset_sec;
 
@@ -78,18 +78,18 @@ private:
     String FIREBASE_PROJECT_ID;
     String USER_EMAIL;
     String USER_PASSWORD;
-    
+
     // sync with the server, saving data variables
     int lasttime = 0; // initialized, used to messure time interaval for the disconnect
     // std::map<String,vector<String>> dict;
-    std::list<String> mesh_values; 
+    std::list<String> mesh_values;
     std::vector<String> server_data;
     friend void receivedCallback(uint32_t from, String &msg);
     friend void newConnectionCallback(uint32_t nodeId);
     friend void changedConnectionCallback();
     friend void nodeTimeAdjustedCallback(int32_t offset);
 
-    //firebase functions
+    // firebase functions
     void firebaseInit();
     void firestoreMeshCollectionClear();
     void firestoreMeshCollectionUpdate();
@@ -97,7 +97,7 @@ private:
     void firestoreReadChanges();
     bool firestoreReadNetwork(String &changes);
     void firestoreDataUpdate(String jsonVal);
-    //bool get_node_changes(String node_id, String &changes);
+    // bool get_node_changes(String node_id, String &changes);
     vector<String> split(String s, String delimiter);
 
     void set_in_firebase(String nodeId);
@@ -105,7 +105,7 @@ private:
     void set_default_nickname(String nodeId);
 
 public:
-    std::map<String,String> change_log;
+    std::map<String, String> change_log;
     MeshBridge();
     void update();
     void get_mesh_nodes();
@@ -114,7 +114,7 @@ public:
     void set_global_config(JsonObject global_config);
     void exit_mesh_connect_server();
     bool configure_ready = false;
-	String config_string;
+    String config_string;
     vector<String> meassures;
 };
 
