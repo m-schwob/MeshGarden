@@ -23,28 +23,27 @@ using namespace std;
 /***************************
  *  Macro Definitions For the mesh
  **************************/
-#define MESH_PREFIX "whateverYouLike"
-#define MESH_PASSWORD "somethingSneaky"
-#define MESH_PORT 5555
+// #define MESH_PREFIX "whateverYouLike"
+// #define MESH_PASSWORD "somethingSneaky"
+// #define MESH_PORT 5555
 
 /***************************
  *  Variables Definitions For the WiFi - Change wifi ssid,password to match yours
  **************************/
-// const char* const ssid = "My_hotspot";
-// const char* const password = "mypassword";
-const char* const ssid = "My_hotspot";
-const char* const password = "mypassword";
-const char* const ntpServer = "pool.ntp.org";
-const long gmtOffset_sec = 3600;
-const int daylightOffset_sec = 3600;
+
+// #define ssid = "My_hotspot";
+// #define password = "mypassword";
+// #define ntp_server = "pool.ntp.org";
+// const long gmt_offset_sec = 3600;
+// const int daylight_offset_sec = 3600;
 
 /***************************
  *  Macro Definitions For the FireStore DB
  **************************/
-#define API_KEY "AIzaSyCpnmHDV7B7oR6pnKXS0VBFoqaF174UzZM"
-#define FIREBASE_PROJECT_ID "meshgarden-iot"
-#define USER_EMAIL "ioadmin@ioadmin.com"
-#define USER_PASSWORD "ioadmin"
+// #define API_KEY "AIzaSyCpnmHDV7B7oR6pnKXS0VBFoqaF174UzZM"
+// #define FIREBASE_PROJECT_ID "meshgarden-iot"
+// #define USER_EMAIL "ioadmin@ioadmin.com"
+// #define USER_PASSWORD "ioadmin"
 
 /***************************
  *  Macro Definitions For the RTC and for time management:
@@ -54,6 +53,7 @@ class MeshBridge
 {
 
 private:
+    bool initialized = false;
     ESP32Time rtc;
     Scheduler userScheduler; // to control your personal task
     painlessMesh mesh;
@@ -63,6 +63,21 @@ private:
     FirebaseData fbdo;
     FirebaseAuth auth;
     FirebaseConfig config;
+
+    String MESH_PREFIX;
+    String MESH_PASSWORD;
+    unsigned int MESH_PORT;
+
+    const char* ssid;
+    const char* password;
+    const char* ntp_server;
+    long gmt_offset_sec;
+    int daylight_offset_sec;
+
+    String API_KEY;
+    String FIREBASE_PROJECT_ID;
+    String USER_EMAIL;
+    String USER_PASSWORD;
     
     // sync with the server, saving data variables
     int lasttime = 0; // initialized, used to messure time interaval for the disconnect
@@ -96,6 +111,7 @@ public:
     void get_mesh_nodes();
     void init_clock();
     void init_mesh();
+    void set_global_config(JsonObject global_config);
     void exit_mesh_connect_server();
     bool configure_ready = false;
 	String config_string;

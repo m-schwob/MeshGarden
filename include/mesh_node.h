@@ -12,9 +12,10 @@
 // #include "mesh_garden.h"
 
 using namespace std;
-#define MESH_PREFIX "whateverYouLike"
-#define MESH_PASSWORD "somethingSneaky"
-#define MESH_PORT 5555
+
+// #define MESH_PREFIX "whateverYouLike"
+// #define MESH_PASSWORD "somethingSneaky"
+// #define MESH_PORT 5555
 
 class MeshNode
 {
@@ -30,6 +31,11 @@ class MeshNode
 		bool set_time = false;
 		std::list<int> counterList;
 		int timer;
+
+		String MESH_PREFIX;
+		String MESH_PASSWORD;
+		unsigned int MESH_PORT;
+
 		friend void receivedCallback(uint32_t from, String &msg);
 		friend void newConnectionCallback(uint32_t nodeId);
 		friend void changedConnectionCallback();
@@ -48,6 +54,7 @@ class MeshNode
 		void remove_task();
 		vector<String> splitString(string str, string delimiter = " ");
 		void setTimeVal(string str, string delimiter = ":");
+		void set_global_config(JsonObject global_config);
 		void init_mesh();
 	//time variables:
 	unsigned long timeNow = 0;

@@ -104,6 +104,28 @@ void nodeTimeAdjustedCallback(int32_t offset)
     Serial.printf("Adjusted time %u. Offset = %d\n", node->mesh.getNodeTime(), offset);
 }
 
+void MeshBridge::set_global_config(JsonObject global_config){
+    // mesh settings
+    MESH_PREFIX = global_config["mesh_prefix"].as<String>();
+    MESH_PASSWORD = global_config["mesh_password"].as<String>();
+    MESH_PORT = global_config["mesh_port"].as<size_t>();
+
+    // wifi settings 
+    ssid = global_config["ssid"];
+    password = global_config["password"];
+
+    // time settings
+    ntp_server = global_config["ntp_server"];
+    gmt_offset_sec = global_config["gmt_offset_sec"].as<long>();
+    daylight_offset_sec = global_config["daylight_offset_sec"].as<int>();
+
+    // firebase settings
+    API_KEY = global_config["api_key"].as<String>();
+    FIREBASE_PROJECT_ID = global_config["firebase_project_id"].as<String>();
+    USER_EMAIL = global_config["user_email"].as<String>();
+    USER_PASSWORD = global_config["user_password"].as<String>();
+}
+
 void MeshBridge::init_mesh()
 {   
     Serial.println("initializeing the mesh network");
@@ -162,7 +184,7 @@ void MeshBridge::init_clock(){
   Serial.println("WiFi connected.");
   
   // Init and get the time
-  configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
+  configTime(gmt_offset_sec, daylight_offset_sec, ntp_server);
   struct tm timeinfo;
   printLocalTime();
 

@@ -176,6 +176,14 @@ void MeshNode::setTimeVal(string str, string delimiter)
     printLocalTime();
 }
 
+void MeshNode::set_global_config(JsonObject global_config){
+    // mesh settings
+    MESH_PREFIX = global_config["mesh_prefix"].as<String>();
+    MESH_PASSWORD = global_config["mesh_password"].as<String>();
+    MESH_PORT = global_config["mesh_port"].as<size_t>();
+}
+
+
 void MeshNode:: init_mesh(){
         // mesh.setDebugMsgTypes( ERROR | MESH_STATUS | CONNECTION | SYNC | COMMUNICATION | GENERAL | MSG_TYPES | REMOTE ); // all types on
         mesh.setDebugMsgTypes(ERROR | STARTUP); // set before init() so that you can see startup messages
