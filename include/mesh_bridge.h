@@ -35,8 +35,8 @@ using namespace std;
 const char* const ssid = "My_hotspot";
 const char* const password = "mypassword";
 const char* const ntpServer = "pool.ntp.org";
-const long gmtOffset_sec = 7200;
-const int daylightOffset_sec = 7200;
+const long gmtOffset_sec = 3600;
+const int daylightOffset_sec = 3600;
 
 /***************************
  *  Macro Definitions For the FireStore DB
@@ -58,13 +58,12 @@ private:
     Scheduler userScheduler; // to control your personal task
     painlessMesh mesh;
     unsigned long myTime; // timer to check how long it takes to initialize mesh network
-
+    Task taskSendMessage;
     // firebase global variables
     FirebaseData fbdo;
     FirebaseAuth auth;
     FirebaseConfig config;
-    bool initialized = false;
-
+    
     // sync with the server, saving data variables
     int lasttime = 0; // initialized, used to messure time interaval for the disconnect
     // std::map<String,vector<String>> dict;
@@ -82,7 +81,7 @@ private:
     void firestoreNetworkDataCollectionUpdate();
     void firestoreReadChanges();
     bool firestoreReadNetwork(String &changes);
-    void firestoreDataUpdate(String plant_id, String sensor_id, String meas_type, String value);
+    void firestoreDataUpdate(String jsonVal);
     //bool get_node_changes(String node_id, String &changes);
     vector<String> split(String s, String delimiter);
 
@@ -97,10 +96,10 @@ public:
     void get_mesh_nodes();
     void init_clock();
     void init_mesh();
+    void exit_mesh_connect_server();
     bool configure_ready = false;
 	String config_string;
-
-
+    vector<String> meassures;
 };
 
 #endif /* _BRIDGENODE_H_ */

@@ -70,7 +70,6 @@ private :
     void parse_config();
     void log_config();
     void init_mesh_connection();
-    void update_got_configs();
 
 public:
     std::list<Device *> device_list;
@@ -78,6 +77,7 @@ public:
     void add_sensor(String hardware_id, InitSensor init_sensor_func, Measure measure_func);
     void update();
     void begin();
+    int start = 0;
 };
 
 #endif /* _MESHGARDEN_H_ */

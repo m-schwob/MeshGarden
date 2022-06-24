@@ -1,0 +1,32 @@
+{
+        "1": {
+                "mapValue": {
+                        "fields": {
+                                "Air Humidity": {
+                                        "mapValue": {
+                                                "fields": {
+                                                        "samples": {
+                                                                "arrayValue": {
+                                                                        "values": [
+                                                                                {
+                                                                                        "mapValue": {
+                                                                                                "fields": {
+                                                                                                        "time": {
+                                                                                                                "timestampValue": "2022-05-23T21:00:00Z"
+                                                                                                        },
+                                                                                                        "value": {
+                                                                                                                "doubleValue": 0.8
+                                                                                                        }
+                                                                                                }
+                                                                                        }
+                                                                                }
+                                                                        ]
+                                                                }
+                                                        }
+                                                }
+                                        }
+                                }
+                        }
+                }
+        }
+}
