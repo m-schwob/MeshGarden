@@ -19,3 +19,18 @@ const kButtonText = TextStyle(
 
 const kBodyText2 =
 TextStyle(fontSize: 28, fontWeight: FontWeight.w500, color: Colors.white);
+
+const kSensorInputText =
+TextStyle(fontSize: 28, fontWeight: FontWeight.w500, color: Colors.white, decoration: TextDecoration.none);
+
+const kConfigTitle =
+TextStyle(fontSize: 20, fontWeight: FontWeight.w500, color: Colors.white);
+
+const kSubmitTitle =
+TextStyle(fontSize: 18, fontWeight: FontWeight.w500, color: Colors.black);
+
+const kConfigSubTitle =
+TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: Colors.white);
+
+const kSensorText =
+TextStyle(fontSize: 19, fontWeight: FontWeight.w500, color: Colors.white);
