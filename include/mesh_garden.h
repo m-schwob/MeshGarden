@@ -18,7 +18,6 @@
 #include "mesh_node.h"
 #endif
 
-#define EEPROM_SIZE 3 * sizeof(int)
 
 uint8_t pin(String pin);
 

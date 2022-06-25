@@ -190,7 +190,7 @@ void MeshBridge::init_clock(){
     Serial.println("WiFi connected.");
     
     // Init and get the time
-    configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
+    configTime(gmt_offset_sec, daylight_offset_sec, ntp_server);
     struct tm timeinfo;
     printLocalTime();  
     calculate_death(20);

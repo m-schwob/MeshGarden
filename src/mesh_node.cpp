@@ -221,13 +221,6 @@ void MeshNode::init_mesh()
         node = this;
         alive = true;
     }
-
-    Serial.print(mesh.getNodeTime());
-    Serial.println("node id: " + String(mesh.getNodeId()));
-    node = this;
-    alive = true;
-}
-
 void MeshNode::send_values(std::function<Measurements()> get_values_callback)
 {
     // add it when we will have a sensor

@@ -55,7 +55,6 @@ class MeshBridge
 {
 
 private:
-    bool initialized = false;
     ESP32Time rtc;
     Scheduler userScheduler; // to control your personal task
     painlessMesh mesh;
