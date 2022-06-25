@@ -162,7 +162,7 @@ void MeshGarden::log_config()
     // TODO replace string keys with constants
     Serial.println("Node Configurations:");
 
-    const char *nickname = config["nickname"];           // "tester"
+    const char *nickname = config["nickname"]; // "tester"
     // const char *firmware = config["firmware"];           // "esp8266_v0.1"
     // const char *mesh_prefix = config["mesh_prefix"];     // "whateverYouLike"
     // const char *mesh_password = config["mesh_password"]; // "somethingSneaky"
@@ -254,13 +254,13 @@ void MeshGarden::add_sensor(String hardware_info, InitSensor init_sensor_func, M
 void MeshGarden::begin()
 {
     pinMode(LED_BUILTIN, OUTPUT);
-    
-    #ifdef ESP32
-    digitalWrite(LED_BUILTIN, HIGH);   // turn the LED on (HIGH is the voltage level)
 
-    #else
-    digitalWrite(LED_BUILTIN, LOW);   // turn the LED on (HIGH is the voltage level)
-    #endif
+#ifdef ESP32
+    digitalWrite(LED_BUILTIN, HIGH); // turn the LED on (HIGH is the voltage level)
+
+#else
+    digitalWrite(LED_BUILTIN, LOW); // turn the LED on (HIGH is the voltage level)
+#endif
     // create a pins map
     map_pins();
 
@@ -280,7 +280,6 @@ void MeshGarden::begin()
     Serial.println("serialization done, now init mesh");
     init_mesh_connection();
     config.~DynamicJsonDocument();
-
 }
 
 void MeshGarden::update()

@@ -18,7 +18,6 @@
 #include "mesh_node.h"
 #endif
 
-
 uint8_t pin(String pin);
 
 class MeshGarden

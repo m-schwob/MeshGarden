@@ -17,7 +17,6 @@
 #include "ArduinoJson.h"
 #include <ESP32Time.h>
 
-
 #define NEXT_DEATH_JSON 96
 using namespace painlessmesh;
 using namespace std;
@@ -65,7 +64,7 @@ private:
     FirebaseAuth auth;
     FirebaseConfig config;
     bool initialized = false;
-    bool init_death= false;
+    bool init_death = false;
 
     String MESH_PREFIX;
     String MESH_PASSWORD;
@@ -85,8 +84,8 @@ private:
     // sync with the server, saving data variables
     int lasttime = 0; // initialized, used to messure time interaval for the disconnect
     // std::map<String,vector<String>> dict;
-    std::list<String> mesh_values; 
-    std::map<String,String> server_data;
+    std::list<String> mesh_values;
+    std::map<String, String> server_data;
     // std::vector<String> server_data;
     friend void receivedCallback(uint32_t from, String &msg);
     friend void newConnectionCallback(uint32_t nodeId);
@@ -110,7 +109,7 @@ private:
 
 public:
     bool got_time = false;
-    std::map<String,String> change_log;
+    std::map<String, String> change_log;
     MeshBridge();
     void update();
     void get_mesh_nodes();
@@ -121,9 +120,9 @@ public:
     bool configure_ready = false;
     String config_string;
     vector<String> meassures;
-    int die_seconds=0;
-    int die_minutes=0;
-    int die_hours=0;
+    int die_seconds = 0;
+    int die_minutes = 0;
+    int die_hours = 0;
     void calculate_death(int ttd);
     ~MeshBridge();
 };

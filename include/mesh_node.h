@@ -80,10 +80,10 @@ public:
 	void add_measurement(std::function<Measurements()> callable, unsigned long interval, long iterations);
 	void send_values(std::function<Measurements()> get_values_callback);
 
-	int die_minute=0;
-	int die_hour=25;
+	int die_minute = 0;
+	int die_hour = 25;
 	int die_second = 0;
-	int die_time=10000;
+	int die_time = 10000;
 	std::queue<String> myqueue;
 	void listenQueue();
 };

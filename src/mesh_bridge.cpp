@@ -41,7 +41,7 @@ void newConnectionCallback(uint32_t nodeId)
     uint32_t time = node->mesh.getNodeTime();
     Serial.printf("--> startHere: New Connection, nodeId = %u\n", nodeId);
     Serial.printf("new node connected at time: %u\n", time);
-    Serial.println("time:");    
+    Serial.println("time:");
     printLocalTime();
     struct tm timeinfo;
     if (!getLocalTime(&timeinfo))
@@ -73,15 +73,17 @@ void newConnectionCallback(uint32_t nodeId)
     death_time["d"]["m"] = node->die_minutes;
     death_time["d"]["h"] = node->die_hours;
     death_time["d"]["s"] = node->die_seconds;
-    death_time["d"]["st"] = 20; //send the sleep time
+    death_time["d"]["st"] = 20; // send the sleep time
     Serial.println("created deathJson");
     node->mesh.sendBroadcast(death_time.as<String>());
     Serial.println(death_time.as<String>());
 
-    if (node->change_log.find(String(nodeId)) != node->change_log.end()){
+    if (node->change_log.find(String(nodeId)) != node->change_log.end())
+    {
         Serial.println("sending update to node " + String(nodeId) + "\n" + String(node->change_log[String(nodeId)]));
-        if(node->change_log[String(nodeId)] != ""){
-            DynamicJsonDocument doc(node->change_log[String(nodeId)].length()+32);
+        if (node->change_log[String(nodeId)] != "")
+        {
+            DynamicJsonDocument doc(node->change_log[String(nodeId)].length() + 32);
             doc["change"] = node->change_log[String(nodeId)];
             Serial.println("created changeJson");
             serializeJson(doc, Serial);
@@ -167,45 +169,50 @@ void MeshBridge::init_mesh()
 
 void MeshBridge::update()
 {
-      // it will run the user scheduler as well
+    // it will run the user scheduler as well
 
-    if(got_time){
+    if (got_time)
+    {
         struct tm timeinfo;
-        if(!getLocalTime(&timeinfo)){
+        if (!getLocalTime(&timeinfo))
+        {
             Serial.println("Failed to obtain time");
             return;
         }
-        if(timeinfo.tm_hour==die_hours && timeinfo.tm_sec==die_seconds && timeinfo.tm_min==die_minutes){
-        get_mesh_nodes(); // get the working nodes list before quit
-        mesh.setContainsRoot(false);
-        lasttime=millis();
-        digitalWrite(LED_BUILTIN, LOW);   // turn the LED on (HIGH is the voltage level)
-        exit_mesh_connect_server();
+        if (timeinfo.tm_hour == die_hours && timeinfo.tm_sec == die_seconds && timeinfo.tm_min == die_minutes)
+        {
+            get_mesh_nodes(); // get the working nodes list before quit
+            mesh.setContainsRoot(false);
+            lasttime = millis();
+            digitalWrite(LED_BUILTIN, LOW); // turn the LED on (HIGH is the voltage level)
+            exit_mesh_connect_server();
         }
-    }  
+    }
     mesh.update();
 }
 
-void MeshBridge::init_clock(){
+void MeshBridge::init_clock()
+{
     Serial.print("Connecting to server to calibrate clock");
     Serial.println(ssid);
     WiFi.begin(ssid, password);
-    while (WiFi.status() != WL_CONNECTED) {
+    while (WiFi.status() != WL_CONNECTED)
+    {
         delay(500);
         Serial.print(".");
     }
     Serial.println("");
     Serial.println("WiFi connected.");
-    
+
     // Init and get the time
     configTime(gmt_offset_sec, daylight_offset_sec, ntp_server);
     struct tm timeinfo;
-    printLocalTime();  
+    printLocalTime();
     calculate_death(10);
     Serial.println("time of next death is:\n");
-    Serial.printf("%d:%d:%d",die_hours,die_minutes,die_seconds);
-    got_time=true;
-    //disconnect WiFi as it's no longer needed
+    Serial.printf("%d:%d:%d", die_hours, die_minutes, die_seconds);
+    got_time = true;
+    // disconnect WiFi as it's no longer needed
     WiFi.disconnect(true);
     WiFi.mode(WIFI_OFF);
 }
@@ -324,8 +331,7 @@ void MeshBridge::get_mesh_nodes()
     }
     Serial.println("mesh network bridge:" + String(mesh.getNodeId()));
     mesh_values.push_back(String(mesh.getNodeId()));
-;
-
+    ;
 }
 
 // this function will delete the active mesh nodes before inserting the new mesh network active nodes in
@@ -546,10 +552,11 @@ void MeshBridge::set_in_firebase(String nodeId)
     }
 }
 
-void MeshBridge::exit_mesh_connect_server(){
-        String nodeId = String(mesh.getNodeId());
-        mesh.stop();
-        calculate_death(30);
+void MeshBridge::exit_mesh_connect_server()
+{
+    String nodeId = String(mesh.getNodeId());
+    mesh.stop();
+    calculate_death(30);
 
     // set initialized values for the mesh network config and the bridge
     if (!initialized)
@@ -578,30 +585,30 @@ void MeshBridge::exit_mesh_connect_server(){
         set_in_firebase(*map_iter);
     }
 
-        //sending to the firstore the meassures:
-        Serial.printf("sending %d cached messages..\n", server_data.size());
-        // for (vector<String>::iterator measures_iter = server_data.begin(); measures_iter != server_data.end(); measures_iter++)
-        // {
-        //     Serial.printf("sending message <%s>\n", measures_iter->c_str());
-        //     std::vector<String> vec = split((*measures_iter), ","); // split the String to vector of Strins by word
-        //     firestoreDataUpdate(*measures_iter);
-        // }
-        for(auto it = server_data.begin(); it != server_data.end(); ++it) {
-            Serial.printf("sending message <%s>\n", it->second.c_str());
-            firestoreDataUpdate(it->second);
-        }
-        server_data.clear();
-        //Serial.println("send to server list:");
-        firestoreReadChanges();	
+    // sending to the firstore the meassures:
+    Serial.printf("sending %d cached messages..\n", server_data.size());
+    // for (vector<String>::iterator measures_iter = server_data.begin(); measures_iter != server_data.end(); measures_iter++)
+    // {
+    //     Serial.printf("sending message <%s>\n", measures_iter->c_str());
+    //     std::vector<String> vec = split((*measures_iter), ","); // split the String to vector of Strins by word
+    //     firestoreDataUpdate(*measures_iter);
+    // }
+    for (auto it = server_data.begin(); it != server_data.end(); ++it)
+    {
+        Serial.printf("sending message <%s>\n", it->second.c_str());
+        firestoreDataUpdate(it->second);
+    }
+    server_data.clear();
+    // Serial.println("send to server list:");
+    firestoreReadChanges();
 
-        mesh_values.clear();
-        Serial.println("send to server end");
-        Serial.println("WiFi disconnected. initialize mesh");
-        
-        // initializing the mesh network again
-        init_mesh();
-        digitalWrite(LED_BUILTIN, HIGH);   // turn the LED on (HIGH is the voltage level)
+    mesh_values.clear();
+    Serial.println("send to server end");
+    Serial.println("WiFi disconnected. initialize mesh");
 
+    // initializing the mesh network again
+    init_mesh();
+    digitalWrite(LED_BUILTIN, HIGH); // turn the LED on (HIGH is the voltage level)
 }
 
 void MeshBridge::set_default_nickname(String nodeId)
@@ -625,36 +632,43 @@ void MeshBridge::set_default_nickname(String nodeId)
     }
 }
 
-void MeshBridge::calculate_death(int ttd){
-      struct tm timeinfo;
-    if(!getLocalTime(&timeinfo)){
+void MeshBridge::calculate_death(int ttd)
+{
+    struct tm timeinfo;
+    if (!getLocalTime(&timeinfo))
+    {
         Serial.println("Failed to obtain time");
         return;
     }
-    if(timeinfo.tm_sec+ ttd < 60){
-        die_seconds = timeinfo.tm_sec+ttd;
+    if (timeinfo.tm_sec + ttd < 60)
+    {
+        die_seconds = timeinfo.tm_sec + ttd;
         die_minutes = timeinfo.tm_min;
-        die_hours =   timeinfo.tm_hour;
+        die_hours = timeinfo.tm_hour;
     }
-    else if(timeinfo.tm_min + 1 <60){
-        die_seconds = (timeinfo.tm_sec+ttd)-60;
-        die_minutes = timeinfo.tm_min+1;
-        die_hours =   timeinfo.tm_hour;
-    }  
-    else if(timeinfo.tm_hour +1 <24){
-        die_seconds = (timeinfo.tm_sec+ttd)-60;
+    else if (timeinfo.tm_min + 1 < 60)
+    {
+        die_seconds = (timeinfo.tm_sec + ttd) - 60;
+        die_minutes = timeinfo.tm_min + 1;
+        die_hours = timeinfo.tm_hour;
+    }
+    else if (timeinfo.tm_hour + 1 < 24)
+    {
+        die_seconds = (timeinfo.tm_sec + ttd) - 60;
         die_minutes = 0;
         die_hours = timeinfo.tm_hour + 1;
     }
-    else if(timeinfo.tm_hour +1 <24){
-    die_seconds = 60-(timeinfo.tm_sec+ttd);
-    die_minutes = 1;
-    die_hours = 0;
+    else if (timeinfo.tm_hour + 1 < 24)
+    {
+        die_seconds = 60 - (timeinfo.tm_sec + ttd);
+        die_minutes = 1;
+        die_hours = 0;
     }
     return;
 }
 
-MeshBridge::~MeshBridge(){
+MeshBridge::~MeshBridge()
+{
     delete ssid;
     delete password;
     delete ntp_server;
