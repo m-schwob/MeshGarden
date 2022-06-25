@@ -1,20 +1,24 @@
 {
-"nickname":"new plant",
-"sensors":  {
-            "1":{
-                "hardware_info":"Grove Soil Moisture Sensor v1",
-                "pinout":{"VCC":"D5"},
-                "sample_interval":30,
-                "sensor_id":1,
-                "sensor_type":["Soil Moisture"],
-                "units":["%"]
-                }
-            },
-"mesh_port": 5555,
-"mesh_password": "somethingSneaky",
-"mesh_prefix": "whateverYouLike",
-"firmware": "esp8266_v0.1"
+    "network_config": {
+        "firebase": {
+            "user_email": "ioadmin@ioadmin.com",
+            "user_password": "ioadmin",
+            "api_key": "AIzaSyCpnmHDV7B7oR6pnKXS0VBFoqaF174UzZM",
+            "firebase_project_id": "meshgarden-iot"
+        },
+        "mesh": {
+            "mesh_prefix": "whateverYouLike",
+            "mesh_password": "somethingSneaky",
+            "mesh_port": 5555
+        },
+        "time": {
+            "gmt_offset_sec": 7200,
+            "ntp_server": "pool.ntp.org",
+            "daylight_offset_sec": 72000
+        },
+        "wifi": {
+            "password": "mypassword",
+            "ssid": "My_hotspot"
+        }
+    }
 }
-
-    
-    
