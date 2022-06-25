@@ -103,6 +103,7 @@ bool MeshGarden::load_configuration()
     Serial.println("Capacity: " + String(capacity_after) + ", reduced by " + String(100 * capacity_after / capacity_before));
     Serial.println("Actual Memory Usage: " + String(config.memoryUsage()));
 
+    Serial.println(config.as<String>());
     return true;
 }
 
@@ -170,18 +171,18 @@ void MeshGarden::log_config()
     // TODO replace string keys with constants
     Serial.println("Node Configurations:");
 
-    const char *nickname = config["nickname"];           // "tester"
-    const char *firmware = config["firmware"];           // "esp8266_v0.1"
-    const char *mesh_prefix = config["mesh_prefix"];     // "whateverYouLike"
-    const char *mesh_password = config["mesh_password"]; // "somethingSneaky"
-    const int mesh_port = config["mesh_port"];           // 5555
+    const char *nickname = config["nickname"]; // "tester"
+    // const char *firmware = config["firmware"];           // "esp8266_v0.1"
+    // const char *mesh_prefix = config["mesh_prefix"];     // "whateverYouLike"
+    // const char *mesh_password = config["mesh_password"]; // "somethingSneaky"
+    // const int mesh_port = config["mesh_port"];           // 5555
 
     printIndent(1, "Nickname: " + String(nickname));
-    printIndent(1, "Firmware: " + String(firmware));
-    printIndent(1, "Mesh Network:");
-    printIndent(2, "SSID: " + String(mesh_prefix));
-    printIndent(2, "Password: " + String(mesh_password));
-    printIndent(2, "Port: " + String(mesh_port));
+    // printIndent(1, "Firmware: " + String(firmware));
+    // printIndent(1, "Mesh Network:");
+    // printIndent(2, "SSID: " + String(mesh_prefix));
+    // printIndent(2, "Password: " + String(mesh_password));
+    // printIndent(2, "Port: " + String(mesh_port));
     printIndent(1, "Sensors:");
 
     JsonObject sensors = config["sensors"];
@@ -224,13 +225,13 @@ void MeshGarden::init_mesh_connection()
     // choose mesh node type to construct
 #ifdef ESP32
     network = new MeshBridge();
-    network->init_clock();
 #else
     network = new MeshNode();
 #endif
 
     // init mesh network
-    network->set_global_config(config["network_config"].as<JsonObject>());
+    network->set_global_config(config["network_config"]);
+    network->init_clock();
     network->init_mesh();
 
     // add devices functions to tasks. pseudo code:
@@ -261,6 +262,14 @@ void MeshGarden::add_sensor(String hardware_info, InitSensor init_sensor_func, M
 
 void MeshGarden::begin()
 {
+    pinMode(LED_BUILTIN, OUTPUT);
+
+#ifdef ESP32
+    digitalWrite(LED_BUILTIN, HIGH); // turn the LED on (HIGH is the voltage level)
+
+#else
+    digitalWrite(LED_BUILTIN, LOW); // turn the LED on (HIGH is the voltage level)
+#endif
     // create a pins map
     map_pins();
 
@@ -274,13 +283,12 @@ void MeshGarden::begin()
     {
         Serial.println("started the file system");
     }
-    EEPROM.begin(EEPROM_SIZE);
 
     load_configuration();
     parse_config();
-    config.~DynamicJsonDocument();
     Serial.println("serialization done, now init mesh");
     init_mesh_connection();
+    config.~DynamicJsonDocument();
 }
 
 void MeshGarden::update()

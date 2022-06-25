@@ -6,6 +6,7 @@
 #include <iostream>
 #include <list>
 #include <vector>
+#include <queue>
 #include <iostream>
 #include "time.h"
 #include "sensor.h"
@@ -46,6 +47,7 @@ public:
 	painlessMesh mesh;
 	int lasttime = 0;
 	bool dead = false;
+	bool initialized = false;
 	bool configure_ready = false;
 	String config_string;
 	MeshNode();
@@ -56,6 +58,7 @@ public:
 	void setTimeVal(string str, string delimiter = ":");
 	void set_global_config(JsonObject global_config);
 	void init_mesh();
+	void init_clock();
 	// time variables:
 	unsigned long timeNow = 0;
 	unsigned long timeLast = 0;
@@ -76,6 +79,13 @@ public:
 	// measurment settings:
 	void add_measurement(std::function<Measurements()> callable, unsigned long interval, long iterations);
 	void send_values(std::function<Measurements()> get_values_callback);
+
+	int die_minute = 0;
+	int die_hour = 25;
+	int die_second = 0;
+	int die_time = 10000;
+	std::queue<String> myqueue;
+	void listenQueue();
 };
 
 #endif /* _MESHNODE_H_ */

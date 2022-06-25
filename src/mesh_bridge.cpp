@@ -27,7 +27,8 @@ void receivedCallback(uint32_t from, String &msg)
 
     DynamicJsonDocument doc(256);
     DeserializationError error = deserializeJson(doc, msg);
-    node->server_data.push_back(doc.as<String>());
+    // node->server_data.push_back(doc.as<String>());
+    node->server_data[doc["nodeId"].as<String>()] = doc.as<String>();
     Serial.println("serialized");
     serializeJson(doc, Serial);
     Serial.println("num of meassures read:");
@@ -40,7 +41,6 @@ void newConnectionCallback(uint32_t nodeId)
     uint32_t time = node->mesh.getNodeTime();
     Serial.printf("--> startHere: New Connection, nodeId = %u\n", nodeId);
     Serial.printf("new node connected at time: %u\n", time);
-
     Serial.println("time:");
     printLocalTime();
     struct tm timeinfo;
@@ -69,10 +69,18 @@ void newConnectionCallback(uint32_t nodeId)
     Serial.printf("node time: %u \n", node->mesh.getNodeTime());
     node->mesh.sendBroadcast(timer.as<String>());
 
+    DynamicJsonDocument death_time(NEXT_DEATH_JSON);
+    death_time["d"]["m"] = node->die_minutes;
+    death_time["d"]["h"] = node->die_hours;
+    death_time["d"]["s"] = node->die_seconds;
+    death_time["d"]["st"] = 20; // send the sleep time
+    Serial.println("created deathJson");
+    node->mesh.sendBroadcast(death_time.as<String>());
+    Serial.println(death_time.as<String>());
+
     if (node->change_log.find(String(nodeId)) != node->change_log.end())
     {
         Serial.println("sending update to node " + String(nodeId) + "\n" + String(node->change_log[String(nodeId)]));
-
         if (node->change_log[String(nodeId)] != "")
         {
             DynamicJsonDocument doc(node->change_log[String(nodeId)].length() + 32);
@@ -88,20 +96,6 @@ void newConnectionCallback(uint32_t nodeId)
 void changedConnectionCallback()
 {
     Serial.printf("Changed connections\n");
-    // uint32_t time = node->mesh.getNodeTime();
-    // Serial.printf("new node connected at time: %u\n", time);
-    // Serial.println("time:");
-    // printLocalTime();
-    // struct tm timeinfo;
-    // if(!getLocalTime(&timeinfo)){
-    //     Serial.println("Failed to obtain time");
-    //     return;
-    //     }
-    // char s[100];
-
-    // int rc = strftime(s,sizeof(s),"%b %d,20%y at %r", &timeinfo);
-    // Serial.printf("%d characters written.\n%s\n",rc,s);
-    // node->mesh.sendBroadcast("clock " + String(s));
 }
 // event driven functions for the mesh
 void nodeTimeAdjustedCallback(int32_t offset)
@@ -112,24 +106,32 @@ void nodeTimeAdjustedCallback(int32_t offset)
 void MeshBridge::set_global_config(JsonObject global_config)
 {
     // mesh settings
-    MESH_PREFIX = global_config["mesh_prefix"].as<String>();
-    MESH_PASSWORD = global_config["mesh_password"].as<String>();
-    MESH_PORT = global_config["mesh_port"].as<size_t>();
+    MESH_PREFIX = global_config["mesh"]["mesh_prefix"].as<String>();
+    MESH_PASSWORD = global_config["mesh"]["mesh_password"].as<String>();
+    MESH_PORT = global_config["mesh"]["mesh_port"].as<size_t>();
 
     // wifi settings
-    ssid = global_config["ssid"];
-    password = global_config["password"];
+    // ssid = new char[100];
+    ssid = new char[global_config["wifi"]["ssid"].as<String>().length()];
+    strcpy(ssid, global_config["wifi"]["ssid"]);
+    // password = new char[100];
+    password = new char[global_config["wifi"]["password"].as<String>().length()];
+    strcpy(password, global_config["wifi"]["password"]);
 
     // time settings
-    ntp_server = global_config["ntp_server"];
-    gmt_offset_sec = global_config["gmt_offset_sec"].as<long>();
-    daylight_offset_sec = global_config["daylight_offset_sec"].as<int>();
+    // ntp_server = new char[100];
+    ntp_server = new char[global_config["time"]["ntp_server"].as<String>().length()];
+    strcpy(ntp_server, global_config["time"]["ntp_server"]);
+    gmt_offset_sec = global_config["time"]["gmt_offset_sec"].as<long>();
+    daylight_offset_sec = global_config["time"]["daylight_offset_sec"].as<int>();
 
     // firebase settings
-    API_KEY = global_config["api_key"].as<String>();
-    FIREBASE_PROJECT_ID = global_config["firebase_project_id"].as<String>();
-    USER_EMAIL = global_config["user_email"].as<String>();
-    USER_PASSWORD = global_config["user_password"].as<String>();
+    API_KEY = global_config["firebase"]["api_key"].as<String>();
+    FIREBASE_PROJECT_ID = global_config["firebase"]["firebase_project_id"].as<String>();
+    USER_EMAIL = global_config["firebase"]["user_email"].as<String>();
+    USER_PASSWORD = global_config["firebase"]["user_password"].as<String>();
+
+    Serial.println("config done");
 }
 
 void MeshBridge::init_mesh()
@@ -168,12 +170,23 @@ void MeshBridge::init_mesh()
 void MeshBridge::update()
 {
     // it will run the user scheduler as well
-    if (millis() - lasttime >= 20000)
+
+    if (got_time)
     {
-        get_mesh_nodes(); // get the working nodes list before quit
-        mesh.setContainsRoot(false);
-        exit_mesh_connect_server();
-        lasttime = millis();
+        struct tm timeinfo;
+        if (!getLocalTime(&timeinfo))
+        {
+            Serial.println("Failed to obtain time");
+            return;
+        }
+        if (timeinfo.tm_hour == die_hours && timeinfo.tm_sec == die_seconds && timeinfo.tm_min == die_minutes)
+        {
+            get_mesh_nodes(); // get the working nodes list before quit
+            mesh.setContainsRoot(false);
+            lasttime = millis();
+            digitalWrite(LED_BUILTIN, LOW); // turn the LED on (HIGH is the voltage level)
+            exit_mesh_connect_server();
+        }
     }
     mesh.update();
 }
@@ -195,7 +208,10 @@ void MeshBridge::init_clock()
     configTime(gmt_offset_sec, daylight_offset_sec, ntp_server);
     struct tm timeinfo;
     printLocalTime();
-
+    calculate_death(10);
+    Serial.println("time of next death is:\n");
+    Serial.printf("%d:%d:%d", die_hours, die_minutes, die_seconds);
+    got_time = true;
     // disconnect WiFi as it's no longer needed
     WiFi.disconnect(true);
     WiFi.mode(WIFI_OFF);
@@ -315,6 +331,7 @@ void MeshBridge::get_mesh_nodes()
     }
     Serial.println("mesh network bridge:" + String(mesh.getNodeId()));
     mesh_values.push_back(String(mesh.getNodeId()));
+    ;
 }
 
 // this function will delete the active mesh nodes before inserting the new mesh network active nodes in
@@ -539,19 +556,7 @@ void MeshBridge::exit_mesh_connect_server()
 {
     String nodeId = String(mesh.getNodeId());
     mesh.stop();
-
-    // // Connect to Wi-Fi
-    Serial.print("Connecting to ");
-    Serial.println(ssid);
-    WiFi.begin(ssid, password);
-    while (WiFi.status() != WL_CONNECTED)
-    {
-        delay(500);
-        Serial.print(".");
-    }
-    Serial.println("");
-    Serial.println("WiFi connected.");
-    firebaseInit();
+    calculate_death(30);
 
     // set initialized values for the mesh network config and the bridge
     if (!initialized)
@@ -582,13 +587,17 @@ void MeshBridge::exit_mesh_connect_server()
 
     // sending to the firstore the meassures:
     Serial.printf("sending %d cached messages..\n", server_data.size());
-    for (vector<String>::iterator measures_iter = server_data.begin(); measures_iter != server_data.end(); measures_iter++)
+    // for (vector<String>::iterator measures_iter = server_data.begin(); measures_iter != server_data.end(); measures_iter++)
+    // {
+    //     Serial.printf("sending message <%s>\n", measures_iter->c_str());
+    //     std::vector<String> vec = split((*measures_iter), ","); // split the String to vector of Strins by word
+    //     firestoreDataUpdate(*measures_iter);
+    // }
+    for (auto it = server_data.begin(); it != server_data.end(); ++it)
     {
-        Serial.printf("sending message <%s>\n", measures_iter->c_str());
-        std::vector<String> vec = split((*measures_iter), ","); // split the String to vector of Strins by word
-        firestoreDataUpdate(*measures_iter);
+        Serial.printf("sending message <%s>\n", it->second.c_str());
+        firestoreDataUpdate(it->second);
     }
-
     server_data.clear();
     // Serial.println("send to server list:");
     firestoreReadChanges();
@@ -599,6 +608,7 @@ void MeshBridge::exit_mesh_connect_server()
 
     // initializing the mesh network again
     init_mesh();
+    digitalWrite(LED_BUILTIN, HIGH); // turn the LED on (HIGH is the voltage level)
 }
 
 void MeshBridge::set_default_nickname(String nodeId)
@@ -620,4 +630,46 @@ void MeshBridge::set_default_nickname(String nodeId)
             Serial.println(fbdo.errorReason());
         }
     }
+}
+
+void MeshBridge::calculate_death(int ttd)
+{
+    struct tm timeinfo;
+    if (!getLocalTime(&timeinfo))
+    {
+        Serial.println("Failed to obtain time");
+        return;
+    }
+    if (timeinfo.tm_sec + ttd < 60)
+    {
+        die_seconds = timeinfo.tm_sec + ttd;
+        die_minutes = timeinfo.tm_min;
+        die_hours = timeinfo.tm_hour;
+    }
+    else if (timeinfo.tm_min + 1 < 60)
+    {
+        die_seconds = (timeinfo.tm_sec + ttd) - 60;
+        die_minutes = timeinfo.tm_min + 1;
+        die_hours = timeinfo.tm_hour;
+    }
+    else if (timeinfo.tm_hour + 1 < 24)
+    {
+        die_seconds = (timeinfo.tm_sec + ttd) - 60;
+        die_minutes = 0;
+        die_hours = timeinfo.tm_hour + 1;
+    }
+    else if (timeinfo.tm_hour + 1 < 24)
+    {
+        die_seconds = 60 - (timeinfo.tm_sec + ttd);
+        die_minutes = 1;
+        die_hours = 0;
+    }
+    return;
+}
+
+MeshBridge::~MeshBridge()
+{
+    delete ssid;
+    delete password;
+    delete ntp_server;
 }

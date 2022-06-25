@@ -17,6 +17,7 @@
 #include "ArduinoJson.h"
 #include <ESP32Time.h>
 
+#define NEXT_DEATH_JSON 96
 using namespace painlessmesh;
 using namespace std;
 
@@ -53,7 +54,6 @@ class MeshBridge
 {
 
 private:
-    bool initialized = false;
     ESP32Time rtc;
     Scheduler userScheduler; // to control your personal task
     painlessMesh mesh;
@@ -63,14 +63,16 @@ private:
     FirebaseData fbdo;
     FirebaseAuth auth;
     FirebaseConfig config;
+    bool initialized = false;
+    bool init_death = false;
 
     String MESH_PREFIX;
     String MESH_PASSWORD;
     unsigned int MESH_PORT;
 
-    const char *ssid;
-    const char *password;
-    const char *ntp_server;
+    char *ssid;
+    char *password;
+    char *ntp_server;
     long gmt_offset_sec;
     int daylight_offset_sec;
 
@@ -83,7 +85,8 @@ private:
     int lasttime = 0; // initialized, used to messure time interaval for the disconnect
     // std::map<String,vector<String>> dict;
     std::list<String> mesh_values;
-    std::vector<String> server_data;
+    std::map<String, String> server_data;
+    // std::vector<String> server_data;
     friend void receivedCallback(uint32_t from, String &msg);
     friend void newConnectionCallback(uint32_t nodeId);
     friend void changedConnectionCallback();
@@ -105,6 +108,7 @@ private:
     void set_default_nickname(String nodeId);
 
 public:
+    bool got_time = false;
     std::map<String, String> change_log;
     MeshBridge();
     void update();
@@ -116,6 +120,11 @@ public:
     bool configure_ready = false;
     String config_string;
     vector<String> meassures;
+    int die_seconds = 0;
+    int die_minutes = 0;
+    int die_hours = 0;
+    void calculate_death(int ttd);
+    ~MeshBridge();
 };
 
 #endif /* _BRIDGENODE_H_ */
