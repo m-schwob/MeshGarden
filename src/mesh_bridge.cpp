@@ -168,10 +168,11 @@ void MeshBridge::init_clock(){
     configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
     struct tm timeinfo;
     printLocalTime();  
-    calculate_death(10);
-    Serial.println("time of next death is:\n");
-    Serial.printf("%d:%d:%d",die_hours,die_minutes,die_seconds);
     got_time=true;
+
+    calculate_death(10);
+    Serial.println("time death time is:\n");
+    Serial.printf("%d:%d:%d",die_hours,die_minutes,die_seconds);
     //disconnect WiFi as it's no longer needed
     WiFi.disconnect(true);
     WiFi.mode(WIFI_OFF);
@@ -572,25 +573,9 @@ void MeshBridge::calculate_death(int ttd){
         Serial.println("Failed to obtain time");
         return;
     }
-    if(timeinfo.tm_sec+ ttd < 60){
-        die_seconds = timeinfo.tm_sec+ttd;
-        die_minutes = timeinfo.tm_min;
-        die_hours =   timeinfo.tm_hour;
-    }
-    else if(timeinfo.tm_min + 1 <60){
-        die_seconds = (timeinfo.tm_sec+ttd)-60;
-        die_minutes = timeinfo.tm_min+1;
-        die_hours =   timeinfo.tm_hour;
-    }  
-    else if(timeinfo.tm_hour +1 <24){
-        die_seconds = (timeinfo.tm_sec+ttd)-60;
-        die_minutes = 0;
-        die_hours = timeinfo.tm_hour + 1;
-    }
-    else if(timeinfo.tm_hour +1 <24){
-    die_seconds = 60-(timeinfo.tm_sec+ttd);
-    die_minutes = 1;
-    die_hours = 0;
-    }
+
+    die_seconds = (timeinfo.tm_sec+ttd)%60;
+    die_minutes = ((timeinfo.tm_min+ ((timeinfo.tm_sec+ttd)/60))%60);
+    die_hours = ((timeinfo.tm_hour + ((timeinfo.tm_min+((timeinfo.tm_sec+ttd)/60))/60)));
     return;
 }
