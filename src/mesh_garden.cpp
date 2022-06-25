@@ -5,7 +5,7 @@ uint8_t pin(String pin)
     return pins_map[pin].as<uint8_t>();
 }
 
-MeshGarden::GenericSensor::GenericSensor(DEVICE_CONSTRUCTOR_ARGUMENTS) 
+MeshGarden::GenericSensor::GenericSensor(DEVICE_CONSTRUCTOR_ARGUMENTS)
     : Sensor(device_id, hardware_info, pinout, envelop) {}
 
 void MeshGarden::GenericSensor::init_sensor()
@@ -75,6 +75,7 @@ bool MeshGarden::load_configuration()
     Serial.println("Capacity: " + String(capacity_after) + ", reduced by " + String(100 * capacity_after / capacity_before));
     Serial.println("Actual Memory Usage: " + String(config.memoryUsage()));
 
+    Serial.println(config.as<String>());
     return true;
 }
 
@@ -83,14 +84,8 @@ void MeshGarden::parse_config()
 {
     Serial.println("start of parse config, the log config is:");
     // TODO calling it only in debug mode.
-    log_config();// TODO check why this function fail (make the the co)
+    log_config(); // TODO check why this function fail (make the the co)
     Serial.println("log config done");
-
-    // TODO set it on node/bridge after making set function for it and making inheriting
-
-    mesh_prefix = config["mesh_prefix"].as<String>();
-    mesh_password = config["mesh_password"].as<String>();
-    mesh_port = config["mesh_port"].as<size_t>();
 
     JsonObject sensors = config["sensors"];
     for (JsonPair s : sensors)
@@ -102,7 +97,7 @@ void MeshGarden::parse_config()
 
         DynamicJsonDocument doc(sensor);
 
-        JsonObject pinout = sensor["pinout"]; 
+        JsonObject pinout = sensor["pinout"];
 
         Serial.println("create sensor: " + hardware_info);
         Device *new_device = DeviceFactory::create(sensor_id, hardware_info, pinout, doc);
@@ -125,9 +120,9 @@ void MeshGarden::parse_config()
         }
     }
 
-        Serial.println("end of parse config, the log config is:");
+    Serial.println("end of parse config, the log config is:");
     // TODO calling it only in debug mode.
-    log_config();// TODO check why this function fail (make the the co)
+    log_config(); // TODO check why this function fail (make the the co)
     Serial.println("log config done");
 }
 
@@ -148,18 +143,18 @@ void MeshGarden::log_config()
     // TODO replace string keys with constants
     Serial.println("Node Configurations:");
 
-    const char *nickname = config["nickname"];           // "tester"
-    const char *firmware = config["firmware"];           // "esp8266_v0.1"
-    const char *mesh_prefix = config["mesh_prefix"];     // "whateverYouLike"
-    const char *mesh_password = config["mesh_password"]; // "somethingSneaky"
-    const int mesh_port = config["mesh_port"];           // 5555
+    const char *nickname = config["nickname"]; // "tester"
+    // const char *firmware = config["firmware"];           // "esp8266_v0.1"
+    // const char *mesh_prefix = config["mesh_prefix"];     // "whateverYouLike"
+    // const char *mesh_password = config["mesh_password"]; // "somethingSneaky"
+    // const int mesh_port = config["mesh_port"];           // 5555
 
     printIndent(1, "Nickname: " + String(nickname));
-    printIndent(1, "Firmware: " + String(firmware));
-    printIndent(1, "Mesh Network:");
-    printIndent(2, "SSID: " + String(mesh_prefix));
-    printIndent(2, "Password: " + String(mesh_password));
-    printIndent(2, "Port: " + String(mesh_port));
+    // printIndent(1, "Firmware: " + String(firmware));
+    // printIndent(1, "Mesh Network:");
+    // printIndent(2, "SSID: " + String(mesh_prefix));
+    // printIndent(2, "Password: " + String(mesh_password));
+    // printIndent(2, "Port: " + String(mesh_port));
     printIndent(1, "Sensors:");
 
     JsonObject sensors = config["sensors"];
@@ -199,47 +194,34 @@ void MeshGarden::log_config()
 
 void MeshGarden::init_mesh_connection()
 {
-    #ifdef ESP32
-    network=new MeshBridge();
+    // choose mesh node type to construct
+#ifdef ESP32
+    network = new MeshBridge();
+#else
+    network = new MeshNode();
+#endif
+
+    // init mesh network
+    network->set_global_config(config["network_config"]);
     network->init_clock();
-    #else
-    network =new  MeshNode();
-    #endif
     network->init_mesh();
-    Serial.println("setup done");
-    // TODO when adding mesh node/bridge classes
 
-    // TODO init mesh.
-
-    // TODO add devices functions to tasks. pseudo code:
-    #ifdef ESP8266
+    // add devices functions to tasks. pseudo code:
+#ifdef ESP8266
     for (Device *device : device_list)
     {
         if (device->DEVICE_TYPE.equals(DEVICE_TYPE_SENSOR))
         {
-            network->add_measurement(((Sensor*)device)->get_measure_callback(),5,5); 
+            network->add_measurement(((Sensor *)device)->get_measure_callback(), 5, 5);
         }
     }
-    #endif
+#endif
+    Serial.println("init mesh connection done");
 }
 
 MeshGarden::MeshGarden() : config(0)
 {
     // Serial.begin(115200);
-    // create a pins map
-    map_pins();
-
-    // start file system
-    if (!LittleFS.begin())
-    {
-        Serial.println("fail to start files system.");
-        return; // exit(1);
-    }
-    else {
-    Serial.println("started the file system");
-    }
-
-
 }
 
 void MeshGarden::add_sensor(String hardware_info, InitSensor init_sensor_func, Measure measure_func)
@@ -253,23 +235,38 @@ void MeshGarden::add_sensor(String hardware_info, InitSensor init_sensor_func, M
 void MeshGarden::begin()
 {
     pinMode(LED_BUILTIN, OUTPUT);
-    
-    #ifdef ESP32
-    digitalWrite(LED_BUILTIN, HIGH);   // turn the LED on (HIGH is the voltage level)
 
-    #else
-    digitalWrite(LED_BUILTIN, LOW);   // turn the LED on (HIGH is the voltage level)
-    #endif
+#ifdef ESP32
+    digitalWrite(LED_BUILTIN, HIGH); // turn the LED on (HIGH is the voltage level)
+
+#else
+    digitalWrite(LED_BUILTIN, LOW); // turn the LED on (HIGH is the voltage level)
+#endif
+    // create a pins map
+    map_pins();
+
+    // start file system
+    if (!LittleFS.begin())
+    {
+        Serial.println("fail to start files system.");
+        return; // exit(1);
+    }
+    else
+    {
+        Serial.println("started the file system");
+    }
 
     load_configuration();
     parse_config();
-    config.~DynamicJsonDocument();
     Serial.println("serialization done, now init mesh");
     init_mesh_connection();
+    config.~DynamicJsonDocument();
 }
 
-void MeshGarden::update() {
-    if(network->configure_ready){
+void MeshGarden::update()
+{
+    if (network->configure_ready)
+    {
         Serial.println("configure ready");
         save_configuration(network->config_string);
         network->configure_ready = false;

@@ -5,7 +5,9 @@
 #include <ArduinoJson.h>
 #include <list>
 #include <LittleFS.h>
+#include <EEPROM.h>
 
+#include "constants_utils.h"
 #include "pins_maps.h"
 #include "device.h"
 #include "sensor.h"
@@ -57,14 +59,13 @@ private:
     String mesh_password;
     size_t mesh_port;
 
-    #ifdef ESP32
-    MeshBridge* network=NULL;
-    #else
-    MeshNode* network=NULL;
-    #endif
-        
+#ifdef ESP32
+    MeshBridge *network = NULL;
+#else
+    MeshNode *network = NULL;
+#endif
 
-private : 
+private:
     void save_configuration(String &config);
     bool load_configuration();
     void parse_config();
