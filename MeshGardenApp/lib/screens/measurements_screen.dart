@@ -77,7 +77,11 @@ class _MeasurementsScreenState extends State<MeasurementsScreen> {
             children: [
               Center(
                 child:
-                Text("No Measurements for this plant", style: kBodyText2),
+                Text("No Measurements", style: kBodyText2),
+              ),
+              Center(
+                child:
+                  Text("for this plant", style: kBodyText2),
               ),
               Center(
                 child: Image(
@@ -138,22 +142,22 @@ class _MeasurementsScreenState extends State<MeasurementsScreen> {
 
             // print(node_sensor_data_map);
             // TODO temp and remove use below version code
-            int i=0;
-            node_sensor_data_map.forEach((key, types) {
-              if( key == "1" ) {
-                Map<String, dynamic> types_map = types as Map<String, dynamic>;
-                types_map.forEach((measure_type, measure_att) {
-                  if(measure_type =="Air Humidity") {
-                    SensorMeasurements measures = SensorMeasurements.fromJson(
-                        measure_att, measure_type);
-                    measurements_list.add(measures);
-                    i++;
-                  }
-                });
-              }
-            });
+            // int i=0;
+            // node_sensor_data_map.forEach((key, types) {
+            //   if( key == "1" ) {
+            //     Map<String, dynamic> types_map = types as Map<String, dynamic>;
+            //     types_map.forEach((measure_type, measure_att) {
+            //       if(measure_type =="Air Humidity") {
+            //         SensorMeasurements measures = SensorMeasurements.fromJson(
+            //             measure_att, measure_type);
+            //         measurements_list.add(measures);
+            //         i++;
+            //       }
+            //     });
+            //   }
+            // });
 
-            /**
+
             node_sensor_data_map.forEach((key, types) {
               Map<String, dynamic> types_map = types as Map<String, dynamic>;
               types_map.forEach((measure_type, measure_att) {
@@ -162,10 +166,10 @@ class _MeasurementsScreenState extends State<MeasurementsScreen> {
               });
             });
 
-            */
 
-            Timestamp? time = measurements_list[0].newSample!.time;
-            print(time);
+
+            // Timestamp? time = measurements_list[0].newSample!.time;
+            // print(time);
 
             return Scaffold(
               body: Padding(
@@ -174,19 +178,30 @@ class _MeasurementsScreenState extends State<MeasurementsScreen> {
                 child: ListView.builder(
                   itemCount: measurements_list.length,
                   itemBuilder: (BuildContext ctx, int index) {
+
+                    return Container(
+                            child: Center(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    children: [
+                                      MeasurementCard(
+                                        value: measurements_list[index].newSample?.value,
+                                        unit: measurements_list[index].units,
+                                        name: measurements_list[index].type,
+                                        assetImage: measurements_list[index].imagePath,
+                                        // trendData: rhList!,
+                                        // linePoint: Colors.blueAccent,
+                                      ),
+                                      SizedBox(
+                                        height: 20,
+                                      )
+                                    ],
+                                  ),
+                                ),
+                    );
+                    /**
                     List<Widget> measureAtt = [];
-                    // int types_num = sensors_list[index].sensor_type!.length;
-                    List<List<String>> type_unit_list = [];
-                    // sensorAtt.add(
-                    //   ListTile(
-                    //     // subtitle:
-                    //     // Text(node_data['nickname'], style: kConfigTitle),
-                    //     title: Text(
-                    //         "Sensor ID :  \t\t\t\t\t\t\t\t\t" +
-                    //             sensors_list[index].sensor_id.toString(),
-                    //         style: kSensorText),
-                    //   ),
-                    // );
+
                     sensorAtt.add(
                       Text(
                           " Sensor ID :  \t\t\t\t\t\t\t\t\t" +
@@ -273,7 +288,6 @@ class _MeasurementsScreenState extends State<MeasurementsScreen> {
                         ),
                       ),
                     );
-
                     return Padding(
                       // padding: const EdgeInsets.symmetric(vertical: 10.0),
                       padding: const EdgeInsets.all(12.0),
@@ -287,28 +301,9 @@ class _MeasurementsScreenState extends State<MeasurementsScreen> {
                         child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: sensorAtt),
-                        // SizedBox(width:20.0),
-                        // Text(
-                        //     "Sensor ID:  " +
-                        //         sensors_list[index].sensor_id.toString(),
-                        //     style: kBodyText2),
-                        // Text(
-                        //     "Hardware Info:  " +
-                        //         sensors_list[index].hardware_info.toString(),
-                        //     style: kBodyText2),
-                        //     Text(
-                        //         "Sample Interval:  " +
-                        //             sensors_list[index].sample_interval.toString(),
-                        //         style: kBodyText2),
-                        //
-                        //     sensors_list[index].sensor_type.forEach((element) {
-                        //       Text(
-                        //           "Sample Interval:  " +
-                        //               element,
-                        //           style: kBodyText2);
-                        //     })
                       ),
                     );
+                     ********************************************/
                   },
                 ),
               ),

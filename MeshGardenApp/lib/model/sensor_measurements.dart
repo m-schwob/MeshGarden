@@ -2,18 +2,20 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-
+import 'package:iot_firestore_flutter_app/const/image_path.dart';
 class SensorMeasurements {
   String? type;
   List<Sample>? samples;
   String? units;
   Sample? newSample;
+  String imagePath;
 
   SensorMeasurements({
     this.type,
     this.samples,
     this.units,
     this.newSample,
+    required this.imagePath,
   });
 
   SensorMeasurements.fromJson(Map<String, Object?> json, String type)
@@ -22,6 +24,7 @@ class SensorMeasurements {
     samples: Sample.fromJsonArray(json['samples']! as List<dynamic>),
     units: SensorMeasurements.modify_units(json['units'] as String),
     newSample: Sample.fromNewSample(json['newSample']! as Map<String, Object?>),
+    imagePath: SensorMeasurements.chooseImage(type),
   );
 
   static String modify_units(String units){
@@ -31,6 +34,23 @@ class SensorMeasurements {
     }
     return pretty_units;
   }
+
+  static String chooseImage(String type){
+    if(type.trim() == "Air Humidity"){
+      return AirHumidityPath;
+    }
+    else if(type.trim() == "Air Temperature"){
+      return TemperaturePath;
+    }
+    else if(type.trim() == "Soil Moisture"){
+      return SoilMoisturePath;
+    }
+    else if(type.trim() == "Uv Index"){
+      return UVPath;
+    }
+    return DefaultSensorPath;
+  }
+
 }
 
 

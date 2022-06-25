@@ -15,12 +15,12 @@ class MeasurementCard extends StatelessWidget {
       })
       : super(key: key);
 
-  final num value;
-  final String name;
-  final String unit;
+  final num? value;
+  final String? name;
+  final String? unit;
   // final List<double> trendData;
   // final Color linePoint;
-  final AssetImage assetImage;
+  final String assetImage;
 
   @override
   Widget build(BuildContext context) {
@@ -44,12 +44,14 @@ class MeasurementCard extends StatelessWidget {
                   children: [
                     Image(
                       width: 60,
-                      image: assetImage,
+                      image: AssetImage(
+                        assetImage,
+                      ),
                     ),
                     SizedBox(
                       height: 10,
                     ),
-                    Text(name, style: kBodyText.copyWith(color: Colors.white)),
+                    Text(name!, style: kBodyText.copyWith(color: Colors.white)),
                     SizedBox(
                       height: 10,
                     ),
