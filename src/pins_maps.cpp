@@ -1,6 +1,6 @@
 #include "pins_maps.h"
 
-DynamicJsonDocument pins_map(PINS_MAP_SIZE);
+DynamicJsonDocument pins_map(PINS_MAP_SIZE + JSON_OBJECT_SIZE(4)); // 4 for ADS pins
 
 #if defined(ESP8266)
 // esp8266 pinout map builder
@@ -30,6 +30,12 @@ void _map_pins()
     pins_map["D6"] = D6;
     pins_map["D7"] = D7;
     pins_map["D8"] = D8;
+
+    // ADS1X115 ADC extender pins
+    pins_map["ADS0"] = 0; 
+    pins_map["ADS1"] = 1; 
+    pins_map["ADS2"] = 2; 
+    pins_map["ADS3"] = 3; 
 }
 
 #elif defined(ESP32)

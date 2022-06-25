@@ -5,6 +5,15 @@ uint8_t pin(String pin)
     return pins_map[pin].as<uint8_t>();
 }
 
+float analogRead(uint16_t pin){
+    return MeshGarden::analog_read(pin);
+}
+
+float MeshGarden::analog_read(uint16_t pin){
+    return ads.analog_read(pin);
+}
+
+
 MeshGarden::GenericSensor::GenericSensor(DEVICE_CONSTRUCTOR_ARGUMENTS)
     : Sensor(device_id, hardware_info, pinout, envelop) {}
 

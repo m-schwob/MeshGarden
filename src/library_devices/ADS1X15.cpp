@@ -10,7 +10,7 @@ ADS1X15::ADS1X15(DEVICE_CONSTRUCTOR_ARGUMENTS) : Device(device_id, hardware_info
         Serial.println("ADS initialized");
 }
 
-float ADS1X15::analogRead(uint16_t pin)
+float ADS1X15::analog_read(uint16_t pin)
 {
     int16_t adc0 = ads.readADC_SingleEnded(pin);
     float volts0 = ads.computeVolts(adc0);

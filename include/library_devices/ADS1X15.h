@@ -13,7 +13,7 @@ private:
 public:
     ADS1X15(DEVICE_CONSTRUCTOR_ARGUMENTS);
 
-    float analogRead(uint16_t pin);
+    float analog_read(uint16_t pin);
 };
 
 // REGISTER_DEVICE(ADS1X15, "ADS1X15");

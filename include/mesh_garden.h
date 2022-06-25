@@ -9,6 +9,8 @@
 
 #include "constants_utils.h"
 #include "pins_maps.h"
+#include "library_devices/ADS1X15.h"
+// #include "library_devices/battery_level_sensor.h"
 #include "device.h"
 #include "sensor.h"
 
@@ -21,6 +23,7 @@
 #define EEPROM_SIZE 3 * sizeof(int)
 
 uint8_t pin(String pin);
+float analogRead(uint16_t pin);
 
 class MeshGarden
 {
@@ -52,14 +55,15 @@ public:
 #define REGISTER_SENSOR(STR) REGISTER_DEVICE(MeshGarden::GenericSensor, STR);
 
 private:
+    static ADS1X15 ads;
+public:
+    static float analog_read(uint16_t pin);
+
+private:
     DynamicJsonDocument config;
 
     // std::list<Device*> device_list; make private after test
     std::map<String, Funcs> funcs_map;
-
-    String mesh_prefix;
-    String mesh_password;
-    size_t mesh_port;
 
 #ifdef ESP32
     MeshBridge *network = NULL;
