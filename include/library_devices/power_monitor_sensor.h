@@ -6,7 +6,8 @@
 #include "pins_maps.h"
 #include "sensor.h"
 
-ADC_MODE(ADC_VCC); // enable measure esp8266 supply input voltage
+// ADC_MODE(ADC_VCC); // enable measure esp8266 supply input voltage
+
 
 #define BATTERY_LEVEL_KEY "Battery Level"
 #define BATTERY_VOLTAGE_KEY "Battery Voltage"

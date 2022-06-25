@@ -6,13 +6,13 @@
 #include <ArduinoJson.h>
 #include "device.h"
 
-class ADS1X15 : public Device
+class ADS1X15
 {
 private:
-    Adafruit_ADS1X15 ads;
+    Adafruit_ADS1X15 ads1x15;
 
 public:
-    ADS1X15(DEVICE_CONSTRUCTOR_ARGUMENTS);
+    ADS1X15();
 
     float analog_read(uint16_t pin);
 };

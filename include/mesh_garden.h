@@ -20,7 +20,6 @@
 #include "mesh_node.h"
 #endif
 
-float analogRead(uint16_t pin);
 
 class MeshGarden
 {
@@ -51,11 +50,6 @@ public:
     };
 #define REGISTER_SENSOR(STR) REGISTER_DEVICE(MeshGarden::GenericSensor, STR);
 
-private:
-    static ADS1X15 ads;
-
-public:
-    static float analog_read(uint16_t pin);
 
 private:
     DynamicJsonDocument config;
