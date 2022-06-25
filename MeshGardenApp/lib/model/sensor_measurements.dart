@@ -1,7 +1,5 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:iot_firestore_flutter_app/const/image_path.dart';
 class SensorMeasurements {
   String? type;

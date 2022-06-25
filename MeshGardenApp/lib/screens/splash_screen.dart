@@ -3,7 +3,6 @@ import 'package:iot_firestore_flutter_app/const/custom_styles.dart';
 import 'package:iot_firestore_flutter_app/route/routing_constants.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
-import 'package:iot_firestore_flutter_app/screens/loading_screen.dart';
 import '../auth_helper.dart';
 
 class SplashScreen extends StatelessWidget {

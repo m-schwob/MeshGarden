@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:iot_firestore_flutter_app/route/routing_constants.dart';
 
 class LoadingScreen extends StatefulWidget {
   @override

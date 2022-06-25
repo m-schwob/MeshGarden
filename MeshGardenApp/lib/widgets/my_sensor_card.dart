@@ -1,3 +1,4 @@
+/**
 import 'package:chart_sparkline/chart_sparkline.dart';
 import 'package:flutter/material.dart';
 import 'package:iot_firestore_flutter_app/const/custom_colors.dart';
@@ -83,3 +84,4 @@ class MySensorCard extends StatelessWidget {
         ));
   }
 }
+*/

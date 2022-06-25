@@ -1,25 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:iot_firestore_flutter_app/model/Node.dart';
-import 'package:iot_firestore_flutter_app/auth_helper.dart';
-import 'package:iot_firestore_flutter_app/const/custom_styles.dart';
-import 'package:iot_firestore_flutter_app/widgets/my_text_field.dart';
-import 'package:iot_firestore_flutter_app/widgets/my_text_button.dart';
-import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:iot_firestore_flutter_app/const/custom_styles.dart';
 import 'package:iot_firestore_flutter_app/const/custom_colors.dart';
-
 import 'package:iot_firestore_flutter_app/model/Sensor.dart';
-import 'package:iot_firestore_flutter_app/route/routing_constants.dart';
 import 'package:iot_firestore_flutter_app/screens/add_sensor_screen.dart';
 import 'package:hawk_fab_menu/hawk_fab_menu.dart';
-//import 'package:iot_firestore_flutter_app/widgets/my_sensor_card.dart';
-// import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:fab_circular_menu/fab_circular_menu.dart';
 import 'package:iot_firestore_flutter_app/const/library_sensors.dart';
-
-
-//TODO : add delete button to sensor card with alert window "are you sure"?
 
 class SensorsScreen extends StatefulWidget {
   const SensorsScreen({Key? key, required this.nodeId}) : super(key: key);
@@ -30,15 +16,6 @@ class SensorsScreen extends StatefulWidget {
   _SensorsScreenState createState() => _SensorsScreenState();
 }
 
-// class _NodesScreenState extends State<NodesScreen> {
-//
-//   static String collectionName = 'TestNodes';
-//   final nodeRef = FirebaseFirestore.instance
-//       .collection(collectionName)
-//       .withConverter<Node>(
-//     fromFirestore: (snapshots, _) => Node.fromJson(snapshots.data()!),
-//     toFirestore: (node, _) => node.toJson(),
-//   );
 
 class _SensorsScreenState extends State<SensorsScreen> {
   late final _docStream = FirebaseFirestore.instance
@@ -49,27 +26,6 @@ class _SensorsScreenState extends State<SensorsScreen> {
   late final _sensorDoc =
       FirebaseFirestore.instance.collection('Nodes').doc(widget.nodeId);
 
-  final GlobalKey<FabCircularMenuState> fabKey = GlobalKey();
-  // final TextEditingController _password = TextEditingController();
-  // final TextEditingController _passwordConfirm = TextEditingController();
-
-  // @override
-  // void dispose() {
-  //   _active.dispose();
-  //   _nickname.dispose();
-  //   // _passwordConfirm.dispose();
-  //   super.dispose();
-  // }
-
-  // final data = FirebaseFirestore.instance
-  //     .collection("TestNodes").doc(widget.nodeId)
-
-  // final nodeRef = FirebaseFirestore.instance
-  //     .collection("TestNodes")
-  //     .withConverter<Node>(
-  //   fromFirestore: (snapshots, _) => Node.fromJson(snapshots.data()!),
-  //   toFirestore: (node, _) => node.toJson(),
-  // );
 
   @override
   Widget build(BuildContext context) {
@@ -144,26 +100,6 @@ class _SensorsScreenState extends State<SensorsScreen> {
 
           if (sensors_list.isEmpty) {
             return Scaffold(
-              // floatingActionButton: FloatingActionButton(
-              //   onPressed: () {
-              //     // _doc.update({"sensors.1": sensor_json});
-              //     Navigator.push(
-              //       context,
-              //       MaterialPageRoute(
-              //         builder: (context) =>
-              //             AddSensorScreen(sensorDoc: _sensorDoc, sensorId: 1),
-              //       ),
-              //     );
-              //     // snapshot.requireData.reference.update({"sensors.1": sensor_json});
-              //   },
-              //   // mini: true,
-              //   elevation: 12,
-              //   foregroundColor: Colors.white,
-              //   child: Icon(
-              //     Icons.add,
-              //     size: 30,
-              //   ),
-              // ),
               body: HawkFabMenu(
                 // openIcon: Icons.add,
                   icon: AnimatedIcons.menu_close,
@@ -227,10 +163,6 @@ class _SensorsScreenState extends State<SensorsScreen> {
                       label: 'New custom sensor',
                       ontap: () {
 
-                        // print("got here2 , max id = ${max_id}\n");
-                        // sensor_json["sensor_id"] = max_id;
-                        // print("....${sensor_json["sensor_id"]}...");
-                        // _doc.update({"sensors.${max_id}": sensor_json});
                         Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -329,10 +261,6 @@ class _SensorsScreenState extends State<SensorsScreen> {
                     label: 'New custom sensor',
                     ontap: () {
 
-                      // print("got here2 , max id = ${max_id}\n");
-                      // sensor_json["sensor_id"] = max_id;
-                      // print("....${sensor_json["sensor_id"]}...");
-                      // _doc.update({"sensors.${max_id}": sensor_json});
                       Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -356,16 +284,6 @@ class _SensorsScreenState extends State<SensorsScreen> {
                       List<Widget> sensorAtt = [];
                       // int types_num = sensors_list[index].sensor_type!.length;
                       List<List<String>> type_unit_list = [];
-                      // sensorAtt.add(
-                      //   ListTile(
-                      //     // subtitle:
-                      //     // Text(node_data['nickname'], style: kConfigTitle),
-                      //     title: Text(
-                      //         "Sensor ID :  \t\t\t\t\t\t\t\t\t" +
-                      //             sensors_list[index].sensor_id.toString(),
-                      //         style: kSensorText),
-                      //   ),
-                      // );
                       sensorAtt.add(
                         ListTile(
                           dense: true,
@@ -422,9 +340,6 @@ class _SensorsScreenState extends State<SensorsScreen> {
                         i++;
                       });
 
-                      // sensorAtt.add(
-                      //   Text("Out Pins  :", style: kSensorText),
-                      // );
 
                       sensors_list[index].pinout!.forEach((key, value) {
                         sensorAtt.add(
@@ -481,26 +396,7 @@ class _SensorsScreenState extends State<SensorsScreen> {
                           child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: sensorAtt),
-                          // SizedBox(width:20.0),
-                          // Text(
-                          //     "Sensor ID:  " +
-                          //         sensors_list[index].sensor_id.toString(),
-                          //     style: kBodyText2),
-                          // Text(
-                          //     "Hardware Info:  " +
-                          //         sensors_list[index].hardware_info.toString(),
-                          //     style: kBodyText2),
-                          //     Text(
-                          //         "Sample Interval:  " +
-                          //             sensors_list[index].sample_interval.toString(),
-                          //         style: kBodyText2),
-                          //
-                          //     sensors_list[index].sensor_type.forEach((element) {
-                          //       Text(
-                          //           "Sample Interval:  " +
-                          //               element,
-                          //           style: kBodyText2);
-                          //     })
+
                         ),
                       );
                     },
@@ -513,14 +409,7 @@ class _SensorsScreenState extends State<SensorsScreen> {
       ),
     );
   }
-  // void _showSnackBar(BuildContext context, String message) {
-  //   Scaffold.of(context).showSnackBar(
-  //       SnackBar(
-  //         content: Text(message),
-  //         duration: const Duration(milliseconds: 1000),
-  //       )
-  //   );
-  // }
+
 
   Future _openRemoveDialog(snap, sensor_id_string) => showDialog(
     context: context,
