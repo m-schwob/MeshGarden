@@ -92,17 +92,17 @@ void MeshGarden::parse_config()
     mesh_password = config["mesh_password"].as<String>();
     mesh_port = config["mesh_port"].as<size_t>();
 
-    JsonArray sensors = config["sensors"]["1"]; //for now
-    for (JsonObject sensor : sensors)
+    JsonObject sensors = config["sensors"];
+    for (JsonPair s : sensors)
     {
+        JsonObject sensor = s.value().as<JsonObject>();
         const String hardware_info = sensor["hardware_info"].as<String>();
         const int sensor_id = sensor["sensor_id"].as<int>();
-        ;
         const int sample_interval = sensor["sample_interval"];
 
         DynamicJsonDocument doc(sensor);
 
-        JsonObject pinout = sensor["1"]["pinout"]; //for now
+        JsonObject pinout = sensor["pinout"]; 
 
         Serial.println("create sensor: " + hardware_info);
         Device *new_device = DeviceFactory::create(sensor_id, hardware_info, pinout, doc);
@@ -162,9 +162,11 @@ void MeshGarden::log_config()
     printIndent(2, "Port: " + String(mesh_port));
     printIndent(1, "Sensors:");
 
-    JsonArray sensors = config["sensors"];
-    for (JsonObject sensor : sensors)
+    JsonObject sensors = config["sensors"];
+    for (JsonPair s : sensors)
     {
+        // Serial.println(sensors.as<String>());
+        JsonObject sensor = s.value().as<JsonObject>();
         const char *hardware_info = sensor["hardware_info"];   // " DHT22"
         const int sensor_id = sensor["sensor_id"];             // 1
         const int sample_interval = sensor["sample_interval"]; // 30
@@ -204,19 +206,21 @@ void MeshGarden::init_mesh_connection()
     network =new  MeshNode();
     #endif
     network->init_mesh();
-    Serial.println("configgured done!");
+    Serial.println("setup done");
     // TODO when adding mesh node/bridge classes
 
     // TODO init mesh.
 
     // TODO add devices functions to tasks. pseudo code:
-    // for (Device *device : device_list)
-    // {
-    //     if (device->DEVICE_TYPE.equals(DEVICE_TYPE_SENSOR))
-    //     {
-    //         mesh.add_func(((Sensor*)device)->get_measure_callback, time interval from config);
-    //     }
-    // }
+    #ifdef ESP8266
+    for (Device *device : device_list)
+    {
+        if (device->DEVICE_TYPE.equals(DEVICE_TYPE_SENSOR))
+        {
+            network->add_measurement(((Sensor*)device)->get_measure_callback(),5,5); 
+        }
+    }
+    #endif
 }
 
 MeshGarden::MeshGarden() : config(0)
@@ -258,77 +262,12 @@ void MeshGarden::begin()
 void MeshGarden::update() {
     if(network->configure_ready){
         Serial.println("configure ready");
-        update_got_configs();
         save_configuration(network->config_string);
         network->configure_ready = false;
         Serial.println("entring delay");
-        delay(5000);
+        delay(2000);
         Serial.println("reset");
         ESP.restart();
     }
     network->update();
-}
-
-void MeshGarden::update_got_configs()
-{
-    if(network->configure_ready){
-    Serial.println("the change we will insert is:");
-    DynamicJsonDocument doc(network->config_string.length());
-    DeserializationError error = deserializeJson(doc, network->config_string);
-        if (error)
-        {
-            Serial.print(F("deserializeJson() failed: "));
-            Serial.println(error.f_str());
-        }
-    Serial.println("the change json is:");
-    Serial.println(doc.as<String>());
-    }
-    Serial.println("start of parse config, the log config is:");
-    // TODO calling it only in debug mode.
-    log_config();// TODO check why this function fail (make the the co)
-    Serial.println("log config done");
-
-    // TODO set it on node/bridge after making set function for it and making inheriting
-
-    mesh_prefix = config["mesh_prefix"].as<String>();
-    mesh_password = config["mesh_password"].as<String>();
-    mesh_port = config["mesh_port"].as<size_t>();
-
-    JsonArray sensors = config["sensors"]["1"]; //for now
-    for (JsonObject sensor : sensors)
-    {
-        const String hardware_info = sensor["hardware_info"].as<String>();
-        const int sensor_id = sensor["sensor_id"].as<int>();
-        ;
-        const int sample_interval = sensor["sample_interval"];
-
-        DynamicJsonDocument doc(sensor);
-
-        JsonObject pinout = sensor["1"]["pinout"]; //for now
-
-        Serial.println("create sensor: " + hardware_info);
-        Device *new_device = DeviceFactory::create(sensor_id, hardware_info, pinout, doc);
-        if (new_device)
-        {
-            // check if the new device is a simple user define sensor
-            std::map<String, Funcs>::const_iterator iter = funcs_map.find(hardware_info);
-            if (iter != funcs_map.end())
-            {
-                if (new_device->DEVICE_TYPE.equals(DEVICE_TYPE_SENSOR))
-                {
-                    ((GenericSensor *)new_device)->set((*iter).second);
-                }
-            }
-            device_list.push_front(new_device);
-        }
-        else // if null, means create fails
-        {
-            Serial.println("fail to initialize sensor " + hardware_info);
-        }
-    }
-
-        Serial.println("end of parse config, the log config is:");
-    // TODO calling it only in debug mode.
-    log_config();// TODO check why this function fail (make the the co)
-    Serial.println("log config done");
 }

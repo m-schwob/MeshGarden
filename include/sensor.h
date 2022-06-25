@@ -12,7 +12,6 @@
 
 struct Measurement{
     unsigned int sensor_id;
-    bool last = false;
     String type;
     float value;
 };
