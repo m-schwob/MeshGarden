@@ -97,6 +97,11 @@ public:
 	int die_interval = 10000;
 	std::queue<String> myqueue;
 	void listenQueue();
+	Time calculate_time();
+
+	void get_battary_level(Measurement battery_level);
+	float node_battery_level;
+
 };
 
 #endif /* _MESHNODE_H_ */

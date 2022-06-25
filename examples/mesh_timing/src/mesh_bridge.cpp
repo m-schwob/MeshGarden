@@ -180,6 +180,7 @@ void MeshBridge::init_clock(){
   //disconnect WiFi as it's no longer needed
   WiFi.disconnect(true);
   WiFi.mode(WIFI_OFF);
+
 }
 
 // a function that parses a string and creates a vector of words
@@ -203,6 +204,12 @@ vector<String> MeshBridge::split(String _s, String _delimiter)
 // fireBase Init function, insert the Project firestore ID and do authentication by userName and password
 void MeshBridge::firebaseInit()
 {
+    Serial.println("firebaseKeys:");
+    Serial.println(API_KEY);
+    Serial.println(USER_EMAIL);
+    Serial.println(USER_PASSWORD);
+    Serial.println("finished");
+
     config.api_key = API_KEY;
     auth.user.email = USER_EMAIL;
     auth.user.password = USER_PASSWORD;

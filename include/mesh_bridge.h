@@ -12,10 +12,12 @@
 #include <AsyncTCP.h>
 #include <ESPAsyncWebServer.h>
 #include <vector>
+#include <queue>
 #include <list>
 #include <map>
 #include "ArduinoJson.h"
 #include <ESP32Time.h>
+#include "sensor.h"
 
 #define NEXT_DEATH_JSON 96
 using namespace painlessmesh;
@@ -34,6 +36,8 @@ using namespace std;
 
 // #define ssid = "My_hotspot";
 // #define password = "mypassword";
+// const char* const ssid = "My_hotspot";
+// const char* const password = "mypassword";
 // #define ntp_server = "pool.ntp.org";
 // const long gmt_offset_sec = 3600;
 // const int daylight_offset_sec = 3600;
@@ -85,7 +89,8 @@ private:
     int lasttime = 0; // initialized, used to messure time interaval for the disconnect
     // std::map<String,vector<String>> dict;
     std::list<String> mesh_values;
-    std::map<String, String> server_data;
+    // std::map<String, String> server_data;
+    queue<String> data_to_send;
     // std::vector<String> server_data;
     friend void receivedCallback(uint32_t from, String &msg);
     friend void newConnectionCallback(uint32_t nodeId);
@@ -100,6 +105,8 @@ private:
     void firestoreReadChanges();
     bool firestoreReadNetwork(String &changes);
     void firestoreDataUpdate(String jsonVal);
+    void firestoreMapBatteryUpdate(String nodeId , float value);
+
     // bool get_node_changes(String node_id, String &changes);
     vector<String> split(String s, String delimiter);
 
@@ -114,12 +121,17 @@ public:
     void update();
     void get_mesh_nodes();
     void init_clock();
+
+    void get_battary_level(Measurement battery_level);
+    std::map<String,float> battery_map;
+
     void init_mesh();
     void set_global_config(JsonObject global_config);
     void exit_mesh_connect_server();
+
     bool configure_ready = false;
     String config_string;
-    vector<String> meassures;
+    //vector<String> meassures;
     int die_seconds = 0;
     int die_minutes = 0;
     int die_hours = 0;

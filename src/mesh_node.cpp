@@ -46,6 +46,13 @@ void receivedCallback(uint32_t from, String &msg)
         node->date = values[0];
         node->AmPm = values[3];
         node->set_time = true;
+
+        DynamicJsonDocument battery_level(32);
+        battery_level["battery"] = battery_level;
+        Serial.println("created battery json");
+        serializeJson(battery_level, Serial);
+        node->mesh.sendSingle(from,battery_level.as<String>());
+
     }
 
     if (message.containsKey("d"))
@@ -227,6 +234,10 @@ void MeshNode::set_global_config(JsonObject global_config)
 void MeshNode::init_clock() {
     Time t;
     load_timing(t, die_interval);
+    time.seconds = (t.seconds+die_interval)%60;
+    time.minutes = ((t.minutes+ ((t.seconds+die_interval)/60))%60);
+    time.hours = ((t.hours + ((t.minutes+ ((t.seconds+die_interval)/60))/60))%24);
+    time = t ;
 }
 
 void MeshNode::listenQueue()
@@ -250,14 +261,12 @@ void MeshNode::init_mesh()
     mesh.onDroppedConnection([](uint32_t nodeId)
                              { Serial.printf("node dropped:%u, at time: %u", nodeId, node->mesh.getNodeTime()); });
     // Task update_time(TASK_SECOND * 1, TASK_FOREVER, [this](){time_update();});
-    Task emptyQueue(TASK_SECOND * 1.5, TASK_FOREVER, [this]()
-                    { listenQueue(); });
+    // Task emptyQueue(TASK_SECOND * 1.5, TASK_FOREVER, [this](){ listenQueue(); });
 
     // userScheduler.addTask(update_time);
     // update_time.enable();
-    userScheduler.addTask(emptyQueue);
-    emptyQueue.enable();
-
+    // userScheduler.addTask(emptyQueue);
+    // emptyQueue.enable();
     Serial.print(mesh.getNodeTime());
     Serial.println("node id: " + String(mesh.getNodeId()));
     node = this;
@@ -314,4 +323,12 @@ void MeshNode::add_measurement(std::function<Measurements()> callable, unsigned 
                 { send_values(callable); });
     userScheduler.addTask(measure);
     measure.enable();
+}
+
+void MeshNode::get_battary_level(Measurement battery_level){
+    node_battery_level = battery_level.value;
+}
+
+void firestoreMapBatteryUpdate(String nodeId , float value){
+
 }
