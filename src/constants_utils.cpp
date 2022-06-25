@@ -1,6 +1,13 @@
-#ifndef _CONSTANTS_UTILS_H_
-#define _CONSTANTS_UTILS_H_
+#include "constants_utils.h"
 
+float analog_read(uint16_t pin)
+{
+    return ads.analog_read(pin);
+}
+// float analogRead(uint16_t pin)
+// {
+//     return ads.analog_read(pin);
+// }
 
 float percentage(float value, float max, float min = 0)
     {
@@ -9,4 +16,3 @@ float percentage(float value, float max, float min = 0)
         return (value - min) / (max - min);
     }
 
-#endif /* _CONSTANTS_UTILS_H_ */

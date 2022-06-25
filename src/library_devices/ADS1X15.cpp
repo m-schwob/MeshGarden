@@ -1,8 +1,9 @@
 #include "library_devices/ADS1X15.h"
 
-ADS1X15::ADS1X15(DEVICE_CONSTRUCTOR_ARGUMENTS) : Device(device_id, hardware_info, pinout, envelop){
-    ads.setGain(GAIN_ONE); // set gain to +/- 4.096 range
-    if (!ads.begin(0x4A))  // use address for (ADDR <-> SDA)
+ADS1X15::ADS1X15()
+{
+    ads1x15.setGain(GAIN_ONE); // set gain to +/- 4.096 range
+    if (!ads1x15.begin(0x4A))  // use address for (ADDR <-> SDA)
     {
         Serial.println("Failed to initialize ADS.");
     }
@@ -12,8 +13,8 @@ ADS1X15::ADS1X15(DEVICE_CONSTRUCTOR_ARGUMENTS) : Device(device_id, hardware_info
 
 float ADS1X15::analog_read(uint16_t pin)
 {
-    int16_t adc0 = ads.readADC_SingleEnded(pin);
-    float volts0 = ads.computeVolts(adc0);
+    int16_t adc0 = ads1x15.readADC_SingleEnded(pin);
+    float volts0 = ads1x15.computeVolts(adc0);
     Serial.print("extender measure: ");
     Serial.println(String(volts0) + "V");
     return volts0;

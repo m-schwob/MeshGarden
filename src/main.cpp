@@ -2,6 +2,8 @@
 #include <ArduinoJson.h>
 #include "mesh_garden.h"
 
+ADC_MODE(ADC_VCC); // enable measure esp8266 supply input voltage
+
 /*
 This documentation will be after use for user instruction and documentation. but for now its here to simplify.
 
@@ -54,12 +56,12 @@ private:
     float C_water = 1; // volts
 
     // ADS1X15 related. TODO make driver for it. check example file
-    Adafruit_ADS1115 ads;
+    Adafruit_ADS1115 _ads;
 
     void init_adc()
     {
-        ads.setGain(GAIN_ONE);
-        if (!ads.begin())
+        _ads.setGain(GAIN_ONE);
+        if (!_ads.begin())
         {
             Serial.println("Failed to initialize ADS.");
         }
@@ -69,8 +71,8 @@ private:
 
     float extender_measure(uint16_t pin)
     {
-        int16_t adc0 = ads.readADC_SingleEnded(pin);
-        float volts0 = ads.computeVolts(adc0);
+        int16_t adc0 = _ads.readADC_SingleEnded(pin);
+        float volts0 = _ads.computeVolts(adc0);
         Serial.println("extender measure"); // TODO print value
         return volts0;
     }
