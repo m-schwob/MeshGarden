@@ -22,9 +22,7 @@ class NodeService {
 
     List<dynamic> nodes_list = nodes_querySnapshot.docs;
 
-    nodes_list.forEach((node) {
-        node.
-    })
+
 
     // if (nodes_snapshot.exists) {
     //   Map<String, dynamic> data = snapshot.data() as Map<String, dynamic>;
