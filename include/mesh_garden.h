@@ -66,8 +66,6 @@ private:
 #endif
 
 private:
-    void store_timing(Time &time, int &sleep_time);
-    void load_timing(Time &time, int &sleep_time);
     void save_configuration(String &config);
     bool load_configuration();
     void parse_config();

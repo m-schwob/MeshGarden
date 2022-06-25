@@ -26,25 +26,6 @@ void MeshGarden::GenericSensor::set(Funcs funcs)
     this->measure_func = funcs.measure_func;
 }
 
-void MeshGarden::store_timing(Time &time, int &sleep_time)
-{
-    EEPROM.begin(EEPROM_SIZE);
-    EEPROM.put(0, sleep_time);
-    EEPROM.put(sizeof(sleep_time), time);
-    EEPROM.commit();
-    EEPROM.end();
-    Serial.println("time stored");
-}
-
-void MeshGarden::load_timing(Time &time, int &sleep_time)
-{
-    EEPROM.begin(EEPROM_SIZE);
-    EEPROM.get(0, sleep_time);
-    EEPROM.get(sizeof(sleep_time), time);
-    EEPROM.end();
-    Serial.println("time loaded");
-}
-
 void MeshGarden::save_configuration(String &config)
 {
     Serial.println("saving configuration to file");

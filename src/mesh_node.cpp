@@ -7,11 +7,11 @@ void MeshNode::printLocalTime()
     Serial.print(" and The time is: ");
     Serial.print(days);
     Serial.print(":");
-    Serial.print(hours);
+    Serial.print(time.hours);
     Serial.print(":");
-    Serial.print(minutes);
+    Serial.print(time.minutes);
     Serial.print(":");
-    Serial.print(seconds);
+    Serial.print(time.seconds);
     Serial.print(" ");
     Serial.println(AmPm);
 }
@@ -50,10 +50,10 @@ void receivedCallback(uint32_t from, String &msg)
 
     if (message.containsKey("d"))
     {
-        node->die_minute = message["d"]["m"].as<int>();
-        node->die_hour = message["d"]["h"].as<int>();
-        node->die_second = message["d"]["s"].as<int>();
-        node->die_time = message["d"]["st"].as<int>();
+        node->die_time.minutes = message["d"]["m"].as<int>();
+        node->die_time.hours = message["d"]["h"].as<int>();
+        node->die_time.seconds = message["d"]["s"].as<int>();
+        node->die_interval = message["d"]["st"].as<int>();
     }
     if (message.containsKey("change"))
     {
@@ -92,14 +92,15 @@ void MeshNode::update()
     {
         time_update();
         printLocalTime();
-        Serial.printf("%d:%d:%d\n", die_hour, die_minute, die_second);
+        Serial.printf("%d:%d:%d\n", die_time.hours, die_time.minutes, die_time.seconds);
         lasttime = millis();
     }
-    if ((die_hour == hours || die_hour - 12 == hours) && die_minute == minutes && die_second == seconds)
+    if ((die_time.hours == time.hours || die_time.hours - 12 == time.hours) && die_time.minutes == time.minutes && die_time.seconds == time.seconds)
     {
         // put here store function
         Serial.println("die");
-        ESP.deepSleep((die_time)*1000000);
+        store_timing(time,die_interval);
+        ESP.deepSleep((die_interval)*1000000);
     }
     if (alive)
         mesh.update();
@@ -108,36 +109,36 @@ void MeshNode::update()
 void MeshNode::time_update()
 {
     // timeNow = millis()/1000; // the number of milliseconds that have passed since boot
-    seconds += 1; // the number of seconds that have passed since the last time 60 seconds was reached.
+    time.seconds += 1; // the number of seconds that have passed since the last time 60 seconds was reached.
 
-    if (seconds == 60)
+    if (time.seconds == 60)
     {
         timeLast = timeNow;
-        minutes = minutes + 1;
-        seconds = 0;
+        time.minutes = time.minutes + 1;
+        time.seconds = 0;
     }
     // if one minute has passed, start counting milliseconds from zero again and add one minute to the clock.
 
-    if (minutes == 60)
+    if (time.minutes == 60)
     {
-        minutes = 0;
-        hours = hours + 1;
+        time.minutes = 0;
+        time.hours = time.hours + 1;
     }
 
     // if one hour has passed, start counting minutes from zero and add one hour to the clock
 
-    if (hours == 24)
+    if (time.hours == 24)
     {
-        hours = 0;
+        time.hours = 0;
         days = days + 1;
     }
 
     // if 24 hours have passed , add one day
 
-    if (hours == (24 - startingHour) && correctedToday == 0)
+    if (time.hours == (24 - startingHour) && correctedToday == 0)
     {
         delay(dailyErrorFast * 1000);
-        seconds = seconds + dailyErrorBehind;
+        time.seconds = time.seconds + dailyErrorBehind;
         correctedToday = 1;
     }
 
@@ -146,7 +147,7 @@ void MeshNode::time_update()
     //  The only way to find out how far off your boards internal clock is, is by uploading this sketch at exactly the same time as the real time, letting it run for a few days
     //  and then determine how many seconds slow/fast your boards internal clock is on a daily average. (24 hours).
 
-    if (hours == 24 - startingHour + 2)
+    if (time.hours == 24 - startingHour + 2)
     {
         correctedToday = 0;
     }
@@ -154,6 +155,26 @@ void MeshNode::time_update()
     // let the sketch know that a new day has started for what concerns correction, if this line was not here the arduiono
     //  would continue to correct for an entire hour that is 24 - startingHour.
 }
+
+void MeshNode::store_timing(Time &time, int &sleep_time)
+{
+    EEPROM.begin(EEPROM_SIZE);
+    EEPROM.put(0, sleep_time);
+    EEPROM.put(sizeof(sleep_time), time);
+    EEPROM.commit();
+    EEPROM.end();
+    Serial.println("time stored");
+}
+
+void MeshNode::load_timing(Time &time, int &sleep_time)
+{
+    EEPROM.begin(EEPROM_SIZE);
+    EEPROM.get(0, sleep_time);
+    EEPROM.get(sizeof(sleep_time), time);
+    EEPROM.end();
+    Serial.println("time loaded");
+}
+
 
 vector<String> MeshNode::splitString(string str, string delimiter)
 {
@@ -187,10 +208,10 @@ void MeshNode::setTimeVal(string str, string delimiter)
     ret.push_back(atoi(str.substr(start, end - start).c_str()));
     Serial.printf("at 0: %d , at 1: %d , at 2 %d\n", ret[0], ret[1], ret[2]);
     startingHour = ret[0];
-    hours = ret[0];
-    minutes = ret[1];
-    seconds = ret[2];
-    Serial.printf("hours: %d , minutes: %d , seconds %d\n", hours, minutes, seconds);
+    time.hours = ret[0];
+    time.minutes = ret[1];
+    time.seconds = ret[2];
+    Serial.printf("hours: %d , minutes: %d , seconds %d\n", time.hours, time.minutes, time.seconds);
     printLocalTime();
 }
 
@@ -203,7 +224,10 @@ void MeshNode::set_global_config(JsonObject global_config)
     Serial.println("config done");
 }
 
-void MeshNode::init_clock() {}
+void MeshNode::init_clock() {
+    Time t;
+    load_timing(t, die_interval);
+}
 
 void MeshNode::listenQueue()
 {
@@ -250,16 +274,16 @@ void MeshNode::send_values(std::function<Measurements()> get_values_callback)
         String time1;
         if (AmPm == "AM")
         {
-            time1 += (hours < 10) ? "0" + String(hours - 3) + ":" : "0" + String(hours - 3) + ":";
+            time1 += (time.hours < 10) ? "0" + String(time.hours - 3) + ":" : "0" + String(time.hours - 3) + ":";
 
-            time1 += (minutes < 10) ? "0" + String(minutes) + ":" : String(minutes) + ":";
-            time1 += (seconds < 10) ? "0" + String(seconds) + ":" : String(seconds);
+            time1 += (time.minutes < 10) ? "0" + String(time.minutes) + ":" : String(time.minutes) + ":";
+            time1 += (time.seconds < 10) ? "0" + String(time.seconds) + ":" : String(time.seconds);
         }
         else
         {
-            time1 += String(hours + 12 - 3) + ":";
-            time1 += (minutes < 10) ? "0" + String(minutes) + ":" : String(minutes) + ":";
-            time1 += (seconds < 10) ? "0" + String(seconds) + ":" : String(seconds);
+            time1 += String(time.hours + 12 - 3) + ":";
+            time1 += (time.minutes < 10) ? "0" + String(time.minutes) + ":" : String(time.minutes) + ":";
+            time1 += (time.seconds < 10) ? "0" + String(time.seconds) + ":" : String(time.seconds);
         }
         // Serial.println(time1);
         String timeStamp = date + "T" + time1 + "Z";
