@@ -6,6 +6,7 @@
 #include <iostream>
 #include <list>
 #include <vector>
+#include <queue>
 #include <iostream>
 #include "time.h"
 #include "sensor.h"
@@ -74,7 +75,9 @@ class MeshNode
 	int die_minute=0;
 	int die_hour=25;
 	int die_second = 0;
-	int die_time=1000;
+	int die_time=10000;
+	std::queue<String> myqueue;
+	void listenQueue();
 };
 
 

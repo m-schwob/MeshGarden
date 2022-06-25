@@ -89,7 +89,7 @@ void MeshNode::update()
         Serial.printf("%d:%d:%d\n",die_hour,die_minute,die_second);
         lasttime=millis();
     }
-    if((die_hour == hours || die_hour+12 ==hours) && die_minute==minutes && die_second==seconds){
+    if((die_hour == hours || die_hour-12 ==hours) && die_minute==minutes && die_second==seconds){
         //put here store function
         Serial.println("die");
         ESP.deepSleep((die_time)*1000000);
@@ -180,6 +180,14 @@ void MeshNode::setTimeVal(string str, string delimiter)
     printLocalTime();
 }
 
+void MeshNode::listenQueue(){
+    if(mesh.isConnected(bridgeId) && !myqueue.empty()){
+        mesh.sendSingle(bridgeId, myqueue.front());
+        myqueue.pop();
+    }
+}
+
+
 void MeshNode:: init_mesh(){
         // mesh.setDebugMsgTypes( ERROR | MESH_STATUS | CONNECTION | SYNC | COMMUNICATION | GENERAL | MSG_TYPES | REMOTE ); // all types on
         mesh.setDebugMsgTypes(ERROR | STARTUP); // set before init() so that you can see startup messages
@@ -193,9 +201,13 @@ void MeshNode:: init_mesh(){
         Serial.printf("node dropped:%u, at time: %u",nodeId,node->mesh.getNodeTime());
         }
         );
-        Task update_time(TASK_SECOND * 1, TASK_FOREVER, [this](){time_update();});
-        userScheduler.addTask(update_time);
-        update_time.enable();
+        // Task update_time(TASK_SECOND * 1, TASK_FOREVER, [this](){time_update();});
+        Task emptyQueue(TASK_SECOND * 1.5 , TASK_FOREVER,[this](){listenQueue();});
+
+        // userScheduler.addTask(update_time);
+        // update_time.enable();
+        userScheduler.addTask(emptyQueue);
+        emptyQueue.enable();
 
         Serial.print(mesh.getNodeTime());
         Serial.println("node id: " + String(mesh.getNodeId()));
@@ -205,37 +217,37 @@ void MeshNode:: init_mesh(){
 
 void MeshNode::send_values(std::function<Measurements()> get_values_callback){
     //add it when we will have a sensor
-    Measurements meas;
-    meas = get_values_callback();
-    String time1;
-    if(AmPm == "AM"){
-    time1 += (hours<10) ? "0"+String(hours-3)+":" : "0"+String(hours-3)+ ":";
-    
-    time1 += (minutes<10) ? "0"+String(minutes)+":" : String(minutes)+ ":";
-    time1 += (seconds<10) ? "0"+String(seconds)+":" : String(seconds);
-    }
-    else{
-    time1 += String(hours+12-3)+":";
-    time1 += (minutes<10) ? "0"+String(minutes)+":" : String(minutes)+ ":";
-    time1 += (seconds<10) ? "0"+String(seconds)+":" : String(seconds);
-    }
-    // Serial.println(time1);
-
-    String timeStamp = date+"T"+ time1 +"Z";
-    Serial.println("sendValues");
-
-    DynamicJsonDocument measure1(256); //ameassure sample Json
-    for(Measurement m : meas){
-        measure1["nodeId"] = mesh.getNodeId();
-        measure1["sensorId"] = "sensor" + String(m.sensor_id);
-        measure1["meassure_type"] = m.type;
-        measure1["value"] = m.value;
-        measure1["time"]["timestampValue"] = timeStamp ;
-        if(measure1["meassure_type"].as<String>() != "" && mesh.isConnected(bridgeId)){
-            String castString = measure1.as<String>(); 
-            Serial.println("send message:");
-            Serial.println(measure1.as<String>());
-            mesh.sendSingle(bridgeId,castString);
+    if(alive){
+        Measurements meas;
+        meas = get_values_callback();
+        String time1;
+        if(AmPm == "AM"){
+        time1 += (hours<10) ? "0"+String(hours-3)+":" : "0"+String(hours-3)+ ":";
+        
+        time1 += (minutes<10) ? "0"+String(minutes)+":" : String(minutes)+ ":";
+        time1 += (seconds<10) ? "0"+String(seconds)+":" : String(seconds);
+        }
+        else{
+        time1 += String(hours+12-3)+":";
+        time1 += (minutes<10) ? "0"+String(minutes)+":" : String(minutes)+ ":";
+        time1 += (seconds<10) ? "0"+String(seconds)+":" : String(seconds);
+        }
+        // Serial.println(time1);
+        String timeStamp = date+"T"+ time1 +"Z";
+        Serial.println("sendValues");
+        DynamicJsonDocument measure1(256); //ameassure sample Json
+        for(Measurement m : meas){
+            measure1["nodeId"] = mesh.getNodeId();
+            measure1["sensorId"] = "sensor" + String(m.sensor_id);
+            measure1["meassure_type"] = m.type;
+            measure1["value"] = m.value;
+            measure1["time"]["timestampValue"] = timeStamp ;
+            if(measure1["meassure_type"].as<String>() != "" && mesh.isConnected(bridgeId)){
+                String castString = measure1.as<String>(); 
+                Serial.println("read message:");
+                Serial.println(measure1.as<String>());
+                myqueue.push(measure1.as<String>());
+            }
         }
     }
 }
@@ -243,7 +255,7 @@ void MeshNode::send_values(std::function<Measurements()> get_values_callback){
 void MeshNode::add_measurement(std::function<Measurements()> callable, unsigned long interval, long iterations)
 {
 Serial.println("adding measurement task");
-measure.set(TASK_SECOND * 5, TASK_FOREVER, [this, callable](){send_values(callable);});
+measure.set(TASK_SECOND * 30, TASK_FOREVER, [this, callable](){send_values(callable);});
 userScheduler.addTask(measure);
 measure.enable();
 }

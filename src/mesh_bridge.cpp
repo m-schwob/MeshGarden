@@ -69,7 +69,7 @@ void newConnectionCallback(uint32_t nodeId)
     death_time["d"]["m"] = node->die_minutes;
     death_time["d"]["h"] = node->die_hours;
     death_time["d"]["s"] = node->die_seconds;
-    death_time["d"]["st"] = 40; //send the sleep time
+    death_time["d"]["st"] = 20; //send the sleep time
     Serial.println("created deathJson");
     node->mesh.sendBroadcast(death_time.as<String>());
     Serial.println(death_time.as<String>());
@@ -168,7 +168,7 @@ void MeshBridge::init_clock(){
     configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
     struct tm timeinfo;
     printLocalTime();  
-    calculate_death(20);
+    calculate_death(10);
     Serial.println("time of next death is:\n");
     Serial.printf("%d:%d:%d",die_hours,die_minutes,die_seconds);
     got_time=true;
@@ -483,7 +483,7 @@ void MeshBridge::set_in_firebase(String nodeId){
 void MeshBridge::exit_mesh_connect_server(){
         String nodeId = String(mesh.getNodeId());
         mesh.stop();
-        calculate_death(60);
+        calculate_death(30);
 
         // // Connect to Wi-Fi
         Serial.print("Connecting to ");
