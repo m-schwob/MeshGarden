@@ -10,6 +10,7 @@ Device::Device(DEVICE_CONSTRUCTOR_ARGUMENTS)
         pinMode(POWER_PIN_CONTROL, OUTPUT);
         digitalWrite(POWER_PIN_CONTROL, LOW);
     }
+    Serial.printf("%s: initalized\n", HARDWARE_INFO.c_str());
 }
 
 DynamicJsonDocument Device::create_envelop(String device_type){

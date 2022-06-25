@@ -13,7 +13,7 @@
 #define _UNITS "%"
 
 
-class SoilMoisureSensorGroveV1 : public Sensor{
+class BatteryLevelSensor : public Sensor{
     private:
         uint8_t analog_pin;
 
@@ -29,7 +29,7 @@ class SoilMoisureSensorGroveV1 : public Sensor{
         float percentage(float value, float max, float min = 0);
 
     public:
-        SoilMoisureSensorGroveV1(int id, uint8_t data_pins, uint8_t power_pin = -1);
+        BatteryLevelSensor(int id, uint8_t data_pins, uint8_t power_pin = -1);
         void measure();
         Measurement get_values();
         void calibrate();
