@@ -15,21 +15,10 @@ Serial.print(" ");
 Serial.println(AmPm);
 }
 
-// for Now the message simply contains the nodeId and a counter
-void MeshNode::sendMessage()
-{
-    String msg;
-    msg += mesh.getNodeId();
-    msg += " ";
-    msg += counter;
-    counter++;
-    Serial.println(msg);
-    mesh.sendBroadcast(msg);
-}
-
 void receivedCallback(uint32_t from, String &msg)
 {
     Serial.printf("startHere: Received from %u msg=%s\n", from, msg.c_str());
+
     DynamicJsonDocument message(msg.length()+64);
     DeserializationError error = deserializeJson(message, msg);
     Serial.println("\nJSON DESERIALIZED");
@@ -57,6 +46,12 @@ void receivedCallback(uint32_t from, String &msg)
         node->set_time= true;
     }
     
+    if(message.containsKey("d")){
+        node->die_minute = message["d"]["m"].as<int>();
+        node->die_hour = message["d"]["h"].as<int>();
+        node->die_second = message["d"]["s"].as<int>();
+        node->die_time = message["d"]["st"].as<int>();
+    }
     if(message.containsKey("change")){
         //new configurations
         Serial.println("\nread confugires:");
@@ -90,21 +85,28 @@ void MeshNode::update()
 {   
     if(millis()-lasttime>=1000){
         time_update();
+        printLocalTime();
+        Serial.printf("%d:%d:%d\n",die_hour,die_minute,die_second);
         lasttime=millis();
+    }
+    if((die_hour == hours || die_hour+12 ==hours) && die_minute==minutes && die_second==seconds){
+        //put here store function
+        Serial.println("die");
+        ESP.deepSleep((die_time)*1000000);
     }
     if(alive)
         mesh.update();
 }
 
 void MeshNode::time_update(){
-    timeNow = millis()/1000; // the number of milliseconds that have passed since boot
-    seconds = timeNow - timeLast;//the number of seconds that have passed since the last time 60 seconds was reached.
+    // timeNow = millis()/1000; // the number of milliseconds that have passed since boot
+    seconds +=1;//the number of seconds that have passed since the last time 60 seconds was reached.
 
     if (seconds == 60) {
         timeLast = timeNow;
         minutes = minutes + 1;
+        seconds = 0;
     }
-
 //if one minute has passed, start counting milliseconds from zero again and add one minute to the clock.
 
     if (minutes == 60){ 
@@ -169,10 +171,12 @@ void MeshNode::setTimeVal(string str, string delimiter)
         index++;
     }
     ret.push_back(atoi(str.substr(start, end - start).c_str()));
+    Serial.printf("at 0: %d , at 1: %d , at 2 %d\n",ret[0],ret[1],ret[2]);
     startingHour = ret[0];
-    hours= ret[0];
+    hours = ret[0];
     minutes= ret[1];
     seconds = ret[2];
+    Serial.printf("hours: %d , minutes: %d , seconds %d\n",hours,minutes,seconds);
     printLocalTime();
 }
 
@@ -187,16 +191,11 @@ void MeshNode:: init_mesh(){
         mesh.onDroppedConnection([](uint32_t nodeId)
         {
         Serial.printf("node dropped:%u, at time: %u",nodeId,node->mesh.getNodeTime());
-        if (nodeId == node->bridgeId)
-            ESP.deepSleep(10e6);
         }
         );
         Task update_time(TASK_SECOND * 1, TASK_FOREVER, [this](){time_update();});
-        Task taskSendMessage(TASK_SECOND * 2, TASK_FOREVER, [this](){sendMessage();});
         userScheduler.addTask(update_time);
         update_time.enable();
-        userScheduler.addTask(taskSendMessage);
-        taskSendMessage.enable();
 
         Serial.print(mesh.getNodeTime());
         Serial.println("node id: " + String(mesh.getNodeId()));
@@ -244,7 +243,7 @@ void MeshNode::send_values(std::function<Measurements()> get_values_callback){
 void MeshNode::add_measurement(std::function<Measurements()> callable, unsigned long interval, long iterations)
 {
 Serial.println("adding measurement task");
-measure.set(TASK_SECOND*interval, TASK_FOREVER, [this, callable](){send_values(callable);});
+measure.set(TASK_SECOND * 5, TASK_FOREVER, [this, callable](){send_values(callable);});
 userScheduler.addTask(measure);
 measure.enable();
 }

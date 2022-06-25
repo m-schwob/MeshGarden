@@ -37,7 +37,6 @@ void newConnectionCallback(uint32_t nodeId)
     uint32_t time = node->mesh.getNodeTime();
     Serial.printf("--> startHere: New Connection, nodeId = %u\n", nodeId);
     Serial.printf("new node connected at time: %u\n", time);
-
     Serial.println("time:");    
     printLocalTime();
     struct tm timeinfo;
@@ -65,9 +64,17 @@ void newConnectionCallback(uint32_t nodeId)
     Serial.printf("node time: %u \n",node->mesh.getNodeTime());
     node->mesh.sendBroadcast(timer.as<String>());
 
+    DynamicJsonDocument death_time(NEXT_DEATH_JSON);
+    death_time["d"]["m"] = node->die_minutes;
+    death_time["d"]["h"] = node->die_hours;
+    death_time["d"]["s"] = node->die_seconds;
+    death_time["d"]["st"] = 40; //send the sleep time
+    Serial.println("created deathJson");
+    node->mesh.sendBroadcast(death_time.as<String>());
+    Serial.println(death_time.as<String>());
+
     if (node->change_log.find(String(nodeId)) != node->change_log.end()){
         Serial.println("sending update to node " + String(nodeId) + "\n" + String(node->change_log[String(nodeId)]));
-        
         if(node->change_log[String(nodeId)] != ""){
             DynamicJsonDocument doc(node->change_log[String(nodeId)].length()+32);
             doc["change"] = node->change_log[String(nodeId)];
@@ -83,20 +90,6 @@ void newConnectionCallback(uint32_t nodeId)
 void changedConnectionCallback()
 {  
     Serial.printf("Changed connections\n");
-    // uint32_t time = node->mesh.getNodeTime();
-    // Serial.printf("new node connected at time: %u\n", time);
-    // Serial.println("time:");    
-    // printLocalTime();
-    // struct tm timeinfo;
-    // if(!getLocalTime(&timeinfo)){
-    //     Serial.println("Failed to obtain time");
-    //     return;
-    //     }
-    // char s[100];
-    
-    // int rc = strftime(s,sizeof(s),"%b %d,20%y at %r", &timeinfo);
-    // Serial.printf("%d characters written.\n%s\n",rc,s);   
-    // node->mesh.sendBroadcast("clock " + String(s));
 }
 // event driven functions for the mesh
 void nodeTimeAdjustedCallback(int32_t offset)
@@ -141,34 +134,46 @@ void MeshBridge::init_mesh()
 void MeshBridge::update()
 {
       // it will run the user scheduler as well
-    if(millis()-lasttime >=20000){
+
+    if(got_time){
+        struct tm timeinfo;
+        if(!getLocalTime(&timeinfo)){
+            Serial.println("Failed to obtain time");
+            return;
+        }
+        if(timeinfo.tm_hour==die_hours && timeinfo.tm_sec==die_seconds && timeinfo.tm_min==die_minutes){
         get_mesh_nodes(); // get the working nodes list before quit
         mesh.setContainsRoot(false);
-        exit_mesh_connect_server();
         lasttime=millis();
+        digitalWrite(LED_BUILTIN, LOW);   // turn the LED on (HIGH is the voltage level)
+        exit_mesh_connect_server();
+        }
     }  
     mesh.update();
 }
 
 void MeshBridge::init_clock(){
-  Serial.print("Connecting to server to calibrate clock");
-  Serial.println(ssid);
-  WiFi.begin(ssid, password);
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
-  }
-  Serial.println("");
-  Serial.println("WiFi connected.");
-  
-  // Init and get the time
-  configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
-  struct tm timeinfo;
-  printLocalTime();
-
-  //disconnect WiFi as it's no longer needed
-  WiFi.disconnect(true);
-  WiFi.mode(WIFI_OFF);
+    Serial.print("Connecting to server to calibrate clock");
+    Serial.println(ssid);
+    WiFi.begin(ssid, password);
+    while (WiFi.status() != WL_CONNECTED) {
+        delay(500);
+        Serial.print(".");
+    }
+    Serial.println("");
+    Serial.println("WiFi connected.");
+    
+    // Init and get the time
+    configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
+    struct tm timeinfo;
+    printLocalTime();  
+    calculate_death(20);
+    Serial.println("time of next death is:\n");
+    Serial.printf("%d:%d:%d",die_hours,die_minutes,die_seconds);
+    got_time=true;
+    //disconnect WiFi as it's no longer needed
+    WiFi.disconnect(true);
+    WiFi.mode(WIFI_OFF);
 }
 
 // a function that parses a string and creates a vector of words
@@ -277,6 +282,14 @@ void MeshBridge::get_mesh_nodes()
     }
     Serial.println("mesh network bridge:" + String(mesh.getNodeId()));
     mesh_values.push_back(String(mesh.getNodeId()));
+    // Serial.println("add kill task");
+    // Task killer(TASK_SECOND *1,TASK_FOREVER, &exit_mesh_connect_server);
+    // Serial.println("created kill task");
+    // userScheduler.addTask(killer);
+    // killer.enable();
+    // killer.delay(5);
+    // Serial.println("delayed kill task");
+
 }
 
 //this function will delete the active mesh nodes before inserting the new mesh network active nodes in
@@ -475,6 +488,7 @@ void MeshBridge::set_in_firebase(String nodeId){
 void MeshBridge::exit_mesh_connect_server(){
         String nodeId = String(mesh.getNodeId());
         mesh.stop();
+        calculate_death(60);
 
         // // Connect to Wi-Fi
         Serial.print("Connecting to ");
@@ -533,6 +547,8 @@ void MeshBridge::exit_mesh_connect_server(){
         
         // initializing the mesh network again
         init_mesh();
+        digitalWrite(LED_BUILTIN, HIGH);   // turn the LED on (HIGH is the voltage level)
+
 }
 
 void MeshBridge::set_default_nickname(String nodeId){
@@ -550,4 +566,33 @@ void MeshBridge::set_default_nickname(String nodeId){
             Serial.println(fbdo.errorReason());
         }
     }
+}
+
+void MeshBridge::calculate_death(int ttd){
+      struct tm timeinfo;
+    if(!getLocalTime(&timeinfo)){
+        Serial.println("Failed to obtain time");
+        return;
+    }
+    if(timeinfo.tm_sec+ ttd < 60){
+        die_seconds = timeinfo.tm_sec+ttd;
+        die_minutes = timeinfo.tm_min;
+        die_hours =   timeinfo.tm_hour;
+    }
+    else if(timeinfo.tm_min + 1 <60){
+        die_seconds = (timeinfo.tm_sec+ttd)-60;
+        die_minutes = timeinfo.tm_min+1;
+        die_hours =   timeinfo.tm_hour;
+    }  
+    else if(timeinfo.tm_hour +1 <24){
+        die_seconds = (timeinfo.tm_sec+ttd)-60;
+        die_minutes = 0;
+        die_hours = timeinfo.tm_hour + 1;
+    }
+    else if(timeinfo.tm_hour +1 <24){
+    die_seconds = 60-(timeinfo.tm_sec+ttd);
+    die_minutes = 1;
+    die_hours = 0;
+    }
+    return;
 }

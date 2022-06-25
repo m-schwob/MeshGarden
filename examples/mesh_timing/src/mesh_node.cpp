@@ -17,16 +17,16 @@ Serial.println(AmPm);
 
 
 // for Now the message simply contains the nodeId and a counter
-void MeshNode::sendMessage()
-{
-    String msg;
-    msg += mesh.getNodeId();
-    msg += " ";
-    msg += counter;
-    counter++;
-    Serial.println(msg);
-    mesh.sendBroadcast(msg);
-}
+// void MeshNode::sendMessage()
+// {
+//     String msg;
+//     msg += mesh.getNodeId();
+//     msg += " ";
+//     msg += counter;
+//     counter++;
+//     Serial.println(msg);
+//     mesh.sendBroadcast(msg);
+// }
 
 void receivedCallback(uint32_t from, String &msg)
 {
