@@ -26,6 +26,25 @@ void MeshGarden::GenericSensor::set(Funcs funcs)
     this->measure_func = funcs.measure_func;
 }
 
+void MeshGarden::store_timing(Time &time, int &sleep_time)
+{
+    EEPROM.begin(EEPROM_SIZE);
+    EEPROM.put(0, sleep_time);
+    EEPROM.put(sizeof(sleep_time), time);
+    EEPROM.commit();
+    EEPROM.end();
+    Serial.println("time stored");
+}
+
+void MeshGarden::load_timing(Time &time, int &sleep_time)
+{
+    EEPROM.begin(EEPROM_SIZE);
+    EEPROM.get(0, sleep_time);
+    EEPROM.get(sizeof(sleep_time), time);
+    EEPROM.end();
+    Serial.println("time loaded");
+}
+
 void MeshGarden::save_configuration(String &config)
 {
     Serial.println("saving configuration to file");
@@ -221,6 +240,18 @@ void MeshGarden::init_mesh_connection()
 MeshGarden::MeshGarden() : config(0)
 {
     // Serial.begin(115200);
+}
+
+void MeshGarden::add_sensor(String hardware_info, InitSensor init_sensor_func, Measure measure_func)
+{
+    Funcs funcs;
+    funcs.init_sensor_func = init_sensor_func;
+    funcs.measure_func = measure_func;
+    funcs_map[hardware_info] = funcs;
+}
+
+void MeshGarden::begin()
+{
     // create a pins map
     map_pins();
 
@@ -234,18 +265,8 @@ MeshGarden::MeshGarden() : config(0)
     {
         Serial.println("started the file system");
     }
-}
+    EEPROM.begin(EEPROM_SIZE);
 
-void MeshGarden::add_sensor(String hardware_info, InitSensor init_sensor_func, Measure measure_func)
-{
-    Funcs funcs;
-    funcs.init_sensor_func = init_sensor_func;
-    funcs.measure_func = measure_func;
-    funcs_map[hardware_info] = funcs;
-}
-
-void MeshGarden::begin()
-{
     load_configuration();
     parse_config();
     config.~DynamicJsonDocument();

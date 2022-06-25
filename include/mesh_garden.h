@@ -5,7 +5,9 @@
 #include <ArduinoJson.h>
 #include <list>
 #include <LittleFS.h>
+#include <EEPROM.h>
 
+#include "constants_utils.h"
 #include "pins_maps.h"
 #include "device.h"
 #include "sensor.h"
@@ -15,6 +17,8 @@
 #else
 #include "mesh_node.h"
 #endif
+
+#define EEPROM_SIZE 3 * sizeof(int)
 
 uint8_t pin(String pin);
 
@@ -64,6 +68,8 @@ private:
 #endif
 
 private:
+    void store_timing(Time &time, int &sleep_time);
+    void load_timing(Time &time, int &sleep_time);
     void save_configuration(String &config);
     bool load_configuration();
     void parse_config();
