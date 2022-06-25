@@ -249,10 +249,10 @@ class _SensorsScreenState extends State<SensorsScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Center(
-                        child:
-                        Text("No sensors for this plant", style: kBodyText2),
-                      ),
+                          Center(
+                          child:
+                          Text("No sensors for this plant", style: kBodyText2.copyWith(fontSize: 26)),
+                        ),
                       Center(
                         child: Image(
                           // width: 60,
@@ -367,25 +367,34 @@ class _SensorsScreenState extends State<SensorsScreen> {
                       //   ),
                       // );
                       sensorAtt.add(
-                        Text(
+                        ListTile(
+                          dense: true,
+                          visualDensity: VisualDensity(vertical: -2),
+                          title: Text(
                             " Sensor ID :  \t\t\t\t\t\t\t\t\t" +
                                 sensors_list[index].sensor_id.toString(),
-                            style: kSensorText),
-                      );
+                            style: kConfigSubTitle),
+                        ));
                       sensorAtt.add(Divider(color: Colors.blueGrey));
                       sensorAtt.add(
-                        Text(
+                        ListTile(
+                          dense: true,
+                          visualDensity: VisualDensity(vertical: -2),
+                          title: Text(
                             " Hardware Info : \t\t" +
                                 sensors_list[index].hardware_info.toString(),
-                            style: kSensorText),
-                      );
+                            style: kConfigSubTitle),
+                      ));
                       sensorAtt.add(Divider(color: Colors.blueGrey));
                       sensorAtt.add(
-                        Text(
+                        ListTile(
+                          dense: true,
+                          visualDensity: VisualDensity(vertical: -2),
+                          title: Text(
                             " Sample Interval : " +
                                 sensors_list[index].sample_interval.toString(),
-                            style: kSensorText),
-                      );
+                            style: kConfigSubTitle),
+                      ));
                       sensorAtt.add(Divider(color: Colors.blueGrey));
                       sensors_list[index].sensor_type!.forEach((element) {
                         // int i = 1;
@@ -397,15 +406,18 @@ class _SensorsScreenState extends State<SensorsScreen> {
                       int i = 1;
                       type_unit_list.forEach((tuple) {
                         sensorAtt.add(
-                          Text(
+                          ListTile(
+                            dense: true,
+                            visualDensity: VisualDensity(vertical: -2),
+                            title: Text(
                               " Type  ${i}  : " +
                                   tuple[0].toString() +
                                   "\t|\tUnits  : " +
                                   "\"" +
                                   tuple[1].toString() +
                                   "\"",
-                              style: kSensorText),
-                        );
+                              style: kConfigSubTitle),
+                          ));
                         sensorAtt.add(Divider(color: Colors.blueGrey));
                         i++;
                       });
@@ -416,20 +428,23 @@ class _SensorsScreenState extends State<SensorsScreen> {
 
                       sensors_list[index].pinout!.forEach((key, value) {
                         sensorAtt.add(
-                          Text(" Out  \"${key}\"  pin  :   \"${value}\"",
-                              style: kSensorText),
-                        );
+                          ListTile(
+                            dense: true,
+                            visualDensity: VisualDensity(vertical: -2),
+                            title: Text(" Sensor pin :  \"${key}\" | Controller pin :   \"${value}\"",
+                              style: kConfigSubTitle),
+                        ));
                         sensorAtt.add(Divider(color: Colors.blueGrey));
                       });
 
                       sensorAtt.removeLast();
-                      sensorAtt.add(Divider());
+                      // sensorAtt.add(Divider());
                       sensorAtt.add(
                         ListTile(
                           // subtitle:
                           // Text(node_data['nickname'], style: kConfigTitle),
                           trailing : Container(
-                            height: 40,
+                            height: 35,
                             width: 80,
                             decoration: BoxDecoration(
                               color: Colors.redAccent,
@@ -442,11 +457,11 @@ class _SensorsScreenState extends State<SensorsScreen> {
                                 ),
                               ),
                               onPressed: () {
-                                snapshot.requireData.reference.update({"sensors.${sensors_list[index].sensor_id.toString()}": FieldValue.delete()});
+                                _openRemoveDialog(snapshot, sensors_list[index].sensor_id.toString());
                               },
                               child: Text(
                                 "Remove",
-                                style: kConfigSubTitle,
+                                style: RemoveTitle,
                               ),
                             ),
                           ),
@@ -457,9 +472,9 @@ class _SensorsScreenState extends State<SensorsScreen> {
                         // padding: const EdgeInsets.symmetric(vertical: 10.0),
                         padding: const EdgeInsets.all(12.0),
                         child: Card(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(18),
-                          ),
+                          // shape: RoundedRectangleBorder(
+                          //   borderRadius: BorderRadius.circular(18),
+                          // ),
                           shadowColor: Colors.white,
                           elevation: 10,
                           color: kTextFieldFill,
@@ -506,4 +521,28 @@ class _SensorsScreenState extends State<SensorsScreen> {
   //       )
   //   );
   // }
+
+  Future _openRemoveDialog(snap, sensor_id_string) => showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (context) => AlertDialog(
+      title: Text("Are you sure you want to remove?"),
+      actions: [
+        TextButton(
+          child: Text('Confirm'),
+          onPressed: () {
+            snap.requireData.reference.update({"sensors.${sensor_id_string}": FieldValue.delete()});
+            Navigator.of(context).pop();
+          },
+        ),
+        TextButton(
+          child: Text('Cancel'),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
+      ],
+    ),
+  );
+
 }

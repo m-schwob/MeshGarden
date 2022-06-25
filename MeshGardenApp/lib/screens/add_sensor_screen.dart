@@ -95,6 +95,7 @@ class _AddSensorScreenState extends State<AddSensorScreen> {
   void dispose() {
     _hardware_info.dispose();
     _sample_interval.dispose();
+
     // _passwordConfirm.dispose();
     super.dispose();
   }
@@ -481,232 +482,235 @@ class _AddSensorScreenState extends State<AddSensorScreen> {
           padding:
               const EdgeInsets.only(left: 16, right: 16, top: 20, bottom: 30),
           // child: Column(
-          child: ListView(
-            children: [
-              // slivers:[
-              Row(
-                mainAxisAlignment: MainAxisAlignment.start,
+          child: Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: ListView(
+              children: [
+                // slivers:[
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
 
-                // padding: const EdgeInsets.symmetric(
-                //     horizontal: 8, vertical: 16
-                // ),
-                children: [
-                  Flexible(
-                    child: TextFormField(
-                      style: kSensorInputText,
-                      decoration: InputDecoration(
-                        border: UnderlineInputBorder(),
-                        labelText: 'Enter Hardware Info',
-                        labelStyle: kConfigTitle,
+                  // padding: const EdgeInsets.symmetric(
+                  //     horizontal: 8, vertical: 16
+                  // ),
+                  children: [
+                    Flexible(
+                      child: TextFormField(
+                        style: kSensorInputText,
+                        decoration: InputDecoration(
+                          border: UnderlineInputBorder(),
+                          labelText: 'Hardware Info',
+                          labelStyle: kConfigTitle,
+                        ),
+                        controller: _hardware_info,
                       ),
-                      controller: _hardware_info,
+                    ),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+
+                  // padding: const EdgeInsets.symmetric(
+                  //     horizontal: 8, vertical: 16
+                  // ),
+                  children: [
+                    Flexible(
+                      child: TextFormField(
+                        keyboardType: TextInputType.number,
+                        style: kSensorInputText,
+                        decoration: InputDecoration(
+                          border: UnderlineInputBorder(),
+                          labelText: 'Sample Interval',
+                          labelStyle: kConfigTitle,
+                        ),
+                        controller: _sample_interval,
+                      ),
+                    ),
+                  ],
+                ),
+                Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+                  IconButton(
+                    onPressed: () async {
+                      setState(() {
+                        _typesAndUnitsCount++;
+                        types_list.add(_typesAndUnitsCount.toString());
+                        units_list.add(_typesAndUnitsCount.toString());
+                      });
+                    },
+                    icon: Icon(
+                      Icons.add_circle,
+                      color: Colors.blue,
                     ),
                   ),
-                ],
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-
-                // padding: const EdgeInsets.symmetric(
-                //     horizontal: 8, vertical: 16
-                // ),
-                children: [
-                  Flexible(
-                    child: TextFormField(
-                      keyboardType: TextInputType.number,
-                      style: kSensorInputText,
-                      decoration: InputDecoration(
-                        border: UnderlineInputBorder(),
-                        labelText: 'Enter Sample Interval',
-                        labelStyle: kConfigTitle,
-                      ),
-                      controller: _sample_interval,
+                  SizedBox(
+                    width: 10,
+                  ),
+                  IconButton(
+                    onPressed: () async {
+                      setState(() {
+                        if (_typesAndUnitsCount > 1) {
+                          _typesAndUnitsCount--;
+                          types_list.removeLast();
+                          units_list.removeLast();
+                        }
+                      });
+                    },
+                    icon: Icon(
+                      Icons.remove_circle,
+                      color: Colors.red,
                     ),
                   ),
-                ],
-              ),
-              Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-                IconButton(
-                  onPressed: () async {
-                    setState(() {
-                      _typesAndUnitsCount++;
-                      types_list.add(_typesAndUnitsCount.toString());
-                      units_list.add(_typesAndUnitsCount.toString());
-                    });
-                  },
-                  icon: Icon(
-                    Icons.add_circle,
-                    color: Colors.blue,
-                  ),
-                ),
-                SizedBox(
-                  width: 10,
-                ),
-                IconButton(
-                  onPressed: () async {
-                    setState(() {
-                      if (_typesAndUnitsCount > 1) {
-                        _typesAndUnitsCount--;
-                        types_list.removeLast();
-                        units_list.removeLast();
-                      }
-                    });
-                  },
-                  icon: Icon(
-                    Icons.remove_circle,
-                    color: Colors.red,
-                  ),
-                ),
-              ]),
+                ]),
 
+                  ListView.builder(
+                    physics: ScrollPhysics(),
+                    shrinkWrap: true,
+                    itemCount: _typesAndUnitsCount,
+                    itemBuilder: (BuildContext ctx, int index) {
+                      // int types_num = sensors_list[index].sensor_type!.length;
+                      // List<List<String>> type_unit_list = [];
+
+
+                      //Add sensor's text fields
+                      return Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+
+                        // padding: const EdgeInsets.symmetric(
+                        //     horizontal: 8, vertical: 16
+                        // ),
+                        children: [
+                          Flexible(
+                            child: TextFormField(
+                              // keyboardType: TextInputType.name,
+                              style: kSensorInputText,
+                              decoration: InputDecoration(
+                                border: UnderlineInputBorder(),
+                                labelText: 'Type',
+                                labelStyle: kConfigTitle,
+                              ),
+                              // controller: _typeCon,
+                              onChanged: (text){
+                                types_list[index]= text.trim();
+                                },
+                            ),
+                          ),
+                          Flexible(
+                            child: TextFormField(
+                              style: kSensorInputText,
+                              decoration: InputDecoration(
+                                border: UnderlineInputBorder(),
+                                labelText: 'Units',
+                                labelStyle: kConfigTitle,
+                              ),
+                              onChanged: (text){
+                                units_list[index]= text.trim();
+                              },
+                            ),
+                          ),
+                        ],
+                      );
+
+                      // return Padding(
+                      //   // padding: const EdgeInsets.symmetric(vertical: 10.0),
+                      //   padding: const EdgeInsets.all(12.0),
+                      //   child: Column(
+                      //       crossAxisAlignment: CrossAxisAlignment.start,
+                      //       children: sensorFields),
+                      // );
+                    },
+                  ),
+
+                // SizedBox(height: 10,),
+                Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+                  IconButton(
+                    onPressed: () async {
+                      setState(() {
+                        _pinoutsCount++;
+                        sensor_pin_list.add(_pinoutsCount.toString());
+                        controller_pin_list.add(_pinoutsCount.toString());
+                      });
+                    },
+                    icon: Icon(
+                      Icons.add_circle,
+                      color: Colors.blue,
+                    ),
+                  ),
+                  SizedBox(
+                    width: 10,
+                  ),
+                  IconButton(
+                    onPressed: () async {
+                      setState(() {
+                        if (_pinoutsCount > 1) {
+                          _pinoutsCount--;
+                          sensor_pin_list.removeLast();
+                          controller_pin_list.removeLast();
+                        }
+                      });
+                    },
+                    icon: Icon(
+                      Icons.remove_circle,
+                      color: Colors.red,
+                    ),
+                  ),
+                ]),
                 ListView.builder(
                   physics: ScrollPhysics(),
-                  shrinkWrap: true,
-                  itemCount: _typesAndUnitsCount,
-                  itemBuilder: (BuildContext ctx, int index) {
-                    // int types_num = sensors_list[index].sensor_type!.length;
-                    // List<List<String>> type_unit_list = [];
+                    shrinkWrap: true,
+                    itemCount: _pinoutsCount,
+                    itemBuilder: (BuildContext ctx, int index) {
+                      // int types_num = sensors_list[index].sensor_type!.length;
+                      // List<List<String>> type_unit_list = [];
 
+                      //Add sensor's text fields
+                      return Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
 
-                    //Add sensor's text fields
-                    return Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-
-                      // padding: const EdgeInsets.symmetric(
-                      //     horizontal: 8, vertical: 16
-                      // ),
-                      children: [
-                        Flexible(
-                          child: TextFormField(
-                            // keyboardType: TextInputType.name,
-                            style: kSensorInputText,
-                            decoration: InputDecoration(
-                              border: UnderlineInputBorder(),
-                              labelText: 'Enter Type',
-                              labelStyle: kConfigTitle,
-                            ),
-                            // controller: _typeCon,
-                            onChanged: (text){
-                              types_list[index]= text.trim();
+                        // padding: const EdgeInsets.symmetric(
+                        //     horizontal: 8, vertical: 16
+                        // ),
+                        children: [
+                          Flexible(
+                            child: TextFormField(
+                              style: kSensorInputText,
+                              decoration: InputDecoration(
+                                border: UnderlineInputBorder(),
+                                labelText: 'Sensor Pin',
+                                labelStyle: kConfigTitle,
+                              ),
+                              onChanged: (text){
+                                sensor_pin_list[index]= text.trim();
                               },
-                          ),
-                        ),
-                        Flexible(
-                          child: TextFormField(
-                            style: kSensorInputText,
-                            decoration: InputDecoration(
-                              border: UnderlineInputBorder(),
-                              labelText: 'Enter Units',
-                              labelStyle: kConfigTitle,
                             ),
-                            onChanged: (text){
-                              units_list[index]= text.trim();
-                            },
                           ),
-                        ),
-                      ],
-                    );
+                          Flexible(
+                            child: TextFormField(
+                              style: kSensorInputText,
+                              decoration: InputDecoration(
+                                border: UnderlineInputBorder(),
+                                labelText: 'Controller Pin',
+                                labelStyle: kConfigTitle,
+                              ),
+                              onChanged: (text){
+                                controller_pin_list[index]= text.trim();
+                              },
+                            ),
+                          ),
+                        ],
+                      );
 
-                    // return Padding(
-                    //   // padding: const EdgeInsets.symmetric(vertical: 10.0),
-                    //   padding: const EdgeInsets.all(12.0),
-                    //   child: Column(
-                    //       crossAxisAlignment: CrossAxisAlignment.start,
-                    //       children: sensorFields),
-                    // );
-                  },
-                ),
-
-              // SizedBox(height: 10,),
-              Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-                IconButton(
-                  onPressed: () async {
-                    setState(() {
-                      _pinoutsCount++;
-                      sensor_pin_list.add(_pinoutsCount.toString());
-                      controller_pin_list.add(_pinoutsCount.toString());
-                    });
-                  },
-                  icon: Icon(
-                    Icons.add_circle,
-                    color: Colors.blue,
+                      // return Padding(
+                      //   // padding: const EdgeInsets.symmetric(vertical: 10.0),
+                      //   padding: const EdgeInsets.all(12.0),
+                      //   child: Column(
+                      //       crossAxisAlignment: CrossAxisAlignment.start,
+                      //       children: sensorFields),
+                      // );
+                    },
                   ),
-                ),
-                SizedBox(
-                  width: 10,
-                ),
-                IconButton(
-                  onPressed: () async {
-                    setState(() {
-                      if (_pinoutsCount > 1) {
-                        _pinoutsCount--;
-                        sensor_pin_list.removeLast();
-                        controller_pin_list.removeLast();
-                      }
-                    });
-                  },
-                  icon: Icon(
-                    Icons.remove_circle,
-                    color: Colors.red,
-                  ),
-                ),
-              ]),
-              ListView.builder(
-                physics: ScrollPhysics(),
-                  shrinkWrap: true,
-                  itemCount: _pinoutsCount,
-                  itemBuilder: (BuildContext ctx, int index) {
-                    // int types_num = sensors_list[index].sensor_type!.length;
-                    // List<List<String>> type_unit_list = [];
-
-                    //Add sensor's text fields
-                    return Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-
-                      // padding: const EdgeInsets.symmetric(
-                      //     horizontal: 8, vertical: 16
-                      // ),
-                      children: [
-                        Flexible(
-                          child: TextFormField(
-                            style: kSensorInputText,
-                            decoration: InputDecoration(
-                              border: UnderlineInputBorder(),
-                              labelText: 'Enter Sensor Pin',
-                              labelStyle: kConfigTitle,
-                            ),
-                            onChanged: (text){
-                              sensor_pin_list[index]= text.trim();
-                            },
-                          ),
-                        ),
-                        Flexible(
-                          child: TextFormField(
-                            style: kSensorInputText,
-                            decoration: InputDecoration(
-                              border: UnderlineInputBorder(),
-                              labelText: 'Enter Controller Pin',
-                              labelStyle: kConfigTitle,
-                            ),
-                            onChanged: (text){
-                              controller_pin_list[index]= text.trim();
-                            },
-                          ),
-                        ),
-                      ],
-                    );
-
-                    // return Padding(
-                    //   // padding: const EdgeInsets.symmetric(vertical: 10.0),
-                    //   padding: const EdgeInsets.all(12.0),
-                    //   child: Column(
-                    //       crossAxisAlignment: CrossAxisAlignment.start,
-                    //       children: sensorFields),
-                    // );
-                  },
-                ),
-              SizedBox(height: 40,),
-            ],
+                SizedBox(height: 40,),
+              ],
+            ),
           ),
         ),
       ),
