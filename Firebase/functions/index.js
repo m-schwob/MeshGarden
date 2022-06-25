@@ -4,21 +4,71 @@ admin.initializeApp();
 
 
 exports.onNodeWrite = functions.firestore.document('/Nodes/{node_id}').onWrite(async (change, context) => {
-    const node_id = context.params.node_id;
-
-    await update_changes_collection(change, node_id);
-    await update_measurements_collection(change, node_id);
+    // skip if trigger by change in active field 
+    if (await change.before.get('active') == await change.before.get('active')) {
+        const node_id = context.params.node_id;
+        if (change.after.exists) {
+            const global_config = await get_global_config();
+            await update_changes_collection(change.after.ref, global_config);
+            await update_measurements_collection(change, node_id);
+            functions.logger.log("node " + node_id + " changed");
+        } else {
+            functions.logger.log("node " + node_id + " deleted");
+        }
+    }
 });
 
-async function update_changes_collection(change, node_id) {
-    if (change.after.exists) {
-        const data = change.after.data();
-        const doc = admin.firestore().collection('Changes').doc(node_id);
-        doc.set({ 'config': JSON.stringify(data) });
-        functions.logger.log("node " + node_id + " changed");
-    } else {
-        functions.logger.log("node " + node_id + " deleted");
+
+exports.onConfigWrite = functions.firestore.document('/Network/{doc}').onWrite(async (change, context) => {
+    const global_config = await get_global_config();
+    const nodes = admin.firestore().collection('/Nodes');
+    for (doc of await nodes.listDocuments()) {
+        await update_changes_collection(doc, global_config);
     }
+    functions.logger.log("nodes configuration changed");
+});
+
+exports.onActivityChanged = functions.firestore.document('/MeshNetwork/active').onWrite(async (change, context) => {
+    const nodes_collection = admin.firestore().collection('Nodes');
+
+    // get active nodes from Nodes collection
+    const active_before = (await nodes_collection.listDocuments()).map(node => node.id);
+    // get active nodes from active document
+    const active_after = Object.keys(change.after.data());
+    //get differences
+    const to_activate = active_after.filter(x => active_before.includes(x) === false);
+    const to_deactivate = active_before.filter(x => active_after.includes(x) === false);
+    functions.logger.log(
+        `active nodes before: [${active_before}]\n` +
+        `active nodes after: [${active_after}]\n` +
+        `nodes to activate: [${to_activate}]\n` +
+        `nodes to deactivate [${to_deactivate}]`);
+
+    // set nodes to active
+    for (var node of to_activate) {
+        nodes_collection.doc(node).set({ 'active': true });
+        functions.logger.log(`node ${node} has been activated`);
+    }
+
+    // set nodes to not active
+    for (var node of to_deactivate) {
+        nodes_collection.doc(node).set({ 'active': false });
+        functions.logger.log(`node ${node} has been deactivated`);
+    }
+});
+
+async function get_global_config() {
+    const global_config = await admin.firestore().collection('/Network').get();
+    return Object.assign({}, ...global_config.docs.map(doc => ({ [doc.id]: doc.data() })));
+}
+
+async function update_changes_collection(node_document_ref, global_config) {
+    // get nodes config data
+    const node_doc = await node_document_ref.get();
+
+    // set config to changes collections
+    const doc = admin.firestore().collection('Changes').doc(node_doc.id);
+    doc.set({ 'config': JSON.stringify({ ...node_doc.data(), ...global_config }) });
 }
 
 async function update_measurements_collection(change, node_id) {
