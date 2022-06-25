@@ -104,24 +104,32 @@ void nodeTimeAdjustedCallback(int32_t offset)
 void MeshBridge::set_global_config(JsonObject global_config)
 {
     // mesh settings
-    MESH_PREFIX = global_config["mesh_prefix"].as<String>();
-    MESH_PASSWORD = global_config["mesh_password"].as<String>();
-    MESH_PORT = global_config["mesh_port"].as<size_t>();
+    MESH_PREFIX = global_config["mesh"]["mesh_prefix"].as<String>();
+    MESH_PASSWORD = global_config["mesh"]["mesh_password"].as<String>();
+    MESH_PORT = global_config["mesh"]["mesh_port"].as<size_t>();
 
     // wifi settings
-    ssid = global_config["ssid"];
-    password = global_config["password"];
+    // ssid = new char[100];
+    ssid = new char[global_config["wifi"]["ssid"].as<String>().length()];
+    strcpy(ssid, global_config["wifi"]["ssid"]);
+    // password = new char[100];
+    password = new char[global_config["wifi"]["password"].as<String>().length()];
+    strcpy(password, global_config["wifi"]["password"]);
 
     // time settings
-    ntp_server = global_config["ntp_server"];
-    gmt_offset_sec = global_config["gmt_offset_sec"].as<long>();
-    daylight_offset_sec = global_config["daylight_offset_sec"].as<int>();
+    // ntp_server = new char[100];
+    ntp_server = new char[global_config["time"]["ntp_server"].as<String>().length()];
+    strcpy(ntp_server, global_config["time"]["ntp_server"]);
+    gmt_offset_sec = global_config["time"]["gmt_offset_sec"].as<long>();
+    daylight_offset_sec = global_config["time"]["daylight_offset_sec"].as<int>();
 
     // firebase settings
-    API_KEY = global_config["api_key"].as<String>();
-    FIREBASE_PROJECT_ID = global_config["firebase_project_id"].as<String>();
-    USER_EMAIL = global_config["user_email"].as<String>();
-    USER_PASSWORD = global_config["user_password"].as<String>();
+    API_KEY = global_config["firebase"]["api_key"].as<String>();
+    FIREBASE_PROJECT_ID = global_config["firebase"]["firebase_project_id"].as<String>();
+    USER_EMAIL = global_config["firebase"]["user_email"].as<String>();
+    USER_PASSWORD = global_config["firebase"]["user_password"].as<String>();
+
+    Serial.println("config done");
 }
 
 void MeshBridge::init_mesh()
@@ -644,4 +652,10 @@ void MeshBridge::calculate_death(int ttd){
     die_hours = 0;
     }
     return;
+}
+
+MeshBridge::~MeshBridge(){
+    delete ssid;
+    delete password;
+    delete ntp_server;
 }

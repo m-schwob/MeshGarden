@@ -57,6 +57,7 @@ public:
 	void setTimeVal(string str, string delimiter = ":");
 	void set_global_config(JsonObject global_config);
 	void init_mesh();
+	void init_clock();
 	// time variables:
 	unsigned long timeNow = 0;
 	unsigned long timeLast = 0;

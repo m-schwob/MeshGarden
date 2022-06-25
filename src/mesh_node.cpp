@@ -198,6 +198,8 @@ void MeshNode::set_global_config(JsonObject global_config)
     MESH_PORT = global_config["mesh_port"].as<size_t>();
 }
 
+void MeshNode::init_clock(){}
+
 void MeshNode::init_mesh()
 {
     // mesh.setDebugMsgTypes( ERROR | MESH_STATUS | CONNECTION | SYNC | COMMUNICATION | GENERAL | MSG_TYPES | REMOTE ); // all types on

@@ -71,9 +71,9 @@ private:
     String MESH_PASSWORD;
     unsigned int MESH_PORT;
 
-    const char *ssid;
-    const char *password;
-    const char *ntp_server;
+    char *ssid;
+    char *password;
+    char *ntp_server;
     long gmt_offset_sec;
     int daylight_offset_sec;
 
@@ -125,6 +125,7 @@ public:
     int die_minutes=0;
     int die_hours=0;
     void calculate_death(int ttd);
+    ~MeshBridge();
 };
 
 #endif /* _BRIDGENODE_H_ */
