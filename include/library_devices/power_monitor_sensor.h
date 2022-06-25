@@ -3,8 +3,8 @@
 
 #include <ArduinoJson.h>
 #include "constants_utils.h"
+#include "pins_maps.h"
 #include "sensor.h"
-#include "mesh_garden.h"
 
 ADC_MODE(ADC_VCC); // enable measure esp8266 supply input voltage
 

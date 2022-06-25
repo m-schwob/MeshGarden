@@ -1,18 +1,15 @@
 #include "mesh_garden.h"
 
-uint8_t pin(String pin)
-{
-    return pins_map[pin].as<uint8_t>();
-}
 
-float analogRead(uint16_t pin){
+float analogRead(uint16_t pin)
+{
     return MeshGarden::analog_read(pin);
 }
 
-float MeshGarden::analog_read(uint16_t pin){
+float MeshGarden::analog_read(uint16_t pin)
+{
     return ads.analog_read(pin);
 }
-
 
 MeshGarden::GenericSensor::GenericSensor(DEVICE_CONSTRUCTOR_ARGUMENTS)
     : Sensor(device_id, hardware_info, pinout, envelop) {}
@@ -220,6 +217,14 @@ void MeshGarden::log_config()
     }
 }
 
+void MeshGarden::init_power_monitor()
+{
+    StaticJsonDocument<100> pinout;
+    char json[] = "{\"BAT\":\"ADS3\"}";
+    deserializeJson(pinout, json);
+    power_monitor = new PowerMonitorSensor(0, "", pinout.as<JsonObject>(), DynamicJsonDocument(0));
+}
+
 void MeshGarden::init_mesh_connection()
 {
     // choose mesh node type to construct
@@ -287,9 +292,21 @@ void MeshGarden::begin()
     load_configuration();
     parse_config();
     Serial.println("serialization done, now init mesh");
+    init_power_monitor();
     init_mesh_connection();
+    Measurements power_status = power_monitor->measure_wrapper();
+    // network.get_battery_level(power_status[0]);
     config.~DynamicJsonDocument();
 }
+
+std::list<String> MeshGarden::get_device_list(){
+    std::list<String> list;
+    for(Device* device :device_list){
+        list.push_back(device->HARDWARE_INFO);
+    }
+    return list;
+}
+
 
 void MeshGarden::update()
 {

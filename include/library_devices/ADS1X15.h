@@ -1,6 +1,7 @@
 #ifndef _MG_ADS1X15_H
 #define _MG_ADS1X15_H
 
+// #include <Adafruit_Sensor.h>
 #include <Adafruit_ADS1X15.h>
 #include <ArduinoJson.h>
 #include "device.h"

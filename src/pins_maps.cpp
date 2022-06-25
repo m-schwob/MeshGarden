@@ -32,10 +32,10 @@ void _map_pins()
     pins_map["D8"] = D8;
 
     // ADS1X115 ADC extender pins
-    pins_map["ADS0"] = 0; 
-    pins_map["ADS1"] = 1; 
-    pins_map["ADS2"] = 2; 
-    pins_map["ADS3"] = 3; 
+    pins_map["ADS0"] = 0;
+    pins_map["ADS1"] = 1;
+    pins_map["ADS2"] = 2;
+    pins_map["ADS3"] = 3;
 }
 
 #elif defined(ESP32)
@@ -102,4 +102,9 @@ void map_pins()
     Serial.print(String(pins_map.capacity()));
     Serial.print(", actual memory usage: ");
     Serial.println(String(pins_map.memoryUsage()));
+}
+
+uint8_t pin(String pin)
+{
+    return pins_map[pin].as<uint8_t>();
 }

@@ -37,6 +37,7 @@ Capacitance soil moisture sensor using ADS1X15 ADC extender.
 
 #include <Adafruit_ADS1X15.h>
 #include <SPI.h>
+#include "Device.h"
 #include "Sensor.h"
 
 #define _DEVICE_TYPE "Soil Moisture Sensor"
@@ -180,8 +181,8 @@ void setup()
     garden.begin();
 
     Serial.println("printing device list");
-    for(Device* device : garden.device_list){
-        Serial.println(device->HARDWARE_INFO);
+    for(String device : garden.get_device_list()){
+        Serial.println(device);
     }
 }
 
