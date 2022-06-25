@@ -36,6 +36,9 @@ dependencies:
   font_awesome_flutter: ^10.1.0
   chart_sparkline: ^1.0.5
   flutter_hooks: ^0.18.0
+  intl: ^0.17.0
+  hawk_fab_menu: ^1.1.2
+  fab_circular_menu: ^1.0.0
 
 dev_dependencies:
   flutter_test:

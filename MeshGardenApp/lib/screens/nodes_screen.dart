@@ -84,7 +84,7 @@ class _NodesScreenState extends State<NodesScreen> {
                           node_document.data()! as Map<String, dynamic>;
                       bool is_active = node_data['active'];
                       bool is_bridge = node_data['bridge'];
-                      num battery_level = node_data['battery'] as num;
+                      num battery_level = node_data['battery'] == null? 100:node_data['battery'] as num;
                       battery_level = battery_level.toInt();
                       // return ListTile(
                       //     shape: RoundedRectangleBorder(

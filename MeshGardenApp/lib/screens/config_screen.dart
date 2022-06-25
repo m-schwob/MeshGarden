@@ -148,72 +148,72 @@ class _ConfigScreenState extends State<ConfigScreen> {
                               ),
                             )
                         ),
-                        Card(
-                            // shape: RoundedRectangleBorder(
-                            //   borderRadius: BorderRadius.circular(18),
-                            // ),
-                            shadowColor: Colors.white,
-                            elevation: 20,
-                            color: kTextFieldFill,
-
-                            child: ListTile(
-                              subtitle:
-                              Text(node_data['active'].toString(), style: kConfigTitle),
-                              title: Text('active :',style: kConfigSubTitle),
-                              trailing: IconButton(
-                                icon: Icon(Icons.edit),
-                                color: Colors.white,
-                                onPressed: () {
-                                  _openEditDialog(TextInputType.text, snapshot,
-                                      _active, "active",node_data['active']);
-                                },
-                              ),
-                            )
-                        ),
-                        Card(
-                            // shape: RoundedRectangleBorder(
-                            //   borderRadius: BorderRadius.circular(18),
-                            // ),
-                            shadowColor: Colors.white,
-                            elevation: 20,
-                            color: kTextFieldFill,
-
-                            child: ListTile(
-                              subtitle:
-                              Text(node_data['bridge'].toString(), style: kConfigTitle),
-                              title: Text('bridge :',style: kConfigSubTitle),
-                              trailing: IconButton(
-                                icon: Icon(Icons.edit),
-                                color: Colors.white,
-                                onPressed: () {
-                                  _openEditDialog(TextInputType.text, snapshot,
-                                      _bridge, "bridge",node_data['bridge']);
-                                },
-                              ),
-                            )
-                        ),
-                        Card(
-                            // shape: RoundedRectangleBorder(
-                            //   borderRadius: BorderRadius.circular(18),
-                            // ),
-                            shadowColor: Colors.white,
-                            elevation: 20,
-                            color: kTextFieldFill,
-
-                            child: ListTile(
-                              subtitle:
-                              Text(node_data['configured'].toString(), style: kConfigTitle),
-                              title: Text('configured :',style: kConfigSubTitle),
-                              trailing: IconButton(
-                                icon: Icon(Icons.edit),
-                                color: Colors.white,
-                                onPressed: () {
-                                  _openEditDialog(TextInputType.text, snapshot,
-                                      _configured, "configured",node_data['configured']);
-                                },
-                              ),
-                            )
-                        ),
+                        // Card(
+                        //     // shape: RoundedRectangleBorder(
+                        //     //   borderRadius: BorderRadius.circular(18),
+                        //     // ),
+                        //     shadowColor: Colors.white,
+                        //     elevation: 20,
+                        //     color: kTextFieldFill,
+                        //
+                        //     child: ListTile(
+                        //       subtitle:
+                        //       Text(node_data['active'].toString(), style: kConfigTitle),
+                        //       title: Text('active :',style: kConfigSubTitle),
+                        //       trailing: IconButton(
+                        //         icon: Icon(Icons.edit),
+                        //         color: Colors.white,
+                        //         onPressed: () {
+                        //           _openEditDialog(TextInputType.text, snapshot,
+                        //               _active, "active",node_data['active']);
+                        //         },
+                        //       ),
+                        //     )
+                        // ),
+                        // Card(
+                        //     // shape: RoundedRectangleBorder(
+                        //     //   borderRadius: BorderRadius.circular(18),
+                        //     // ),
+                        //     shadowColor: Colors.white,
+                        //     elevation: 20,
+                        //     color: kTextFieldFill,
+                        //
+                        //     child: ListTile(
+                        //       subtitle:
+                        //       Text(node_data['bridge'].toString(), style: kConfigTitle),
+                        //       title: Text('bridge :',style: kConfigSubTitle),
+                        //       trailing: IconButton(
+                        //         icon: Icon(Icons.edit),
+                        //         color: Colors.white,
+                        //         onPressed: () {
+                        //           _openEditDialog(TextInputType.text, snapshot,
+                        //               _bridge, "bridge",node_data['bridge']);
+                        //         },
+                        //       ),
+                        //     )
+                        // ),
+                        // Card(
+                        //     // shape: RoundedRectangleBorder(
+                        //     //   borderRadius: BorderRadius.circular(18),
+                        //     // ),
+                        //     shadowColor: Colors.white,
+                        //     elevation: 20,
+                        //     color: kTextFieldFill,
+                        //
+                        //     child: ListTile(
+                        //       subtitle:
+                        //       Text(node_data['configured'].toString(), style: kConfigTitle),
+                        //       title: Text('configured :',style: kConfigSubTitle),
+                        //       trailing: IconButton(
+                        //         icon: Icon(Icons.edit),
+                        //         color: Colors.white,
+                        //         onPressed: () {
+                        //           _openEditDialog(TextInputType.text, snapshot,
+                        //               _configured, "configured",node_data['configured']);
+                        //         },
+                        //       ),
+                        //     )
+                        // ),
                         Card(
                           // shape: RoundedRectangleBorder(
                           //   borderRadius: BorderRadius.circular(18),

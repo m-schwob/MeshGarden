@@ -12,9 +12,12 @@ import 'package:iot_firestore_flutter_app/const/custom_colors.dart';
 import 'package:iot_firestore_flutter_app/model/Sensor.dart';
 import 'package:iot_firestore_flutter_app/route/routing_constants.dart';
 import 'package:iot_firestore_flutter_app/screens/add_sensor_screen.dart';
-
+import 'package:hawk_fab_menu/hawk_fab_menu.dart';
 //import 'package:iot_firestore_flutter_app/widgets/my_sensor_card.dart';
 // import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:fab_circular_menu/fab_circular_menu.dart';
+import 'package:iot_firestore_flutter_app/const/library_sensors.dart';
+
 
 //TODO : add delete button to sensor card with alert window "are you sure"?
 
@@ -46,6 +49,7 @@ class _SensorsScreenState extends State<SensorsScreen> {
   late final _sensorDoc =
       FirebaseFirestore.instance.collection('Nodes').doc(widget.nodeId);
 
+  final GlobalKey<FabCircularMenuState> fabKey = GlobalKey();
   // final TextEditingController _password = TextEditingController();
   // final TextEditingController _passwordConfirm = TextEditingController();
 
@@ -114,6 +118,7 @@ class _SensorsScreenState extends State<SensorsScreen> {
               sensors_list.add(s);
             });
           }
+
           // Sensor sensor = Sensor(
           //     hardware_info: "DHT22",
           //     pinout: {"DAT": "D1"},
@@ -127,155 +132,299 @@ class _SensorsScreenState extends State<SensorsScreen> {
           // final data = snapshot.data!.docs.map((DocumentSnapshot node_document)
 
           // final data = data.
+
+          int? max_id = 0;
+          if(!sensors_list.isEmpty){
+            // get max sensor id
+            sensors_list.forEach((sensor) {
+              if (sensor.sensor_id! >= max_id!)
+                max_id = (sensor.sensor_id! + 1);
+            });
+          }
+
           if (sensors_list.isEmpty) {
             return Scaffold(
-              floatingActionButton: FloatingActionButton(
-                onPressed: () {
-                  // _doc.update({"sensors.1": sensor_json});
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) =>
-                          AddSensorScreen(sensorDoc: _sensorDoc, sensorId: 1),
+              // floatingActionButton: FloatingActionButton(
+              //   onPressed: () {
+              //     // _doc.update({"sensors.1": sensor_json});
+              //     Navigator.push(
+              //       context,
+              //       MaterialPageRoute(
+              //         builder: (context) =>
+              //             AddSensorScreen(sensorDoc: _sensorDoc, sensorId: 1),
+              //       ),
+              //     );
+              //     // snapshot.requireData.reference.update({"sensors.1": sensor_json});
+              //   },
+              //   // mini: true,
+              //   elevation: 12,
+              //   foregroundColor: Colors.white,
+              //   child: Icon(
+              //     Icons.add,
+              //     size: 30,
+              //   ),
+              // ),
+              body: HawkFabMenu(
+                // openIcon: Icons.add,
+                  icon: AnimatedIcons.menu_close,
+                  fabColor: Colors.blue,
+                  iconColor: Colors.white,
+                  items: [
+                    HawkFabMenuItem(
+                      label: 'UV',
+                      ontap: () {
+                        Map<String, dynamic> sensor_json = UV_DEFAULT;
+                        sensor_json["sensor_id"] = 1;
+                        snapshot.requireData.reference.update({"sensors.1": sensor_json});
+
+                        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('UV added'),
+                              duration: const Duration(milliseconds: 1000)),
+                        );
+                      },
+                      icon: const Icon(Icons.add),
+                      color: Colors.blue,
+                      labelColor: Colors.red,
+                      labelBackgroundColor: Colors.yellow,
                     ),
-                  );
-                  // snapshot.requireData.reference.update({"sensors.1": sensor_json});
-                },
-                // mini: true,
-                elevation: 12,
-                foregroundColor: Colors.white,
-                child: Icon(
-                  Icons.add,
-                  size: 30,
-                ),
-              ),
-              body: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Center(
-                      child:
-                          Text("No sensors for this plant", style: kBodyText2),
+                    HawkFabMenuItem(
+                      label: 'DHT 11',
+                      ontap: () {
+                        Map<String, dynamic> sensor_json = DHT11_DEFAULT;
+                        sensor_json["sensor_id"] = 1;
+                        snapshot.requireData.reference.update({"sensors.1": sensor_json});
+
+                        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('DHT 11 added'),
+                          duration: const Duration(milliseconds: 1000),),
+                        );
+                      },
+                      icon: const Icon(Icons.add),
+                      color: Colors.blue,
+                      labelColor: Colors.red,
+                      labelBackgroundColor: Colors.blueAccent,
                     ),
-                    Center(
-                      child: Image(
-                        // width: 60,
-                        image: AssetImage(
-                          'assets/images/crying_plant_new.png',
+                    HawkFabMenuItem(
+                      label: 'Soil Moisture',
+                      ontap: () {
+                        Map<String, dynamic> sensor_json = SOIL_MOISTURE_DEFAULT;
+                        sensor_json["sensor_id"] = 1;
+                        snapshot.requireData.reference.update({"sensors.1": sensor_json});
+
+                        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Soil Moisture added'),
+                              duration: const Duration(milliseconds: 1000)),
+                        );
+                      },
+                      icon: const Icon(Icons.add),
+                      labelColor: Colors.blue,
+                      labelBackgroundColor: Colors.brown,
+                    ),
+                    HawkFabMenuItem(
+                      label: 'New custom sensor',
+                      ontap: () {
+
+                        // print("got here2 , max id = ${max_id}\n");
+                        // sensor_json["sensor_id"] = max_id;
+                        // print("....${sensor_json["sensor_id"]}...");
+                        // _doc.update({"sensors.${max_id}": sensor_json});
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => AddSensorScreen(
+                                sensorDoc: _sensorDoc, sensorId: 1),
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.add),
+                      color: Colors.green,
+                      labelColor: Colors.white,
+                      labelBackgroundColor: Colors.green,
+                    ),
+                  ],
+                body:Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Center(
+                        child:
+                        Text("No sensors for this plant", style: kBodyText2),
+                      ),
+                      Center(
+                        child: Image(
+                          // width: 60,
+                          image: AssetImage(
+                            'assets/images/crying_plant_new.png',
+                          ),
                         ),
                       ),
-                    ),
-                  ]),
+                    ]),
+              ),
             );
           } else {
             return Scaffold(
-              floatingActionButton: FloatingActionButton(
-                onPressed: () {
-                  // get max sensor id
-                  int? max_id = 0;
-                  sensors_list.forEach((sensor) {
-                    if (sensor.sensor_id! >= max_id!)
-                      max_id = (sensor.sensor_id! + 1);
-                  });
-                  // print("got here2 , max id = ${max_id}\n");
-                  // sensor_json["sensor_id"] = max_id;
-                  // print("....${sensor_json["sensor_id"]}...");
-                  // _doc.update({"sensors.${max_id}": sensor_json});
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => AddSensorScreen(
-                          sensorDoc: _sensorDoc, sensorId: max_id!),
-                    ),
-                  );
-                  // snapshot.requireData.reference.update({"sensors.${max_id}": sensor_json});
-                },
-                // mini: true,
-                elevation: 12,
-                foregroundColor: Colors.white,
-                child: Icon(
-                  Icons.add,
-                  size: 30,
-                ),
-              ),
-              body: Padding(
-                padding: const EdgeInsets.only(
-                    left: 16, right: 16, top: 20, bottom: 30),
-                child: ListView.builder(
-                  itemCount: sensors_list.length,
-                  itemBuilder: (BuildContext ctx, int index) {
-                    List<Widget> sensorAtt = [];
-                    // int types_num = sensors_list[index].sensor_type!.length;
-                    List<List<String>> type_unit_list = [];
-                    // sensorAtt.add(
-                    //   ListTile(
-                    //     // subtitle:
-                    //     // Text(node_data['nickname'], style: kConfigTitle),
-                    //     title: Text(
-                    //         "Sensor ID :  \t\t\t\t\t\t\t\t\t" +
-                    //             sensors_list[index].sensor_id.toString(),
-                    //         style: kSensorText),
-                    //   ),
-                    // );
-                    sensorAtt.add(
-                      Text(
-                          " Sensor ID :  \t\t\t\t\t\t\t\t\t" +
-                              sensors_list[index].sensor_id.toString(),
-                          style: kSensorText),
-                    );
-                    sensorAtt.add(Divider(color: Colors.blueGrey));
-                    sensorAtt.add(
-                      Text(
-                          " Hardware Info : \t\t" +
-                              sensors_list[index].hardware_info.toString(),
-                          style: kSensorText),
-                    );
-                    sensorAtt.add(Divider(color: Colors.blueGrey));
-                    sensorAtt.add(
-                      Text(
-                          " Sample Interval : " +
-                              sensors_list[index].sample_interval.toString(),
-                          style: kSensorText),
-                    );
-                    sensorAtt.add(Divider(color: Colors.blueGrey));
-                    sensors_list[index].sensor_type!.forEach((element) {
-                      // int i = 1;
-                      type_unit_list.add([element, "1"]);
-                    });
+              body: HawkFabMenu(
+                // openIcon: Icons.add,
+                icon: AnimatedIcons.menu_close,
+                fabColor: Colors.blue,
+                iconColor: Colors.white,
+                items: [
+                  HawkFabMenuItem(
+                    label: 'UV',
+                    ontap: () {
+                      Map<String, dynamic> sensor_json = UV_DEFAULT;
+                      sensor_json["sensor_id"] = max_id;
+                      snapshot.requireData.reference.update({"sensors.$max_id": sensor_json});
 
-                    sensors_list[index].units!.asMap().forEach(
-                        (index, value) => {type_unit_list[index][1] = value});
-                    int i = 1;
-                    type_unit_list.forEach((tuple) {
+                      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('UV added'),
+                            duration: const Duration(milliseconds: 1000)),
+                      );
+                    },
+                    icon: const Icon(Icons.add),
+                    color: Colors.blue,
+                    labelColor: Colors.red,
+                    labelBackgroundColor: Colors.yellow,
+                  ),
+                  HawkFabMenuItem(
+                    label: 'DHT 11',
+                    ontap: () {
+                      Map<String, dynamic> sensor_json = DHT11_DEFAULT;
+                      sensor_json["sensor_id"] = max_id;
+                      snapshot.requireData.reference.update({"sensors.$max_id": sensor_json});
+
+                      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('DHT 11 added'),
+                          duration: const Duration(milliseconds: 1000),),
+                      );
+                    },
+                    icon: const Icon(Icons.add),
+                    color: Colors.blue,
+                    labelColor: Colors.red,
+                    labelBackgroundColor: Colors.blueAccent,
+                  ),
+                  HawkFabMenuItem(
+                    label: 'Soil Moisture',
+                    ontap: () {
+                      Map<String, dynamic> sensor_json = SOIL_MOISTURE_DEFAULT;
+                      sensor_json["sensor_id"] = max_id;
+                      snapshot.requireData.reference.update({"sensors.$max_id": sensor_json});
+
+                      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Soil Moisture added'),
+                            duration: const Duration(milliseconds: 1000)),
+                      );
+                    },
+                    icon: const Icon(Icons.add),
+                    labelColor: Colors.blue,
+                    labelBackgroundColor: Colors.brown,
+                  ),
+                  HawkFabMenuItem(
+                    label: 'New custom sensor',
+                    ontap: () {
+
+                      // print("got here2 , max id = ${max_id}\n");
+                      // sensor_json["sensor_id"] = max_id;
+                      // print("....${sensor_json["sensor_id"]}...");
+                      // _doc.update({"sensors.${max_id}": sensor_json});
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => AddSensorScreen(
+                              sensorDoc: _sensorDoc, sensorId: max_id!),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.add),
+                    color: Colors.green,
+                    labelColor: Colors.white,
+                    labelBackgroundColor: Colors.green,
+                  ),
+                ],
+                body:Padding(
+                  padding: const EdgeInsets.only(
+                      left: 16, right: 16, top: 20, bottom: 30),
+                  child: ListView.builder(
+                    itemCount: sensors_list.length,
+                    itemBuilder: (BuildContext ctx, int index) {
+                      List<Widget> sensorAtt = [];
+                      // int types_num = sensors_list[index].sensor_type!.length;
+                      List<List<String>> type_unit_list = [];
+                      // sensorAtt.add(
+                      //   ListTile(
+                      //     // subtitle:
+                      //     // Text(node_data['nickname'], style: kConfigTitle),
+                      //     title: Text(
+                      //         "Sensor ID :  \t\t\t\t\t\t\t\t\t" +
+                      //             sensors_list[index].sensor_id.toString(),
+                      //         style: kSensorText),
+                      //   ),
+                      // );
                       sensorAtt.add(
                         Text(
-                            " Type  ${i}  : " +
-                                tuple[0].toString() +
-                                "\t|\tUnits  : " +
-                                "\"" +
-                                tuple[1].toString() +
-                                "\"",
+                            " Sensor ID :  \t\t\t\t\t\t\t\t\t" +
+                                sensors_list[index].sensor_id.toString(),
                             style: kSensorText),
                       );
                       sensorAtt.add(Divider(color: Colors.blueGrey));
-                      i++;
-                    });
-
-                    // sensorAtt.add(
-                    //   Text("Out Pins  :", style: kSensorText),
-                    // );
-
-                    sensors_list[index].pinout!.forEach((key, value) {
                       sensorAtt.add(
-                        Text(" Out  \"${key}\"  pin  :   \"${value}\"",
+                        Text(
+                            " Hardware Info : \t\t" +
+                                sensors_list[index].hardware_info.toString(),
                             style: kSensorText),
                       );
                       sensorAtt.add(Divider(color: Colors.blueGrey));
-                    });
+                      sensorAtt.add(
+                        Text(
+                            " Sample Interval : " +
+                                sensors_list[index].sample_interval.toString(),
+                            style: kSensorText),
+                      );
+                      sensorAtt.add(Divider(color: Colors.blueGrey));
+                      sensors_list[index].sensor_type!.forEach((element) {
+                        // int i = 1;
+                        type_unit_list.add([element, "1"]);
+                      });
 
-                    sensorAtt.removeLast();
-                    sensorAtt.add(Divider());
-                    sensorAtt.add(
+                      sensors_list[index].units!.asMap().forEach(
+                              (index, value) => {type_unit_list[index][1] = value});
+                      int i = 1;
+                      type_unit_list.forEach((tuple) {
+                        sensorAtt.add(
+                          Text(
+                              " Type  ${i}  : " +
+                                  tuple[0].toString() +
+                                  "\t|\tUnits  : " +
+                                  "\"" +
+                                  tuple[1].toString() +
+                                  "\"",
+                              style: kSensorText),
+                        );
+                        sensorAtt.add(Divider(color: Colors.blueGrey));
+                        i++;
+                      });
+
+                      // sensorAtt.add(
+                      //   Text("Out Pins  :", style: kSensorText),
+                      // );
+
+                      sensors_list[index].pinout!.forEach((key, value) {
+                        sensorAtt.add(
+                          Text(" Out  \"${key}\"  pin  :   \"${value}\"",
+                              style: kSensorText),
+                        );
+                        sensorAtt.add(Divider(color: Colors.blueGrey));
+                      });
+
+                      sensorAtt.removeLast();
+                      sensorAtt.add(Divider());
+                      sensorAtt.add(
                         ListTile(
                           // subtitle:
                           // Text(node_data['nickname'], style: kConfigTitle),
@@ -301,45 +450,46 @@ class _SensorsScreenState extends State<SensorsScreen> {
                               ),
                             ),
                           ),
-                      ),
-                    );
-
-                    return Padding(
-                      // padding: const EdgeInsets.symmetric(vertical: 10.0),
-                      padding: const EdgeInsets.all(12.0),
-                      child: Card(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(18),
                         ),
-                        shadowColor: Colors.white,
-                        elevation: 10,
-                        color: kTextFieldFill,
-                        child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: sensorAtt),
-                        // SizedBox(width:20.0),
-                        // Text(
-                        //     "Sensor ID:  " +
-                        //         sensors_list[index].sensor_id.toString(),
-                        //     style: kBodyText2),
-                        // Text(
-                        //     "Hardware Info:  " +
-                        //         sensors_list[index].hardware_info.toString(),
-                        //     style: kBodyText2),
-                        //     Text(
-                        //         "Sample Interval:  " +
-                        //             sensors_list[index].sample_interval.toString(),
-                        //         style: kBodyText2),
-                        //
-                        //     sensors_list[index].sensor_type.forEach((element) {
-                        //       Text(
-                        //           "Sample Interval:  " +
-                        //               element,
-                        //           style: kBodyText2);
-                        //     })
-                      ),
-                    );
-                  },
+                      );
+
+                      return Padding(
+                        // padding: const EdgeInsets.symmetric(vertical: 10.0),
+                        padding: const EdgeInsets.all(12.0),
+                        child: Card(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(18),
+                          ),
+                          shadowColor: Colors.white,
+                          elevation: 10,
+                          color: kTextFieldFill,
+                          child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: sensorAtt),
+                          // SizedBox(width:20.0),
+                          // Text(
+                          //     "Sensor ID:  " +
+                          //         sensors_list[index].sensor_id.toString(),
+                          //     style: kBodyText2),
+                          // Text(
+                          //     "Hardware Info:  " +
+                          //         sensors_list[index].hardware_info.toString(),
+                          //     style: kBodyText2),
+                          //     Text(
+                          //         "Sample Interval:  " +
+                          //             sensors_list[index].sample_interval.toString(),
+                          //         style: kBodyText2),
+                          //
+                          //     sensors_list[index].sensor_type.forEach((element) {
+                          //       Text(
+                          //           "Sample Interval:  " +
+                          //               element,
+                          //           style: kBodyText2);
+                          //     })
+                        ),
+                      );
+                    },
+                  ),
                 ),
               ),
             );
@@ -348,4 +498,12 @@ class _SensorsScreenState extends State<SensorsScreen> {
       ),
     );
   }
+  // void _showSnackBar(BuildContext context, String message) {
+  //   Scaffold.of(context).showSnackBar(
+  //       SnackBar(
+  //         content: Text(message),
+  //         duration: const Duration(milliseconds: 1000),
+  //       )
+  //   );
+  // }
 }

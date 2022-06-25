@@ -186,6 +186,7 @@ class _MeasurementsScreenState extends State<MeasurementsScreen> {
                                     children: [
                                       MeasurementCard(
                                         value: measurements_list[index].newSample?.value,
+                                        date_time: measurements_list[index].newSample?.time?.toDate().add(Duration(hours: 3)),
                                         unit: measurements_list[index].units,
                                         name: measurements_list[index].type,
                                         assetImage: measurements_list[index].imagePath,

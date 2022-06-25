@@ -2,26 +2,27 @@ import 'package:chart_sparkline/chart_sparkline.dart';
 import 'package:flutter/material.dart';
 import 'package:iot_firestore_flutter_app/const/custom_colors.dart';
 import 'package:iot_firestore_flutter_app/const/custom_styles.dart';
-
+import 'package:intl/intl.dart';
 class MeasurementCard extends StatelessWidget {
-  const MeasurementCard(
-      {Key? key,
-        required this.value,
-        required this.name,
-        required this.assetImage,
-        required this.unit,
-        // required this.trendData,
-        // required this.linePoint
-      })
-      : super(key: key);
+  const MeasurementCard({
+    Key? key,
+    required this.value,
+    required this.date_time,
+    required this.name,
+    required this.assetImage,
+    required this.unit,
+    // required this.trendData,
+    // required this.linePoint
+  }) : super(key: key);
 
   final num? value;
   final String? name;
   final String? unit;
+  final DateTime? date_time;
+
   // final List<double> trendData;
   // final Color linePoint;
   final String assetImage;
-
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -33,7 +34,7 @@ class MeasurementCard extends StatelessWidget {
         color: kMainBG,
         child: Container(
           width: MediaQuery.of(context).size.width * 0.8,
-          height: 200,
+          height: 250,
           child: Row(
             children: [
               Expanded(
@@ -57,6 +58,7 @@ class MeasurementCard extends StatelessWidget {
                     ),
                     Text('$value$unit',
                         style: kHeadline.copyWith(color: Colors.white)),
+                    Text(DateFormat('dd-MM-yyy HH:mm:ss').format(date_time!), style: kSensorText),
                   ],
                 ),
               ),
