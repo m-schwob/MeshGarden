@@ -24,7 +24,8 @@ void receivedCallback(uint32_t from, String &msg)
     
     DynamicJsonDocument doc(256);
     DeserializationError error = deserializeJson(doc, msg);
-    node->server_data.push_back(doc.as<String>());
+    // node->server_data.push_back(doc.as<String>());
+    node->server_data[doc["nodeId"].as<String>()] = doc.as<String>();
     Serial.println("serialized");
     serializeJson(doc, Serial);
     Serial.println("num of meassures read:");
@@ -282,13 +283,7 @@ void MeshBridge::get_mesh_nodes()
     }
     Serial.println("mesh network bridge:" + String(mesh.getNodeId()));
     mesh_values.push_back(String(mesh.getNodeId()));
-    // Serial.println("add kill task");
-    // Task killer(TASK_SECOND *1,TASK_FOREVER, &exit_mesh_connect_server);
-    // Serial.println("created kill task");
-    // userScheduler.addTask(killer);
-    // killer.enable();
-    // killer.delay(5);
-    // Serial.println("delayed kill task");
+;
 
 }
 
@@ -530,13 +525,16 @@ void MeshBridge::exit_mesh_connect_server(){
 
         //sending to the firstore the meassures:
         Serial.printf("sending %d cached messages..\n", server_data.size());
-        for (vector<String>::iterator measures_iter = server_data.begin(); measures_iter != server_data.end(); measures_iter++)
-        {
-            Serial.printf("sending message <%s>\n", measures_iter->c_str());
-            std::vector<String> vec = split((*measures_iter), ","); // split the String to vector of Strins by word
-            firestoreDataUpdate(*measures_iter);
+        // for (vector<String>::iterator measures_iter = server_data.begin(); measures_iter != server_data.end(); measures_iter++)
+        // {
+        //     Serial.printf("sending message <%s>\n", measures_iter->c_str());
+        //     std::vector<String> vec = split((*measures_iter), ","); // split the String to vector of Strins by word
+        //     firestoreDataUpdate(*measures_iter);
+        // }
+        for(auto it = server_data.begin(); it != server_data.end(); ++it) {
+            Serial.printf("sending message <%s>\n", it->second.c_str());
+            firestoreDataUpdate(it->second);
         }
-        
         server_data.clear();
         //Serial.println("send to server list:");
         firestoreReadChanges();	

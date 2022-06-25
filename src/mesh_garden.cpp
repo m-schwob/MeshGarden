@@ -253,7 +253,7 @@ void MeshGarden::add_sensor(String hardware_info, InitSensor init_sensor_func, M
 void MeshGarden::begin()
 {
     pinMode(LED_BUILTIN, OUTPUT);
-    digitalWrite(LED_BUILTIN, HIGH);   // turn the LED on (HIGH is the voltage level)
+    digitalWrite(LED_BUILTIN, LOW);   // turn the LED on (HIGH is the voltage level)
     load_configuration();
     parse_config();
     config.~DynamicJsonDocument();

@@ -38,7 +38,7 @@ const char* const ssid = "My_hotspot";
 const char* const password = "mypassword";
 const char* const ntpServer = "pool.ntp.org";
 const long gmtOffset_sec = 3600;
-const int daylightOffset_sec = 3600;
+const int daylightOffset_sec = 7200;
 
 /***************************
  *  Macro Definitions For the FireStore DB
@@ -72,7 +72,8 @@ private:
     int lasttime = 0; // initialized, used to messure time interaval for the disconnect
     // std::map<String,vector<String>> dict;
     std::list<String> mesh_values; 
-    std::vector<String> server_data;
+    std::map<String,String> server_data;
+    // std::vector<String> server_data;
     friend void receivedCallback(uint32_t from, String &msg);
     friend void newConnectionCallback(uint32_t nodeId);
     friend void changedConnectionCallback();
