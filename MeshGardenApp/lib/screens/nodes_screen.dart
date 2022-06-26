@@ -12,7 +12,6 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:iot_firestore_flutter_app/screens/measurements_screen.dart';
 import '../const/custom_colors.dart';
 
-
 class NodesScreen extends StatefulWidget {
   const NodesScreen({Key? key}) : super(key: key);
 
@@ -50,7 +49,6 @@ class _NodesScreenState extends State<NodesScreen> {
         title: Text(
             user_email.substring(0, user_email.indexOf("@")) + "'s plants",
             style: kBodyText2),
-
       ),
       body: StreamBuilder<QuerySnapshot>(
         stream: _nodesStream,
@@ -75,7 +73,9 @@ class _NodesScreenState extends State<NodesScreen> {
                           node_document.data()! as Map<String, dynamic>;
                       bool is_active = node_data['active'];
                       bool is_bridge = node_data['bridge'];
-                      num battery_level = node_data['battery'] == null? 100:node_data['battery'] as num;
+                      num battery_level = node_data['battery'] == null
+                          ? 100
+                          : node_data['battery'] as num;
                       battery_level = battery_level.toInt();
 
                       return Card(
@@ -88,57 +88,53 @@ class _NodesScreenState extends State<NodesScreen> {
                           child: Column(
                             children: [
                               ListTile(
-                                dense: true,
-                                visualDensity: VisualDensity(vertical: -3),
-                                trailing: is_bridge
-                                    ? Wrap(
-                                  crossAxisAlignment:
-                                  WrapCrossAlignment.center,
-                                  // alignment: WrapAlignment.spaceEvenly,
-                                  spacing: 5, // space between two icons
-                                  children: <Widget>[
-                                    FaIcon(FontAwesomeIcons.wifi,
-                                        color:
-                                        Colors.blueAccent), // icon-1
-                                    IconButton(
-                                      iconSize: 30,
-                                      icon:
-                                      BatteryCard(level: battery_level),
-                                      color: Colors.white,
-                                      onPressed: (){},
-                                    ),
-                                    Text(
-                                      battery_level.toString()+"%",
-                                      style: BatteryLevel,
-                                    ),// icon-2
-                                  ],
-                                )
-                                    : Wrap(
-                                  crossAxisAlignment:
-                                  WrapCrossAlignment.center,
-                                  // alignment: WrapAlignment.spaceEvenly,
-                                  spacing: 5, // space between two icons
-                                  children: <Widget>[
-                                    IconButton(
-                                      iconSize: 30,
-                                      icon:
-                                      BatteryCard(level: battery_level),
-                                      color: Colors.white,
-                                      onPressed: (){},
-                                    ),
-                                    Text(
-                                      battery_level.toString()+"%",
-                                      style: BatteryLevel,
-                                    ),// icon-2
-                                  ],
-                                )
-                              ),
+                                  dense: true,
+                                  visualDensity: VisualDensity(vertical: -3),
+                                  trailing: is_bridge
+                                      ? Wrap(
+                                          crossAxisAlignment:
+                                              WrapCrossAlignment.center,
+                                          // alignment: WrapAlignment.spaceEvenly,
+                                          spacing: 2, // space between two icons
+                                          children: <Widget>[
+                                            FaIcon(FontAwesomeIcons.wifi,
+                                                color: Colors
+                                                    .blueAccent),
+                                            ActiveIcon(isActive: is_active),// icon-1
+                                            IconButton(
+                                              iconSize: 30,
+                                              icon: BatteryCard(
+                                                  level: battery_level),
+                                              color: Colors.white,
+                                              onPressed: () {},
+                                            ),
+                                            Text(
+                                              battery_level.toString() + "%",
+                                              style: BatteryLevel,
+                                            ), // icon-2
+                                          ],
+                                        )
+                                      : Wrap(
+                                          crossAxisAlignment:
+                                              WrapCrossAlignment.center,
+                                          // alignment: WrapAlignment.spaceEvenly,
+                                          spacing: 2, // space between two icons
+                                          children: <Widget>[
+                                            ActiveIcon(isActive: is_active),
+                                            IconButton(
+                                              iconSize: 30,
+                                              icon: BatteryCard(
+                                                  level: battery_level),
+                                              color: Colors.white,
+                                              onPressed: () {},
+                                            ),
+                                            Text(
+                                              battery_level.toString() + "%",
+                                              style: BatteryLevel,
+                                            ), // icon-2
+                                          ],
+                                        )),
                               ListTile(
-                                leading: is_active
-                                    ? FaIcon(FontAwesomeIcons.circleCheck,
-                                    color: Colors.green)
-                                    : FaIcon(FontAwesomeIcons.circleXmark,
-                                    color: Colors.red),
                                 onTap: () {
                                   bool has_measurements = true;
                                   if (node_data['sensors'] == null) {
@@ -160,10 +156,8 @@ class _NodesScreenState extends State<NodesScreen> {
                                     ),
                                   );
                                 },
-
                                 title: Text(node_data['nickname'],
                                     style: kBodyText2),
-
                               ),
                               ListTile(
                                 dense: true,
@@ -175,9 +169,8 @@ class _NodesScreenState extends State<NodesScreen> {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (context) =>
-                                            ConfigScreen(
-                                                nodeId: node_document.id),
+                                        builder: (context) => ConfigScreen(
+                                            nodeId: node_document.id),
                                       ),
                                     );
                                   },
@@ -185,7 +178,6 @@ class _NodesScreenState extends State<NodesScreen> {
                               ),
                             ],
                           ));
-
                     })
                     .toList()
                     .cast(),
@@ -220,32 +212,47 @@ class _NodesScreenState extends State<NodesScreen> {
   }
 }
 
+class ActiveIcon extends StatelessWidget {
+  const ActiveIcon({
+    Key? key,
+    required this.isActive,
+  }) : super(key: key);
+
+  final bool isActive;
+
+  @override
+  Widget build(BuildContext context) {
+    if (isActive) {
+      return FaIcon(FontAwesomeIcons.circleCheck, color: Colors.green);
+    }
+    return FaIcon(FontAwesomeIcons.circleXmark, color: Colors.red);
+  }
+}
 
 class BatteryCard extends StatelessWidget {
-  const BatteryCard(
-      {Key? key,
-        required this.level,
-      })
-      : super(key: key);
+  const BatteryCard({
+    Key? key,
+    required this.level,
+  }) : super(key: key);
 
   final num level;
 
   @override
   Widget build(BuildContext context) {
     level.toInt();
-    if(50 <= level && level <= 74){
-      return FaIcon(FontAwesomeIcons.batteryThreeQuarters, size: 32,color: Colors.lightGreen);
+    if (50 <= level && level <= 74) {
+      return FaIcon(FontAwesomeIcons.batteryThreeQuarters,
+          size: 32, color: Colors.lightGreen);
+    } else if (25 <= level && level <= 49) {
+      return FaIcon(FontAwesomeIcons.batteryHalf,
+          size: 32, color: Color(0xffFF7F7F));
+    } else if (1 <= level && level <= 24) {
+      return FaIcon(FontAwesomeIcons.batteryQuarter,
+          size: 32, color: Colors.red);
+    } else if (0 == level) {
+      return FaIcon(FontAwesomeIcons.batteryEmpty,
+          size: 32, color: Colors.black);
     }
-    else if(25 <= level && level <= 49){
-      return FaIcon(FontAwesomeIcons.batteryHalf, size: 32,color: Color(0xffFF7F7F));
-    }
-    else if(1 <= level && level <= 24){
-      return FaIcon(FontAwesomeIcons.batteryQuarter, size: 32,color: Colors.red);
-    }
-    else if(0 == level){
-      return FaIcon(FontAwesomeIcons.batteryEmpty, size: 32,color: Colors.black);
-    }
-    return FaIcon(FontAwesomeIcons.batteryFull, size: 32,color: Colors.green);
+    return FaIcon(FontAwesomeIcons.batteryFull, size: 32, color: Colors.green);
   }
 }
-

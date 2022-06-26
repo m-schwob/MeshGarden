@@ -103,7 +103,7 @@ class _MeasurementsScreenState extends State<MeasurementsScreen> {
               // print(widget.nodeId + "\n");
               // print(node_document.id + "------\n");
               if (node_document.id.trim() ==
-                  2989123787.toString().trim()) {
+                  2989123787.toString().trim()) { //Todo change id to widget.nodeID
                 node_sensor_data_map =
                 node_document.data()! as Map<String, dynamic>;
               }
