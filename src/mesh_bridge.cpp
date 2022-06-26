@@ -596,9 +596,9 @@ void MeshBridge::exit_mesh_connect_server()
 
     //*************updating Measurements and battery collections****************//
     Serial.printf("sending %d cached messages:\n", server_data.size());
-    Serial.println(server_data.front());
+    // Serial.println(server_data.front());
 
-        while (!server_data.empty())
+    while (!server_data.empty())
     {
         String front = server_data.front();
         firestoreDataUpdate(front);
