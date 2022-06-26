@@ -21,7 +21,6 @@ exports.onNodeWrite = functions.firestore.document('/Nodes/{node_id}').onWrite(a
     }
 });
 
-
 exports.onConfigWrite = functions.firestore.document('/Network/{doc}').onWrite(async (change, context) => {
     const global_config = await get_global_config();
     const nodes = admin.firestore().collection('/Nodes');
@@ -31,7 +30,7 @@ exports.onConfigWrite = functions.firestore.document('/Network/{doc}').onWrite(a
     functions.logger.log("nodes configuration changed");
 });
 
-exports.onActivityChanged = functions.firestore.document('/MeshNetwork/active').onWrite(async (change, context) => {
+exports.onActivityChanged = functions.firestore.document('/MeshNetwork/active').onCreate(async (change, context) => {
     const nodes_collection = admin.firestore().collection('Nodes');
 
     // get active/not active nodes from Nodes collection
