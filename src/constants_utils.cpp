@@ -1,5 +1,7 @@
 #include "constants_utils.h"
 
+ADS1X15 ads;
+
 float analog_read(uint16_t pin)
 {
     return ads.analog_read(pin);

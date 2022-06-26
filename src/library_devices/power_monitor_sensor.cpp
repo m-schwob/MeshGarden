@@ -17,7 +17,7 @@ Measurements PowerMonitorSensor::measure()
 
     Measurement battery_level;
     battery_level.type = BATTERY_LEVEL_KEY;
-    float volt = analogRead(analog_pin);
+    float volt = analog_read(analog_pin);
     battery_level.value = 100 * percentage(volt, full_voltage, drained_voltage); // TODO calculate by non linear graph
     measurements.push_back(battery_level);
 

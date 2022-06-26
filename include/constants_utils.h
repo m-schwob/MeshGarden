@@ -3,7 +3,7 @@
 
 #include "library_devices/ADS1X15.h"
 
-ADS1X15 ads;
+extern ADS1X15 ads;
 float analog_read(uint16_t pin);
 // float analogRead(uint16_t pin);
 
