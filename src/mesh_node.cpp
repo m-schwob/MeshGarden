@@ -318,7 +318,7 @@ void MeshNode::send_values(std::function<Measurements()> get_values_callback)
 void MeshNode::add_measurement(std::function<Measurements()> callable, unsigned long interval, long iterations)
 {
     Serial.println("adding measurement task");
-    measure.set(TASK_SECOND * 4, TASK_FOREVER, [this, callable]()
+    measure.set(TASK_SECOND * 8, TASK_FOREVER, [this, callable]()
                 { send_values(callable); });
     userScheduler.addTask(measure);
     measure.enable();
