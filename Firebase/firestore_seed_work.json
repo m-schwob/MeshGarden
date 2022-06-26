@@ -1,0 +1,283 @@
+{
+    "__collections__": {
+        "Changes": {
+            "101": {
+                "config": "{\"nickname\":\"Taub plant 3\",\"active\":true,\"sensors\":{\"1\":{\"sensor_type\":[\"Soil Moisture\"],\"pinout\":{\"AOUT\":\"ADS\",\"VCC\":\"V1\"},\"hardware_info\":\"Grove Soil Moisture Sensor v1\",\"sample_interval\":30,\"sensor_id\":1,\"units\":[\"%\"]},\"2\":{\"sensor_id\":2,\"sensor_type\":[\"UVA\",\"UVB\"],\"sample_interval\":30,\"pinout\":{\"DAT\":\"D1\",\"VCC\":\"V1\"},\"units\":[\"UVi\",\"UVi\"],\"hardware_info\":\"UV\"},\"3\":{\"sensor_id\":3,\"hardware_info\":\"DHT11\",\"units\":[\"%\",\"C\"],\"sample_interval\":30,\"pinout\":{\"DAT\":\"D1\"},\"sensor_type\":[\"Air Humidity\",\"Air Temperature\"]}},\"bridge\":false,\"battery\":55,\"network_config\":{\"firebase\":{\"api_key\":\"AIzaSyCpnmHDV7B7oR6pnKXS0VBFoqaF174UzZM\",\"firebase_project_id\":\"meshgarden-iot\",\"user_password\":\"ioadmin\",\"user_email\":\"ioadmin@ioadmin.com\"},\"mesh\":{\"mesh_password\":\"somethingSneaky\",\"mesh_port\":5555,\"mesh_prefix\":\"whateverYouLike\"},\"time\":{\"gmt_offset_sec\":3600,\"ntp_server\":\"pool.ntp.org\",\"daylight_offset_sec\":7200},\"wifi\":{\"ssid\":\"My_hotspot\",\"password\":\"mypassword\"}}}",
+                "__collections__": {}
+            },
+            "3049689558": {
+                "config": "{\"sensors\":{\"1\":{\"sensor_type\":[\"Soil Moisture\"],\"sensor_id\":1,\"units\":[\"%\"],\"sample_interval\":30,\"pinout\":{\"AOUT\":\"ADS\",\"VCC\":\"V1\"},\"hardware_info\":\"Grove Soil Moisture Sensor v1\"}},\"active\":true,\"nickname\":\"Taub Plant 1 \",\"bridge\":false,\"battery\":50,\"network_config\":{\"firebase\":{\"user_email\":\"ioadmin@ioadmin.com\",\"firebase_project_id\":\"meshgarden-iot\",\"user_password\":\"ioadmin\",\"api_key\":\"AIzaSyCpnmHDV7B7oR6pnKXS0VBFoqaF174UzZM\"},\"mesh\":{\"mesh_port\":5555,\"mesh_prefix\":\"whateverYouLike\",\"mesh_password\":\"somethingSneaky\"},\"time\":{\"ntp_server\":\"pool.ntp.org\",\"gmt_offset_sec\":3600,\"daylight_offset_sec\":7200},\"wifi\":{\"ssid\":\"My_hotspot\",\"password\":\"mypassword\"}}}",
+                "__collections__": {}
+            },
+            "3049737557": {
+                "config": "{\"bridge\":false,\"active\":true,\"nickname\":\"Taub plant 1\",\"sensors\":{\"1\":{\"sensor_type\":[\"Soil Moisture\"],\"sensor_id\":1,\"pinout\":{\"VCC\":\"V1\",\"AOUT\":\"ADS\"},\"hardware_info\":\"Grove Soil Moisture Sensor v1\",\"units\":[\"%\"],\"sample_interval\":30}},\"network_config\":{\"firebase\":{\"user_email\":\"ioadmin@ioadmin.com\",\"user_password\":\"ioadmin\",\"api_key\":\"AIzaSyCpnmHDV7B7oR6pnKXS0VBFoqaF174UzZM\",\"firebase_project_id\":\"meshgarden-iot\"},\"mesh\":{\"mesh_port\":5555,\"mesh_password\":\"somethingSneaky\",\"mesh_prefix\":\"whateverYouLike\"},\"time\":{\"daylight_offset_sec\":7200,\"ntp_server\":\"pool.ntp.org\",\"gmt_offset_sec\":3600},\"wifi\":{\"ssid\":\"My_hotspot\",\"password\":\"mypassword\"}}}",
+                "__collections__": {}
+            }
+        },
+        "Measurements": {
+            "101": {
+                "1": {
+                    "Soil Moisture": {
+                        "units": "%",
+                        "newSample": {
+                            "value": 30,
+                            "time": {
+                                "__datatype__": "timestamp",
+                                "value": {
+                                    "_seconds": 1656243581,
+                                    "_nanoseconds": 629000000
+                                }
+                            }
+                        }
+                    }
+                },
+                "2": {
+                    "UVA": {
+                        "newSample": {
+                            "value": 4,
+                            "time": {
+                                "__datatype__": "timestamp",
+                                "value": {
+                                    "_seconds": 1656243625,
+                                    "_nanoseconds": 369000000
+                                }
+                            }
+                        },
+                        "units": "UVi"
+                    },
+                    "UVB": {
+                        "newSample": {
+                            "value": 2,
+                            "time": {
+                                "__datatype__": "timestamp",
+                                "value": {
+                                    "_seconds": 1656243668,
+                                    "_nanoseconds": 74000000
+                                }
+                            }
+                        },
+                        "units": "UVi"
+                    }
+                },
+                "3": {
+                    "Air Temperature": {
+                        "newSample": {
+                            "value": 24.4,
+                            "time": {
+                                "__datatype__": "timestamp",
+                                "value": {
+                                    "_seconds": 1656243783,
+                                    "_nanoseconds": 249000000
+                                }
+                            }
+                        },
+                        "units": "C"
+                    },
+                    "Air Humidity": {
+                        "newSample": {
+                            "value": 62.5,
+                            "time": {
+                                "__datatype__": "timestamp",
+                                "value": {
+                                    "_seconds": 1656243721,
+                                    "_nanoseconds": 910000000
+                                }
+                            }
+                        },
+                        "units": "%"
+                    }
+                },
+                "__collections__": {}
+            },
+            "3049689558": {
+                "1": {
+                    "Soil Moisture": {
+                        "units": "%"
+                    }
+                },
+                "__collections__": {}
+            },
+            "3049737556": {
+                "1": {
+                    "Soil Moisture": {
+                        "units": "%",
+                        "newSample": {
+                            "value": 44,
+                            "time": {
+                                "__datatype__": "timestamp",
+                                "value": {
+                                    "_seconds": 1656242732,
+                                    "_nanoseconds": 613000000
+                                }
+                            }
+                        }
+                    }
+                },
+                "__collections__": {}
+            }
+        },
+        "MeshNetwork": {
+            "active": {
+                "2989123785": null,
+                "__collections__": {}
+            }
+        },
+        "Network": {
+            "firebase": {
+                "user_email": "ioadmin@ioadmin.com",
+                "firebase_project_id": "meshgarden-iot",
+                "user_password": "ioadmin",
+                "api_key": "AIzaSyCpnmHDV7B7oR6pnKXS0VBFoqaF174UzZM",
+                "__collections__": {}
+            },
+            "mesh": {
+                "mesh_prefix": "whateverYouLike",
+                "mesh_password": "somethingSneaky",
+                "mesh_port": 5555,
+                "__collections__": {}
+            },
+            "time": {
+                "ntp_server": "pool.ntp.org",
+                "gmt_offset_sec": 3600,
+                "daylight_offset_sec": 7200,
+                "__collections__": {}
+            },
+            "wifi": {
+                "ssid": "My_hotspot",
+                "password": "mypassword",
+                "__collections__": {}
+            }
+        },
+        "Nodes": {
+            "101": {
+                "sensors": {
+                    "1": {
+                        "pinout": {
+                            "VCC": "V1",
+                            "AOUT": "ADS"
+                        },
+                        "hardware_info": "Grove Soil Moisture Sensor v1",
+                        "units": [
+                            "%"
+                        ],
+                        "sensor_type": [
+                            "Soil Moisture"
+                        ],
+                        "sample_interval": 30,
+                        "sensor_id": 1
+                    },
+                    "2": {
+                        "hardware_info": "UV",
+                        "sensor_type": [
+                            "UVA",
+                            "UVB"
+                        ],
+                        "pinout": {
+                            "VCC": "V1",
+                            "DAT": "D1"
+                        },
+                        "sample_interval": 30,
+                        "units": [
+                            "UVi",
+                            "UVi"
+                        ],
+                        "sensor_id": 2
+                    },
+                    "3": {
+                        "hardware_info": "DHT11",
+                        "sensor_type": [
+                            "Air Humidity",
+                            "Air Temperature"
+                        ],
+                        "sample_interval": 30,
+                        "units": [
+                            "%",
+                            "C"
+                        ],
+                        "sensor_id": 3,
+                        "pinout": {
+                            "DAT": "D1"
+                        }
+                    }
+                },
+                "nickname": "Taub plant 3",
+                "bridge": false,
+                "active": true,
+                "battery": 55,
+                "__collections__": {}
+            },
+            "2989123785": {
+                "nickname": "Bridge",
+                "active": true,
+                "bridge": true,
+                "__collections__": {}
+            },
+            "3049689558": {
+                "sensors": {
+                    "1": {
+                        "sample_interval": 30,
+                        "hardware_info": "Grove Soil Moisture Sensor v1",
+                        "sensor_type": [
+                            "Soil Moisture"
+                        ],
+                        "sensor_id": 1,
+                        "units": [
+                            "%"
+                        ],
+                        "pinout": {
+                            "VCC": "V1",
+                            "AOUT": "ADS"
+                        }
+                    }
+                },
+                "active": true,
+                "bridge": false,
+                "battery": 50,
+                "nickname": "Taub Plant 1 ",
+                "__collections__": {}
+            },
+            "3049737556": {
+                "active": true,
+                "sensors": {
+                    "1": {
+                        "units": [
+                            "%"
+                        ],
+                        "sensor_type": [
+                            "Soil Moisture"
+                        ],
+                        "pinout": {
+                            "VCC": "V1",
+                            "AOUT": "ADS"
+                        },
+                        "sample_interval": 30,
+                        "sensor_id": 1,
+                        "hardware_info": "Grove Soil Moisture Sensor v1"
+                    }
+                },
+                "bridge": false,
+                "nickname": "Taub Plant 2",
+                "battery": 32,
+                "__collections__": {}
+            }
+        },
+        "NodesNickname": {
+            "2120314353": {
+                "nodeId": "2120314353",
+                "__collections__": {}
+            },
+            "3049689558": {
+                "nodeId": "3049689558",
+                "__collections__": {}
+            },
+            "3049737556": {
+                "nodeId": "3049737556",
+                "__collections__": {}
+            },
+            "3049737557": {
+                "nodeId": "3049737557",
+                "__collections__": {}
+            }
+        }
+    }
+}
