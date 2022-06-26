@@ -194,6 +194,27 @@ class _MeasurementsScreenState extends State<MeasurementsScreen> {
                   ]),
             );
 
+            if(measurements_list.isEmpty) return Scaffold(
+              body: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Center(
+                      child: Text("No Measurements", style: kBodyText2),
+                    ),
+                    Center(
+                      child: Text("for this plant", style: kBodyText2),
+                    ),
+                    Center(
+                      child: Image(
+                        // width: 60,
+                        image: AssetImage(
+                          CryingBabyPlant,
+                        ),
+                      ),
+                    ),
+                  ]),
+            );
             // Timestamp? time = measurements_list[0].newSample!.time;
             // print(time);
 
