@@ -1,1 +1,1 @@
-# IoT MeshGarden APP
+# Mesh Garden App

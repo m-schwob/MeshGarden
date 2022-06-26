@@ -49,7 +49,6 @@ void SoilMoisureSensorGroveV1::measure(){
     //TODO handle the case that the value go off range
     result = 1 - percentage(volt, C_air, C_water);
     Serial.printf("%s: measure %f volts, %f/1 range\n", HARDWARE_INFO.c_str(), volt, result);
-
     // power on sensor if power pin is defined 
     if(POWER_PIN != -1)
         digitalWrite(POWER_PIN, HIGH); //TODO solve it and change to low

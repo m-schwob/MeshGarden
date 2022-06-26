@@ -5,7 +5,9 @@
 #include <ArduinoJson.h>
 #include <list>
 #include <LittleFS.h>
+#include <EEPROM.h>
 
+#include "constants_utils.h"
 #include "pins_maps.h"
 #include "device.h"
 #include "sensor.h"
@@ -57,14 +59,15 @@ private:
     String mesh_password;
     size_t mesh_port;
 
-    #ifdef ESP32
-    MeshBridge* network=NULL;
-    #else
-    MeshNode* network=NULL;
-    #endif
-        
+#ifdef ESP32
+    MeshBridge *network = NULL;
+#else
+    MeshNode *network = NULL;
+#endif
 
-private : 
+private:
+    void store_timing(Time &time, int &sleep_time);
+    void load_timing(Time &time, int &sleep_time);
     void save_configuration(String &config);
     bool load_configuration();
     void parse_config();
@@ -77,6 +80,7 @@ public:
     void add_sensor(String hardware_id, InitSensor init_sensor_func, Measure measure_func);
     void update();
     void begin();
+    int start = 0;
 };
 
 #endif /* _MESHGARDEN_H_ */

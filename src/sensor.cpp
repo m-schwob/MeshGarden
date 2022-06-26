@@ -29,7 +29,7 @@ std::vector<String> Sensor::from_envelop(DynamicJsonDocument envelop, String key
 
 Measurements Sensor::measure_wrapper(){
     Measurements measurements = measure();
-    for(Measurement meas : measurements){
+    for(Measurement &meas : measurements){
         meas.sensor_id = DEVICE_ID;
     }
     return measurements;
@@ -37,7 +37,7 @@ Measurements Sensor::measure_wrapper(){
 
 measure_callback_t Sensor::get_measure_callback()
 {
-    return [this]() -> Measurements { return measure(); };
+    return [this]() -> Measurements { return measure_wrapper(); };
 }
 
 // get_values_callback_t Sensor::get_values_callback(){

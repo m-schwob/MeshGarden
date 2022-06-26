@@ -137,7 +137,8 @@ class _SignInScreenState extends State<SignInScreen> {
 
     if (obj is User) {
       Navigator.pushNamedAndRemoveUntil(
-          context, DashboardScreenRoute, (Route<dynamic> route) => false);
+          context, NodesScreenRoute, (Route<dynamic> route) => false);
+          // context, DashboardScreenRoute, (Route<dynamic> route) => false);
     } else {
       await showOkAlertDialog(
         context: context,

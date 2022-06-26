@@ -1,10 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:iot_firestore_flutter_app/auth_helper.dart';
 import 'package:iot_firestore_flutter_app/const/custom_styles.dart';
-import 'package:iot_firestore_flutter_app/model/sensor.dart';
+import 'package:iot_firestore_flutter_app/model/Sensor.dart';
 import 'package:iot_firestore_flutter_app/route/routing_constants.dart';
-import 'package:iot_firestore_flutter_app/widgets/my_sensor_card.dart';
+// import 'package:iot_firestore_flutter_app/widgets/my_sensor_card.dart';
 import 'package:flutter/material.dart';
+// import 'dart:io';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({Key? key}) : super(key: key);
@@ -17,7 +18,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   List<double>? tempList;
   List<double>? rhList;
 
-  static String collectionName = 'House';
+  static String collectionName = 'TestMeasurements';
   final sensorRef = FirebaseFirestore.instance
       .collection(collectionName)
       .withConverter<Sensor>(
@@ -44,18 +45,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
         final data = snapshot.requireData;
 
         if (tempList == null) {
-          tempList = List.filled(5, data.docs.first.data().temperature,
+          tempList = List.filled(5, data.docs.first.data().temperature.toDouble(),
               growable: true);
         } else {
-          tempList!.add(data.docs.first.data().temperature);
+          tempList!.add(data.docs.first.data().temperature.toDouble());
           tempList!.removeAt(0);
         }
 
         if (rhList == null) {
           rhList =
-              List.filled(5, data.docs.first.data().humidity, growable: true);
+              List.filled(5, data.docs.first.data().humidity.toDouble(), growable: true);
         } else {
-          rhList!.add(data.docs.first.data().humidity);
+          rhList!.add(data.docs.first.data().humidity.toDouble());
           rhList!.removeAt(0);
         }
 
@@ -74,14 +75,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: Text(
-                            collectionName,
+                            //collectionName,
+                            "Taub Plant",
                             style: kHeadline,
                           ),
                         ),
                         Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: Text(
-                            data.docs.first.id,
+                            //data.docs.first.id,
+                            "Sensor 1",
                             style: kHeadline,
                           ),
                         ),
@@ -95,7 +98,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               MySensorCard(
                                 value: data.docs.first.data().humidity,
                                 unit: '%',
-                                name: 'Humidity',
+                                name: 'Air Humidity',
                                 assetImage: AssetImage(
                                   'assets/images/humidity_icon.png',
                                 ),
@@ -108,7 +111,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               MySensorCard(
                                 value: data.docs.first.data().temperature,
                                 unit: '\'C',
-                                name: 'Temperature',
+                                name: 'Air Temperature',
                                 assetImage: AssetImage(
                                   'assets/images/temperature_icon.png',
                                 ),
