@@ -22,6 +22,6 @@ var UV_DEFAULT= {
   "sample_interval": 30,
   "pinout": {"DAT": "D1",
     "VCC": "V1"},
-  "sensor_type": ["Soil Moisture"],
-  "units": ["%"],
+  "sensor_type": ["UVA","UVB"],
+  "units": ["UVi","UVi"],
 };

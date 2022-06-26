@@ -6,11 +6,11 @@ import 'package:iot_firestore_flutter_app/model/sensor_measurements.dart';
 import 'package:iot_firestore_flutter_app/widgets/measurement_card.dart';
 import '../const/custom_colors.dart';
 import 'package:iot_firestore_flutter_app/const/image_path.dart';
+
 class MeasurementsScreen extends StatefulWidget {
-  const MeasurementsScreen({
-    Key? key,
-    required this.nodeId,required this.hasMeasurements
-  }) : super(key: key);
+  const MeasurementsScreen(
+      {Key? key, required this.nodeId, required this.hasMeasurements})
+      : super(key: key);
 
   final String nodeId;
   final bool hasMeasurements;
@@ -20,10 +20,11 @@ class MeasurementsScreen extends StatefulWidget {
 }
 
 class _MeasurementsScreenState extends State<MeasurementsScreen> {
-
   final Stream<QuerySnapshot> _measureStream =
       FirebaseFirestore.instance.collection('Measurements').snapshots();
 
+  List<List<DateTime>>? timesList;
+  List<List<num>>? valuesList;
 
   @override
   Widget build(BuildContext context) {
@@ -49,12 +50,10 @@ class _MeasurementsScreenState extends State<MeasurementsScreen> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Center(
-                child:
-                Text("No Measurements", style: kBodyText2),
+                child: Text("No Measurements", style: kBodyText2),
               ),
               Center(
-                child:
-                  Text("for this plant", style: kBodyText2),
+                child: Text("for this plant", style: kBodyText2),
               ),
               Center(
                 child: Image(
@@ -85,8 +84,8 @@ class _MeasurementsScreenState extends State<MeasurementsScreen> {
         ),
         body: StreamBuilder<QuerySnapshot>(
           stream: _measureStream,
-          builder: (BuildContext context,
-              AsyncSnapshot<QuerySnapshot> snapshot) {
+          builder:
+              (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
             if (snapshot.hasError) {
               return Center(
                 child: Text(snapshot.error.toString()),
@@ -102,14 +101,42 @@ class _MeasurementsScreenState extends State<MeasurementsScreen> {
             snapshot.data!.docs.forEach((node_document) {
               // print(widget.nodeId + "\n");
               // print(node_document.id + "------\n");
-              if (node_document.id.trim() ==
-                  2989123787.toString().trim()) { //Todo change id to widget.nodeID
+
+              if (node_document.id.trim() == widget.nodeId.toString().trim()) {
                 node_sensor_data_map =
-                node_document.data()! as Map<String, dynamic>;
+                    node_document.data()! as Map<String, dynamic>;
               }
+
+              // if (node_document.id.trim() ==
+              //     2989123787.toString().trim()) { //Todo change id to widget.nodeID
+              //   node_sensor_data_map =
+              //   node_document.data()! as Map<String, dynamic>;
+              // }
             });
 
-
+            /** Check if no data yet */
+            if (node_sensor_data_map == {})
+              return Scaffold(
+                body: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Center(
+                        child: Text("No Measurements", style: kBodyText2),
+                      ),
+                      Center(
+                        child: Text("for this plant", style: kBodyText2),
+                      ),
+                      Center(
+                        child: Image(
+                          // width: 60,
+                          image: AssetImage(
+                            CryingBabyPlant,
+                          ),
+                        ),
+                      ),
+                    ]),
+              );
 
             List<SensorMeasurements> measurements_list = [];
 
@@ -130,16 +157,42 @@ class _MeasurementsScreenState extends State<MeasurementsScreen> {
             //   }
             // });
 
-
             node_sensor_data_map.forEach((key, types) {
               Map<String, dynamic> types_map = types as Map<String, dynamic>;
               types_map.forEach((measure_type, measure_att) {
-                SensorMeasurements measures = SensorMeasurements.fromJson(measure_att, measure_type);
+                SensorMeasurements measures =
+                    SensorMeasurements.fromJson(measure_att, measure_type);
                 measurements_list.add(measures);
               });
             });
 
+            bool is_avail_measure = false;
+            measurements_list.forEach((measure) {
+              if(measure.newSample != null) is_avail_measure = true;
+            });
 
+            // Check if no measurements yet
+            if(!is_avail_measure) return Scaffold(
+              body: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Center(
+                      child: Text("No Measurements", style: kBodyText2),
+                    ),
+                    Center(
+                      child: Text("for this plant", style: kBodyText2),
+                    ),
+                    Center(
+                      child: Image(
+                        // width: 60,
+                        image: AssetImage(
+                          CryingBabyPlant,
+                        ),
+                      ),
+                    ),
+                  ]),
+            );
 
             // Timestamp? time = measurements_list[0].newSample!.time;
             // print(time);
@@ -151,28 +204,35 @@ class _MeasurementsScreenState extends State<MeasurementsScreen> {
                 child: ListView.builder(
                   itemCount: measurements_list.length,
                   itemBuilder: (BuildContext ctx, int index) {
-
-                    return Container(
-                            child: Center(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.center,
-                                    children: [
-                                      MeasurementCard(
-                                        value: measurements_list[index].newSample?.value,
-                                        date_time: measurements_list[index].newSample?.time?.toDate().add(Duration(hours: 3)),
-                                        unit: measurements_list[index].units,
-                                        name: measurements_list[index].type,
-                                        assetImage: measurements_list[index].imagePath,
-                                        // trendData: rhList!,
-                                        // linePoint: Colors.blueAccent,
-                                      ),
-                                      SizedBox(
-                                        height: 20,
-                                      )
-                                    ],
-                                  ),
-                                ),
-                    );
+                    if (measurements_list[index].newSample == null){ return SizedBox(
+                      height: 20,
+                    );}
+                      return Container(
+                        child: Center(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              MeasurementCard(
+                                value:
+                                    measurements_list[index].newSample?.value,
+                                // date_time: measurements_list[index].newSample?.time?.toDate().add(Duration(hours: 3)),
+                                date_time: measurements_list[index]
+                                    .newSample
+                                    ?.time
+                                    ?.toDate(),
+                                unit: measurements_list[index].units,
+                                name: measurements_list[index].type,
+                                assetImage: measurements_list[index].imagePath,
+                                // trendData: rhList!,
+                                // linePoint: Colors.blueAccent,
+                              ),
+                              SizedBox(
+                                height: 20,
+                              )
+                            ],
+                          ),
+                        ),
+                      );
                   },
                 ),
               ),
@@ -183,4 +243,3 @@ class _MeasurementsScreenState extends State<MeasurementsScreen> {
     }
   }
 }
-

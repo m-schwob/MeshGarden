@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/rendering.dart';
 
 import 'package:iot_firestore_flutter_app/auth_helper.dart';
 import 'package:iot_firestore_flutter_app/const/custom_styles.dart';
@@ -78,106 +79,118 @@ class _NodesScreenState extends State<NodesScreen> {
                           : node_data['battery'] as num;
                       battery_level = battery_level.toInt();
 
-                      return Card(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(18),
-                          ),
-                          shadowColor: Colors.white,
-                          elevation: 8,
-                          color: kTextFieldFill,
-                          child: Column(
-                            children: [
-                              ListTile(
-                                  dense: true,
-                                  visualDensity: VisualDensity(vertical: -3),
-                                  trailing: is_bridge
-                                      ? Wrap(
-                                          crossAxisAlignment:
-                                              WrapCrossAlignment.center,
-                                          // alignment: WrapAlignment.spaceEvenly,
-                                          spacing: 2, // space between two icons
-                                          children: <Widget>[
-                                            FaIcon(FontAwesomeIcons.wifi,
-                                                color: Colors
-                                                    .blueAccent),
-                                            ActiveIcon(isActive: is_active),// icon-1
-                                            IconButton(
-                                              iconSize: 30,
-                                              icon: BatteryCard(
-                                                  level: battery_level),
-                                              color: Colors.white,
-                                              onPressed: () {},
-                                            ),
-                                            Text(
-                                              battery_level.toString() + "%",
-                                              style: BatteryLevel,
-                                            ), // icon-2
-                                          ],
-                                        )
-                                      : Wrap(
-                                          crossAxisAlignment:
-                                              WrapCrossAlignment.center,
-                                          // alignment: WrapAlignment.spaceEvenly,
-                                          spacing: 2, // space between two icons
-                                          children: <Widget>[
-                                            ActiveIcon(isActive: is_active),
-                                            IconButton(
-                                              iconSize: 30,
-                                              icon: BatteryCard(
-                                                  level: battery_level),
-                                              color: Colors.white,
-                                              onPressed: () {},
-                                            ),
-                                            Text(
-                                              battery_level.toString() + "%",
-                                              style: BatteryLevel,
-                                            ), // icon-2
-                                          ],
-                                        )),
-                              ListTile(
-                                onTap: () {
-                                  bool has_measurements = true;
-                                  if (node_data['sensors'] == null) {
-                                    has_measurements = false;
-                                  } else {
-                                    Map<String, dynamic> check_sensors_map =
-                                        node_data["sensors"]
-                                            as Map<String, dynamic>;
-                                    if (check_sensors_map.isEmpty) {
+                      return Container(
+                        padding: EdgeInsets.all(3),
+                        // decoration: new BoxDecoration(
+                        //   boxShadow: [
+                        //     new BoxShadow(
+                        //       color: Colors.black,
+                        //       blurRadius: 5.0,
+                        //     ),
+                        //   ],
+                        // ),
+                        child: Card(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(18),
+                            ),
+                            shadowColor: Colors.white,
+                            elevation: 8,
+                            color: kTextFieldFill,
+                            child: Column(
+                              children: [
+                                ListTile(
+                                    dense: true,
+                                    visualDensity: VisualDensity(vertical: -3),
+                                    trailing: is_bridge
+                                        ? Wrap(
+                                            crossAxisAlignment:
+                                                WrapCrossAlignment.center,
+                                            // alignment: WrapAlignment.spaceEvenly,
+                                            spacing: 2, // space between two icons
+                                            children: <Widget>[
+                                              FaIcon(FontAwesomeIcons.wifi,
+                                                  color: Colors
+                                                      .blueAccent),
+                                              SizedBox(width: 6,),
+                                              ActiveIcon(isActive: is_active),// icon-1
+                                              IconButton(
+                                                iconSize: 30,
+                                                icon: BatteryCard(
+                                                    level: battery_level),
+                                                color: Colors.white,
+                                                onPressed: () {},
+                                              ),
+                                              Text(
+                                                battery_level.toString() + "%",
+                                                style: BatteryLevel,
+                                              ), // icon-2
+                                            ],
+                                          )
+                                        : Wrap(
+                                            crossAxisAlignment:
+                                                WrapCrossAlignment.center,
+                                            // alignment: WrapAlignment.spaceEvenly,
+                                            spacing: 2, // space between two icons
+                                            children: <Widget>[
+                                              ActiveIcon(isActive: is_active),
+                                              IconButton(
+                                                iconSize: 30,
+                                                icon: BatteryCard(
+                                                    level: battery_level),
+                                                color: Colors.white,
+                                                onPressed: () {},
+                                              ),
+                                              Text(
+                                                battery_level.toString() + "%",
+                                                style: BatteryLevel,
+                                              ), // icon-2
+                                            ],
+                                          )),
+                                ListTile(
+                                  onTap: () {
+                                    bool has_measurements = true;
+                                    if (node_data['sensors'] == null) {
                                       has_measurements = false;
+                                    } else {
+                                      Map<String, dynamic> check_sensors_map =
+                                          node_data["sensors"]
+                                              as Map<String, dynamic>;
+                                      if (check_sensors_map.isEmpty) {
+                                        has_measurements = false;
+                                      }
                                     }
-                                  }
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => MeasurementsScreen(
-                                          nodeId: node_document.id,
-                                          hasMeasurements: has_measurements),
-                                    ),
-                                  );
-                                },
-                                title: Text(node_data['nickname'],
-                                    style: kBodyText2),
-                              ),
-                              ListTile(
-                                dense: true,
-                                visualDensity: VisualDensity(vertical: -2),
-                                trailing: IconButton(
-                                  icon: Icon(Icons.settings),
-                                  color: Colors.white,
-                                  onPressed: () {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (context) => ConfigScreen(
-                                            nodeId: node_document.id),
+                                        builder: (context) => MeasurementsScreen(
+                                            nodeId: node_document.id,
+                                            hasMeasurements: has_measurements),
                                       ),
                                     );
                                   },
+                                  title: Text(node_data['nickname'],
+                                      style: kBodyText2),
                                 ),
-                              ),
-                            ],
-                          ));
+                                ListTile(
+                                  dense: true,
+                                  visualDensity: VisualDensity(vertical: -2),
+                                  trailing: IconButton(
+                                    icon: Icon(Icons.settings),
+                                    color: Colors.white,
+                                    onPressed: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => ConfigScreen(
+                                              nodeId: node_document.id),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ],
+                            )),
+                      );
                     })
                     .toList()
                     .cast(),
