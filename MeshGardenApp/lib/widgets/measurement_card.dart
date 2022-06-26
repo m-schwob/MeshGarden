@@ -57,7 +57,7 @@ class MeasurementCard extends StatelessWidget {
                     ),
                     Text('$value$unit',
                         style: kHeadline.copyWith(color: Colors.white)),
-                    Text(DateFormat('dd-MM-yyy HH:mm:ss').format(date_time!), style: kSensorText.copyWith(color: Colors.grey)),
+                    Text(DateFormat('MMM d, h:mm a').format(date_time!), style: kSensorText.copyWith(color: Colors.grey)),
                   ],
                 ),
               ),

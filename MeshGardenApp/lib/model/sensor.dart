@@ -1,32 +1,3 @@
-import 'package:flutter/foundation.dart';
-
-// @immutable
-// class Sensor {
-//   Sensor({
-//     required this.humidity,
-//     required this.temperature,
-//   });
-//
-//   Sensor.fromJson(Map<String, Object?> json)
-//       : this(
-//     humidity: json['humidity']! as num,
-//     temperature: json['temperature']! as num,
-//   );
-//
-//   final num humidity;
-//   final num temperature;
-//
-//   Map<String, Object?> toJson() {
-//     return {
-//       'humidity': humidity,
-//       'temperature': temperature,
-//     };
-//   }
-// }
-
-
-
-import 'package:flutter/material.dart';
 
 class Sensor {
   String? hardware_info;

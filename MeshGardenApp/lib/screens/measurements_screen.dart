@@ -5,7 +5,7 @@ import 'package:iot_firestore_flutter_app/const/custom_colors.dart';
 import 'package:iot_firestore_flutter_app/model/sensor_measurements.dart';
 import 'package:iot_firestore_flutter_app/widgets/measurement_card.dart';
 import '../const/custom_colors.dart';
-
+import 'package:iot_firestore_flutter_app/const/image_path.dart';
 class MeasurementsScreen extends StatefulWidget {
   const MeasurementsScreen({
     Key? key,
@@ -60,7 +60,7 @@ class _MeasurementsScreenState extends State<MeasurementsScreen> {
                 child: Image(
                   // width: 60,
                   image: AssetImage(
-                    'assets/images/crying_plant_new.png',
+                    CryingBabyPlant,
                   ),
                 ),
               ),

@@ -6,7 +6,7 @@ import 'package:iot_firestore_flutter_app/model/Sensor.dart';
 import 'package:iot_firestore_flutter_app/screens/add_sensor_screen.dart';
 import 'package:hawk_fab_menu/hawk_fab_menu.dart';
 import 'package:iot_firestore_flutter_app/const/library_sensors.dart';
-
+import 'package:iot_firestore_flutter_app/const/image_path.dart';
 class SensorsScreen extends StatefulWidget {
   const SensorsScreen({Key? key, required this.nodeId}) : super(key: key);
 
@@ -189,7 +189,7 @@ class _SensorsScreenState extends State<SensorsScreen> {
                         child: Image(
                           // width: 60,
                           image: AssetImage(
-                            'assets/images/crying_plant_new.png',
+                            CryingBabyPlant,
                           ),
                         ),
                       ),
