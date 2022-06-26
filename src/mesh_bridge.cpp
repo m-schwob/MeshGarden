@@ -79,7 +79,7 @@ void newConnectionCallback(uint32_t nodeId)
     death_time["d"]["m"] = node->die_minutes;
     death_time["d"]["h"] = node->die_hours;
     death_time["d"]["s"] = node->die_seconds;
-    death_time["d"]["st"] = 20; // send the sleep time
+    death_time["d"]["st"] = 40; // send the sleep time
     Serial.println("created deathJson");
     node->mesh.sendBroadcast(death_time.as<String>());
     Serial.println(death_time.as<String>());
@@ -214,7 +214,7 @@ void MeshBridge::init_clock()
     configTime(gmt_offset_sec, daylight_offset_sec, ntp_server);
     struct tm timeinfo;
     printLocalTime();
-    calculate_death(10);
+    calculate_death(20);
     Serial.println("time of next death is:\n");
     Serial.printf("%d:%d:%d", die_hours, die_minutes, die_seconds);
     got_time = true;
@@ -491,8 +491,7 @@ void MeshBridge::set_bridge_in_firebase(String nodeId)
         bool response;
         content.set("fields/nickname/stringValue/", nodeId.c_str());
         content.set("fields/bridge/booleanValue/", true);
-        content.set("fields/active/booleanValue/", false);
-        content.set("fields/configured/booleanValue/", false);
+        content.set("fields/active/booleanValue/", true);
         if (Firebase.Firestore.createDocument(&fbdo, FIREBASE_PROJECT_ID, "", documentPath.c_str(), content.raw()))
         {
             Serial.printf("ok\n%s\n\n", fbdo.payload().c_str());
@@ -504,21 +503,21 @@ void MeshBridge::set_bridge_in_firebase(String nodeId)
         {
             Serial.println(fbdo.errorReason());
         }
-        // part2: initializing empty Node in the nickname list dedicated for the node
-        String documentPath2 = "NodesNickname/" + nodeId;
-        FirebaseJson content2;
-        bool response2;
-        content2.set("fields/nodeId/stringValue/", nodeId.c_str());
+        // // part2: initializing empty Node in the nickname list dedicated for the node
+        // String documentPath2 = "NodesNickname/" + nodeId;
+        // FirebaseJson content2;
+        // bool response2;
+        // content2.set("fields/nodeId/stringValue/", nodeId.c_str());
 
-        if (Firebase.Firestore.createDocument(&fbdo, FIREBASE_PROJECT_ID, "", documentPath2.c_str(), content2.raw()))
-        {
-            Serial.printf("ok\n%s\n\n", fbdo.payload().c_str());
-            return;
-        }
-        else
-        {
-            Serial.println(fbdo.errorReason());
-        }
+        // if (Firebase.Firestore.createDocument(&fbdo, FIREBASE_PROJECT_ID, "", documentPath2.c_str(), content2.raw()))
+        // {
+        //     Serial.printf("ok\n%s\n\n", fbdo.payload().c_str());
+        //     return;
+        // }
+        // else
+        // {
+        //     Serial.println(fbdo.errorReason());
+        // }
     }
 }
 
@@ -533,8 +532,7 @@ void MeshBridge::set_in_firebase(String nodeId)
         bool response;
         content.set("fields/nickname/stringValue/", nodeId.c_str());
         content.set("fields/bridge/booleanValue/", false);
-        content.set("fields/active/booleanValue/", false);
-        content.set("fields/configured/booleanValue/", false);
+        content.set("fields/active/booleanValue/", true);
         if (Firebase.Firestore.createDocument(&fbdo, FIREBASE_PROJECT_ID, "", documentPath.c_str(), content.raw()))
         {
             Serial.printf("ok\n%s\n\n", fbdo.payload().c_str());
@@ -555,7 +553,7 @@ void MeshBridge::exit_mesh_connect_server()
 {
     String nodeId = String(mesh.getNodeId());
     mesh.stop();
-    calculate_death(30);
+    calculate_death(60);
     // // Connect to Wi-Fi
     Serial.print("Connecting to ");
     Serial.println(ssid);
@@ -597,7 +595,6 @@ void MeshBridge::exit_mesh_connect_server()
     Serial.println("update connections");
     firestoreMeshCollectionClear();
     firestoreMeshCollectionUpdate();
-    mesh_values.clear();
 
     //*************updating Measurements and battery collections****************//
     Serial.printf("sending %d cached messages..\n", data_to_send.size());
@@ -618,6 +615,7 @@ void MeshBridge::exit_mesh_connect_server()
 
     // Serial.println("send to server list:");
     firestoreReadChanges();
+    mesh_values.clear();
     Serial.println("send to server end");
     Serial.println("WiFi disconnected. initialize mesh");
     // initializing the mesh network again

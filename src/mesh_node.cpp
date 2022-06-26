@@ -99,7 +99,6 @@ void MeshNode::update()
     {
         time_update();
         printLocalTime();
-        Serial.printf("%d:%d:%d\n", die_time.hours, die_time.minutes, die_time.seconds);
         lasttime = millis();
     }
     if ((die_time.hours == time.hours || die_time.hours - 12 == time.hours) && die_time.minutes == time.minutes && die_time.seconds == time.seconds)
@@ -240,14 +239,14 @@ void MeshNode::init_clock() {
     time = t ;
 }
 
-void MeshNode::listenQueue()
-{
-    if (mesh.isConnected(bridgeId) && !myqueue.empty())
-    {
-        mesh.sendSingle(bridgeId, myqueue.front());
-        myqueue.pop();
-    }
-}
+// void MeshNode::listenQueue()
+// {
+//     if (mesh.isConnected(bridgeId) && !myqueue.empty())
+//     {
+//         mesh.sendSingle(bridgeId, myqueue.front());
+//         myqueue.pop();
+//     }
+// }
 
 void MeshNode::init_mesh()
 {
@@ -259,9 +258,9 @@ void MeshNode::init_mesh()
     mesh.onChangedConnections(&changedConnectionCallback);
     mesh.onNodeTimeAdjusted(&nodeTimeAdjustedCallback);
     mesh.onDroppedConnection([](uint32_t nodeId)
-                             { Serial.printf("node dropped:%u, at time: %u", nodeId, node->mesh.getNodeTime()); });
+        { Serial.printf("node dropped:%u, at time: %u", nodeId, node->mesh.getNodeTime()); });
     // Task update_time(TASK_SECOND * 1, TASK_FOREVER, [this](){time_update();});
-    // Task emptyQueue(TASK_SECOND * 1.5, TASK_FOREVER, [this](){ listenQueue(); });
+    // Task emptyQueue(TASK_SECOND * 5, TASK_FOREVER, [this](){ listenQueue(); });
 
     // userScheduler.addTask(update_time);
     // update_time.enable();
@@ -275,8 +274,7 @@ void MeshNode::init_mesh()
 
 void MeshNode::send_values(std::function<Measurements()> get_values_callback)
 {
-    // add it when we will have a sensor
-    if (alive)
+    if (mesh.isConnected(bridgeId) && set_time)
     {
         Measurements meas;
         meas = get_values_callback();
@@ -296,7 +294,7 @@ void MeshNode::send_values(std::function<Measurements()> get_values_callback)
         }
         // Serial.println(time1);
         String timeStamp = date + "T" + time1 + "Z";
-        Serial.println("sendValues");
+        Serial.println("test");
         DynamicJsonDocument measure1(256); // ameassure sample Json
         for (Measurement m : meas)
         {
@@ -310,16 +308,18 @@ void MeshNode::send_values(std::function<Measurements()> get_values_callback)
                 String castString = measure1.as<String>();
                 Serial.println("read message:");
                 Serial.println(measure1.as<String>());
-                myqueue.push(measure1.as<String>());
+                // myqueue.push(measure1.as<String>());
+                mesh.sendSingle(bridgeId,measure1.as<String>());
             }
         }
+        Serial.println("done measure");
     }
 }
 
 void MeshNode::add_measurement(std::function<Measurements()> callable, unsigned long interval, long iterations)
 {
     Serial.println("adding measurement task");
-    measure.set(TASK_SECOND * 30, TASK_FOREVER, [this, callable]()
+    measure.set(TASK_SECOND * 4, TASK_FOREVER, [this, callable]()
                 { send_values(callable); });
     userScheduler.addTask(measure);
     measure.enable();
@@ -329,6 +329,4 @@ void MeshNode::get_battary_level(Measurement battery_level){
     node_battery_level = battery_level.value;
 }
 
-void firestoreMapBatteryUpdate(String nodeId , float value){
-
-}
+void firestoreMapBatteryUpdate(String nodeId , float value){}
