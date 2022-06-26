@@ -100,7 +100,7 @@ public:
 	Time calculate_time();
 
 	void get_battary_level(Measurement battery_level);
-	float node_battery_level;
+	float node_battery_level = -1;
 
 };
 

@@ -47,12 +47,13 @@ void receivedCallback(uint32_t from, String &msg)
         node->AmPm = values[3];
         node->set_time = true;
 
-        DynamicJsonDocument battery_level(32);
-        battery_level["battery"] = battery_level;
-        Serial.println("created battery json");
-        serializeJson(battery_level, Serial);
-        node->mesh.sendSingle(from,battery_level.as<String>());
-
+        if(node->node_battery_level!=-1){
+            DynamicJsonDocument battery_level(32);
+            battery_level["battery"] = battery_level;
+            Serial.println("created battery json");
+            serializeJson(battery_level, Serial);
+            node->mesh.sendSingle(from,battery_level.as<String>());
+        }
     }
 
     if (message.containsKey("d"))
@@ -89,9 +90,7 @@ void nodeTimeAdjustedCallback(int32_t offset)
     Serial.printf("Adjusted time %u. Offset = %d\n", node->mesh.getNodeTime(), offset);
 }
 
-MeshNode::MeshNode() : counter(0) //, taskSendMessage(TASK_SECOND * 2, TASK_FOREVER, [this](){sendMessage();})
-{
-}
+MeshNode::MeshNode() : counter(0){}
 
 void MeshNode::update()
 {
@@ -284,13 +283,13 @@ void MeshNode::send_values(std::function<Measurements()> get_values_callback)
             time1 += (time.hours < 10) ? "0" + String(time.hours - 3) + ":" : "0" + String(time.hours - 3) + ":";
 
             time1 += (time.minutes < 10) ? "0" + String(time.minutes) + ":" : String(time.minutes) + ":";
-            time1 += (time.seconds < 10) ? "0" + String(time.seconds) + ":" : String(time.seconds);
+            time1 += (time.seconds < 10) ? "0" + String(time.seconds)  : String(time.seconds);
         }
         else
         {
             time1 += String(time.hours + 12 - 3) + ":";
             time1 += (time.minutes < 10) ? "0" + String(time.minutes) + ":" : String(time.minutes) + ":";
-            time1 += (time.seconds < 10) ? "0" + String(time.seconds) + ":" : String(time.seconds);
+            time1 += (time.seconds < 10) ? "0" + String(time.seconds)  : String(time.seconds);
         }
         // Serial.println(time1);
         String timeStamp = date + "T" + time1 + "Z";

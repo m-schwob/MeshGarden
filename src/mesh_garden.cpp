@@ -56,7 +56,7 @@ bool MeshGarden::load_configuration()
     // https://arduinojson.org/v6/assistant/
     // https://arduinojson.org/v6/how-to/determine-the-capacity-of-the-jsondocument/
     config.~BasicJsonDocument();
-    config = DynamicJsonDocument(file.size());
+    config = DynamicJsonDocument(file.size()*2);
     // DynamicJsonDocument doc(file.size());
     DeserializationError error = deserializeJson(config, file);
     if (error)

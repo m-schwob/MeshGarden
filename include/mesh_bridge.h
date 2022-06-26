@@ -90,7 +90,7 @@ private:
     // std::map<String,vector<String>> dict;
     std::list<String> mesh_values;
     // std::map<String, String> server_data;
-    queue<String> data_to_send;
+    queue<String> server_data;
     // std::vector<String> server_data;
     friend void receivedCallback(uint32_t from, String &msg);
     friend void newConnectionCallback(uint32_t nodeId);
