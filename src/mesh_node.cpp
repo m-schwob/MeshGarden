@@ -16,6 +16,16 @@ void MeshNode::printLocalTime()
     Serial.println(AmPm);
 }
 
+/*
+must function for the painlessmesh network. 
+input:  uint32_t from - the node id of the node from whom we got the message (always will be the bridge id) 
+        String msg containing the message passed, the message is always in JSON format
+output: NONE
+the function will act differentelly according to the message it had recive.
+if got a "clock" message- the node will set its time values and will start counting the time
+if got a "d" message - the node will set its next time of death
+if got a "change" message - that mean the user changed the configurations of the node. it will set the new configs and reset the node.
+*/
 void receivedCallback(uint32_t from, String &msg)
 {
     Serial.printf("startHere: Received from %u msg=%s\n", from, msg.c_str());
@@ -74,23 +84,21 @@ void receivedCallback(uint32_t from, String &msg)
         node->configure_ready = true;
     }
 }
-
 void newConnectionCallback(uint32_t nodeId)
 {
     Serial.printf("--> startHere: New Connection, nodeId = %u\n", nodeId);
 }
-
 void changedConnectionCallback()
 {
     Serial.printf("Changed connections at time: %d\n", node->mesh.getNodeTime());
 }
-
 void nodeTimeAdjustedCallback(int32_t offset)
 {
     Serial.printf("Adjusted time %u. Offset = %d\n", node->mesh.getNodeTime(), offset);
 }
 
 MeshNode::MeshNode() : counter(0){}
+
 
 void MeshNode::update()
 {
@@ -273,11 +281,13 @@ void MeshNode::init_mesh()
 
 void MeshNode::send_values(std::function<Measurements()> get_values_callback)
 {
-    if (mesh.isConnected(bridgeId) && set_time)
-    {
-        Measurements meas;
-        meas = get_values_callback();
+    // if (mesh.isConnected(bridgeId) && set_time)
+    // {
+        Serial.println("test0");
+        //Measurements meas;
+        //meas = get_values_callback();
         String time1;
+        Serial.println("test1");
         if (AmPm == "AM")
         {
             time1 += (time.hours < 10) ? "0" + String(time.hours - 3) + ":" : "0" + String(time.hours - 3) + ":";
@@ -293,14 +303,17 @@ void MeshNode::send_values(std::function<Measurements()> get_values_callback)
         }
         // Serial.println(time1);
         String timeStamp = date + "T" + time1 + "Z";
-        Serial.println("test");
+        Serial.println("test2");
         DynamicJsonDocument measure1(256); // ameassure sample Json
-        for (Measurement m : meas)
-        {
+        //for (Measurement m : meas)
+        //{
             measure1["nodeId"] = mesh.getNodeId();
-            measure1["sensorId"] = "sensor" + String(m.sensor_id);
-            measure1["meassure_type"] = m.type;
-            measure1["value"] = m.value;
+          //  measure1["sensorId"] = "sensor" + String(m.sensor_id);
+            measure1["sensorId"] = "sensor1";   
+          //  measure1["meassure_type"] = m.type;
+            measure1["meassure_type"] = "Soil Moisture";
+          //  measure1["value"] = m.value;
+            measure1["value"] = time.minutes;
             measure1["time"]["timestampValue"] = timeStamp;
             if (measure1["meassure_type"].as<String>() != "" && mesh.isConnected(bridgeId))
             {
@@ -310,18 +323,19 @@ void MeshNode::send_values(std::function<Measurements()> get_values_callback)
                 // myqueue.push(measure1.as<String>());
                 mesh.sendSingle(bridgeId,measure1.as<String>());
             }
-        }
+        //}
         Serial.println("done measure");
-    }
+    // }
 }
 
 void MeshNode::add_measurement(std::function<Measurements()> callable, unsigned long interval, long iterations)
 {
     Serial.println("adding measurement task");
-    measure.set(TASK_SECOND * 8, TASK_FOREVER, [this, callable]()
+    measure.set(TASK_SECOND * 5, TASK_FOREVER, [this, callable]()
                 { send_values(callable); });
     userScheduler.addTask(measure);
     measure.enable();
+        Serial.println("adding measurement tast set");
 }
 
 void MeshNode::get_battary_level(Measurement battery_level){
