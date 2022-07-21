@@ -68,7 +68,7 @@ void newConnectionCallback(uint32_t nodeId)
     death_time["d"]["m"] = node->die_minutes;
     death_time["d"]["h"] = node->die_hours;
     death_time["d"]["s"] = node->die_seconds;
-    death_time["d"]["st"] = 40; // send the sleep time
+    death_time["d"]["st"] = node->NODE_DEEP_SLEEP_TIME; // send the sleep time
     node->mesh.sendBroadcast(death_time.as<String>());
     Serial.println("next death time:" + death_time.as<String>());
 
@@ -127,7 +127,10 @@ void MeshBridge::set_global_config(JsonObject global_config)
     FIREBASE_PROJECT_ID = global_config["firebase"]["firebase_project_id"].as<String>();
     USER_EMAIL = global_config["firebase"]["user_email"].as<String>();
     USER_PASSWORD = global_config["firebase"]["user_password"].as<String>();
-
+    
+    //deep sleep settings
+    NODE_WAKE_TIME = global_config["mesh_timing"]["mesh_connection_time"].as<int>();
+    NODE_DEEP_SLEEP_TIME=global_config["mesh_timing"]["deep_sleep_time"].as<int>();
     Serial.println("config done");
 }
 
@@ -203,7 +206,7 @@ void MeshBridge::init_clock()
     configTime(gmt_offset_sec, daylight_offset_sec, ntp_server);
     struct tm timeinfo;
     printLocalTime();
-    calculate_death(20);
+    calculate_death(NODE_WAKE_TIME);
     Serial.println("time of next death is:\n");
     Serial.printf("%d:%d:%d", die_hours, die_minutes, die_seconds);
     got_time = true;
@@ -308,13 +311,15 @@ void MeshBridge::firestoreUpdateLastMesh(String jsonVal){
         // aa is the collection id, bb is the document id.
         String documentPath = "Measurements/" + doc["nodeId"].as<String>();
 
-        String f_path = "fields/"+doc["sensorId"].as<String>()+ "/mapValue/fields/" + doc["meassure_type"].as<String>() + "/mapValue/fields/new_sample/mapValue/fields/";
+        String f_path = "fields/"+doc["sensorId"].as<String>()+ "/mapValue/fields/" + doc["meassure_type"].as<String>() + "/mapValue/fields/newSample/mapValue/fields/";
         content.set(f_path + "time/timestampValue/" ,doc["time"]["timestampValue"].as<String>());
         content.set(f_path + "value/doubleValue/",doc["value"].as<double>());
-        String masker = doc["sensorId"].as<String>()+"."+doc["meassure_type"].as<String>()+".newample";
+        String masker = doc["sensorId"].as<String>()+"."+doc["meassure_type"].as<String>()+".newSample";
         
         if (Firebase.Firestore.patchDocument(&fbdo, FIREBASE_PROJECT_ID, "" /* databaseId can be (default) or empty */, documentPath.c_str(), content.raw(), masker /* updateMask */))
-            Serial.println("last_sample was set for node:" + doc["nodeId"].as<String>());
+           { 
+            Serial.println("set last_sample for node:" + doc["nodeId"].as<String>());
+           }
         else
             Serial.println(fbdo.errorReason());
     }
@@ -570,7 +575,7 @@ void MeshBridge::exit_mesh_connect_server()
 {
     String nodeId = String(mesh.getNodeId());
     mesh.stop();
-    calculate_death(60);
+    calculate_death(NODE_WAKE_TIME+NODE_DEEP_SLEEP_TIME);
     // // Connect to Wi-Fi
     Serial.print("Connecting to ");
     Serial.println(ssid);

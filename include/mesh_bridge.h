@@ -85,8 +85,8 @@ private:
     String USER_EMAIL;
     String USER_PASSWORD;
 
-    int NODE_WAKE_TIME = 20; //(recomended initial value 20)
-    int NODE_DEEP_SLEEP_TIME = 40 ;//(reconemded initial value 40)
+    int NODE_WAKE_TIME; //(recomended initial value 20)
+    int NODE_DEEP_SLEEP_TIME;//(reconemded initial value 40)
 
     // sync with the server, saving data variables
     int lasttime = 0; // initialized, used to messure time interaval for the disconnect

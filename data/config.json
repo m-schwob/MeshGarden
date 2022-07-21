@@ -19,6 +19,10 @@
         "wifi": {
             "password": "mypassword",
             "ssid": "My_hotspot"
+        },
+        "mesh_timing": {
+            "mesh_connection_time": 10,
+            "deep_sleep_time":20
         }
     }
 }
