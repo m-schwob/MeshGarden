@@ -51,7 +51,7 @@ using namespace std;
 // #define USER_PASSWORD "ioadmin"
 
 /***************************
- *  Macro Definitions For the RTC and for time management:
+ *  Macro Definitions:
  **************************/
 
 class MeshBridge
@@ -85,6 +85,9 @@ private:
     String USER_EMAIL;
     String USER_PASSWORD;
 
+    int NODE_WAKE_TIME = 20; //(recomended initial value 20)
+    int NODE_DEEP_SLEEP_TIME = 40 ;//(reconemded initial value 40)
+
     // sync with the server, saving data variables
     int lasttime = 0; // initialized, used to messure time interaval for the disconnect
     // std::map<String,vector<String>> dict;
@@ -106,6 +109,7 @@ private:
     bool firestoreReadNetwork(String &changes);
     void firestoreDataUpdate(String jsonVal);
     void firestoreMapBatteryUpdate(String nodeId , float value);
+    void firestoreUpdateLastMesh(String jsonVal);
 
     // bool get_node_changes(String node_id, String &changes);
     vector<String> split(String s, String delimiter);

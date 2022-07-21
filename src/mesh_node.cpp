@@ -268,7 +268,6 @@ void MeshNode::init_mesh()
         { Serial.printf("node dropped:%u, at time: %u", nodeId, node->mesh.getNodeTime()); });
     // Task update_time(TASK_SECOND * 1, TASK_FOREVER, [this](){time_update();});
     // Task emptyQueue(TASK_SECOND * 5, TASK_FOREVER, [this](){ listenQueue(); });
-
     // userScheduler.addTask(update_time);
     // update_time.enable();
     // userScheduler.addTask(emptyQueue);
@@ -311,7 +310,11 @@ void MeshNode::send_values(std::function<Measurements()> get_values_callback)
           //  measure1["sensorId"] = "sensor" + String(m.sensor_id);
             measure1["sensorId"] = "sensor1";   
           //  measure1["meassure_type"] = m.type;
-            measure1["meassure_type"] = "Soil Moisture";
+          String mtyp = "Soil Moisture";
+          std::string m_type = std::string(mtyp.c_str());
+          std::replace(m_type.begin(), m_type.end(), ' ', '_');
+          Serial.println("CONVERTED Soil Moisture into " + String(m_type.c_str()));
+            measure1["meassure_type"] = String(m_type.c_str());
           //  measure1["value"] = m.value;
             measure1["value"] = time.minutes;
             measure1["time"]["timestampValue"] = timeStamp;
