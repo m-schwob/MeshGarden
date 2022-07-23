@@ -37,3 +37,6 @@ TextStyle(fontSize: 19, fontWeight: FontWeight.w500, color: Colors.white);
 
 const BatteryLevel =
 TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.white);
+
+const RemoveTitle =
+TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Colors.white);

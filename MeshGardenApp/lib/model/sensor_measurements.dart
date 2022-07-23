@@ -1,7 +1,5 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:iot_firestore_flutter_app/const/image_path.dart';
 class SensorMeasurements {
   String? type;
@@ -21,18 +19,32 @@ class SensorMeasurements {
   SensorMeasurements.fromJson(Map<String, Object?> json, String type)
       : this(
     type: type,
-    samples: Sample.fromJsonArray(json['samples']! as List<dynamic>),
-    units: SensorMeasurements.modify_units(json['units'] as String),
-    newSample: Sample.fromNewSample(json['newSample']! as Map<String, Object?>),
+    samples:json['samples'] == null? []: Sample.fromJsonArray(json['samples']! as List<dynamic>),
+    units: SensorMeasurements.modify_units(type),
+    newSample:json['newSample'] == null? null: Sample.fromNewSample(json['newSample']! as Map<String, Object?>),
     imagePath: SensorMeasurements.chooseImage(type),
   );
 
-  static String modify_units(String units){
-    String pretty_units = units.trim();
-    if(units == "C"){
-      pretty_units = "\'" + pretty_units;
+  static String modify_units(String type){
+    if(type.trim() == "Air Humidity"){
+      return "%";
     }
-    return pretty_units;
+    else if(type.trim() == "Air Temperature"){
+      return "\'C";
+    }
+    else if(type.trim() == "Soil Moisture"){
+      return "%";
+    }
+    else if(type.trim() == "UVA" || type.trim() == "UVB"){
+      return "\'UVi";
+    }
+    return "";
+
+    // String pretty_units = units.trim();
+    // if(units == "C"){
+    //   pretty_units = "\'" + pretty_units;
+    // }
+    // return pretty_units;
   }
 
   static String chooseImage(String type){
@@ -45,7 +57,7 @@ class SensorMeasurements {
     else if(type.trim() == "Soil Moisture"){
       return SoilMoisturePath;
     }
-    else if(type.trim() == "Uv Index"){
+    else if(type.trim() == "UVA" || type.trim() == "UVB"){
       return UVPath;
     }
     return DefaultSensorPath;

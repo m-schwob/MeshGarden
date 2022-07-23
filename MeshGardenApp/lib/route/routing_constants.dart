@@ -1,7 +1,6 @@
 const String SplashScreenRoute = '/';
 const String SignInScreenRoute = '/SignIn';
 const String SignUpScreenRoute = '/SignUp';
-// const String DashboardScreenRoute = '/Dashboard';
 const String NodesScreenRoute = '/Nodes';
 const String ConfigScreenRoute = '/Config';
 const String LoadingScreenRoute = '/Loading';

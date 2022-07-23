@@ -1,11 +1,10 @@
+/**
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:iot_firestore_flutter_app/auth_helper.dart';
 import 'package:iot_firestore_flutter_app/const/custom_styles.dart';
 import 'package:iot_firestore_flutter_app/model/Sensor.dart';
 import 'package:iot_firestore_flutter_app/route/routing_constants.dart';
-// import 'package:iot_firestore_flutter_app/widgets/my_sensor_card.dart';
 import 'package:flutter/material.dart';
-// import 'dart:io';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({Key? key}) : super(key: key);
@@ -160,3 +159,4 @@ class _DashboardScreenState extends State<DashboardScreen> {
         context, SplashScreenRoute, (Route<dynamic> route) => false);
   }
 }
+    */
