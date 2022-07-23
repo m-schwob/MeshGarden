@@ -1,11 +1,13 @@
 @startjson
 
 {   
-    "Measurements": [
+    "Measurements": 
     {      
-        "nodeId":[
+        "nodeId":
         {
-        "sensor id": "1" ,   
+        "sensor id":{  
+        "sensor Type":{  
+        "units": "%",       
         "samples": [
         {
             "measure value": "value",
@@ -17,17 +19,19 @@
         }
         ]
         }
-        ]
-    }
-    ],
-    "Nodes": [
+        }
+        }
+    },
+    "Nodes":
     {    
-        "nodeId":[
+        "nodeId":
         {
             "nickname": "nick",
-            "firmware_version" : "f1",  
+            "active" : "true",  
+            "bridge" : "false",
             "sensors" : [
                 {
+                    "hardware info": "Grove Soil Moisture Sensor v1",
                     "sensor_id": "1",
                     "measurement type": "Humidity",
                     "sensor_time_interval": "40",
@@ -35,48 +39,48 @@
                     "pinout": {
                         "AOUT": "A0",
                         "VCC": "D4"
-                    }
-                }
-                ] 
-        },
-                {
-            "nickname": "nick",
-            "firmware_version" : "f1",  
-            "sensors" : [
-                {
-                    "sensor_id": "1",
-                    "measurement type": "Humidity",
-                    "sensor_time_interval": "40",
-                    "sensor units": "%",
-                    "pinout": {
-                        "AOUT": "A0",
-                        "VCC": "D4"
-                    }
+                    },
+                    "sensor type":["Soil Moisture"]
                 }
                 ] 
         }
-        ]
-    }
-    ],
+    },
     "Mesh Network": {
         "node1": "nodeId1",
         "nodeId2": "nodeid2",
         "nodeId3": "nodeid3"
     },
-    "Nodes Nicknames": [
+    "Nodes Nicknames": 
         {
-            "nodeId": "nickname"
+            "nodeId": "nickname1",
+            "nodeId2": "nickname2",
+            "nodeId3": "nickname3"
         },
-        {
-            "nodeId2": "nickname"
-        },
-        {
-            "nodeId3": "nickname"
-        }
-    ],
     "Nodes changes": {
-            "nodeId": "ID",
-            "nodeId2": "ID2"
+            "nodeId": "change string",
+            "nodeId2": "change string"
+    },
+    "Network" : {
+        "firebase":{
+            "api_key": "",
+            "firebase_project_id": "",
+            "user_email": "",
+            "user_password": ""
+            },
+        "mesh":{
+            "mesh_password":"",
+            "mesh port":"",
+            "mesh_prefix": ""
+        },
+        "time":{
+            "daylight_offset_sec": 7200,
+            "gmt_offset_sec" :3600,
+            "ntp_server":"pool.ntp.org"
+        },
+        "wifi":{
+            "ssid":"",
+            "password":""
+        }
     }
 }
 

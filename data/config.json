@@ -12,13 +12,17 @@
             "mesh_port": 5555
         },
         "time": {
-            "gmt_offset_sec": 7200,
+            "gmt_offset_sec": 3600,
             "ntp_server": "pool.ntp.org",
-            "daylight_offset_sec": 72000
+            "daylight_offset_sec": 7200
         },
         "wifi": {
             "password": "mypassword",
             "ssid": "My_hotspot"
+        },
+        "mesh_timing": {
+            "mesh_connection_time": 10,
+            "deep_sleep_time":20
         }
     }
 }

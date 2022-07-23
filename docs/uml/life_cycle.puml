@@ -1,0 +1,22 @@
+@startuml
+(*) --> "Initialization"
+
+if "bridge node?" as ini then
+  -->[true] "ntp clock initialization"
+  --> "load mesh network for X seconds" as node
+  --> "stop mesh network, initialize firestore"
+  --> "update firestore"
+  --> "log out out from firestore"
+  --> node
+else
+  ->[false] "start mesh network"
+  --> if "connected to mesh" as c then
+       -->[true] "set timer for deep sleep, initialize clock"
+       --> "send measurements to bridge"
+       -->[after timer set off] "deep sleep"
+       -->[deep sleep over] ini
+      else 
+  -->[false]c
+      endif
+endif
+@enduml
