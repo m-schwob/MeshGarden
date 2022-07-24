@@ -280,13 +280,11 @@ void MeshNode::init_mesh()
 
 void MeshNode::send_values(std::function<Measurements()> get_values_callback)
 {
-    // if (mesh.isConnected(bridgeId) && set_time)
-    // {
-        Serial.println("test0");
-        //Measurements meas;
-        //meas = get_values_callback();
+    if (mesh.isConnected(bridgeId) && set_time)
+    {
+        Measurements meas;
+        meas = get_values_callback();
         String time1;
-        Serial.println("test1");
         if (AmPm == "AM")
         {
             time1 += (time.hours < 10) ? "0" + String(time.hours - 3) + ":" : "0" + String(time.hours - 3) + ":";
@@ -302,33 +300,32 @@ void MeshNode::send_values(std::function<Measurements()> get_values_callback)
         }
         // Serial.println(time1);
         String timeStamp = date + "T" + time1 + "Z";
-        Serial.println("test2");
         DynamicJsonDocument measure1(256); // ameassure sample Json
-        //for (Measurement m : meas)
-        //{
+        for (Measurement m : meas)
+        {
             measure1["nodeId"] = mesh.getNodeId();
-          //  measure1["sensorId"] = "sensor" + String(m.sensor_id);
-            measure1["sensorId"] = "sensor1";   
-          //  measure1["meassure_type"] = m.type;
+           measure1["sensorId"] = "sensor" + String(m.sensor_id);
+            // measure1["sensorId"] = "sensor1";   
+           measure1["meassure_type"] = m.type;
           String mtyp = "Soil Moisture";
           std::string m_type = std::string(mtyp.c_str());
           std::replace(m_type.begin(), m_type.end(), ' ', '_');
           Serial.println("CONVERTED Soil Moisture into " + String(m_type.c_str()));
             measure1["meassure_type"] = String(m_type.c_str());
-          //  measure1["value"] = m.value;
-            measure1["value"] = time.minutes;
+           measure1["value"] = m.value;
+            // measure1["value"] = time.minutes;
             measure1["time"]["timestampValue"] = timeStamp;
             if (measure1["meassure_type"].as<String>() != "" && mesh.isConnected(bridgeId))
             {
                 String castString = measure1.as<String>();
                 Serial.println("read message:");
                 Serial.println(measure1.as<String>());
-                // myqueue.push(measure1.as<String>());
+                myqueue.push(measure1.as<String>());
                 mesh.sendSingle(bridgeId,measure1.as<String>());
             }
-        //}
+        }
         Serial.println("done measure");
-    // }
+    }
 }
 
 void MeshNode::add_measurement(std::function<Measurements()> callable, unsigned long interval, long iterations)
@@ -341,7 +338,7 @@ void MeshNode::add_measurement(std::function<Measurements()> callable, unsigned 
         Serial.println("adding measurement tast set");
 }
 
-void MeshNode::get_battary_level(Measurement battery_level){
+void MeshNode::get_battery_level(Measurement battery_level){
     node_battery_level = battery_level.value;
 }
 

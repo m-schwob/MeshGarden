@@ -126,7 +126,7 @@ public:
     void get_mesh_nodes();
     void init_clock();
 
-    void get_battary_level(Measurement battery_level);
+    void get_battery_level(Measurement battery_level);
     std::map<String,float> battery_map;
 
     void init_mesh();

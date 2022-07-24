@@ -1,6 +1,8 @@
 #include "constants_utils.h"
 
+#if defined(ESP8266)
 ADS1X15 ads;
+#endif
 
 float analog_read(uint16_t pin)
 {

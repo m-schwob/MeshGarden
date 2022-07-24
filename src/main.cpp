@@ -63,7 +63,7 @@ private:
     void init_adc()
     {
         _ads.setGain(GAIN_ONE);
-        if (!_ads.begin())
+        if (!_ads.begin(0x4A))
         {
             Serial.println("Failed to initialize ADS.");
         }

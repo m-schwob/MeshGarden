@@ -99,7 +99,7 @@ public:
 	void listenQueue();
 	Time calculate_time();
 
-	void get_battary_level(Measurement battery_level);
+	void get_battery_level(Measurement battery_level);
 	float node_battery_level = -1;
 
 };

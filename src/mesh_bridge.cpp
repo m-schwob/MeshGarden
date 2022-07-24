@@ -698,7 +698,7 @@ MeshBridge::~MeshBridge()
     delete ntp_server;
 }
 
-void MeshBridge::get_battary_level(Measurement battery_level){}
+void MeshBridge::get_battery_level(Measurement battery_level){}
 
 void MeshBridge::firestoreMapBatteryUpdate(String nodeId , float value){
        if (WiFi.status() == WL_CONNECTED && Firebase.ready())
