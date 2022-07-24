@@ -2,7 +2,9 @@
 #include <ArduinoJson.h>
 #include "mesh_garden.h"
 
-ADC_MODE(ADC_VCC); // enable measure esp8266 supply input voltage
+#if defined(ESP8266)
+    ADC_MODE(ADC_VCC); // enable measure esp8266 supply input voltage
+#endif
 
 /*
 This documentation will be after use for user instruction and documentation. but for now its here to simplify.

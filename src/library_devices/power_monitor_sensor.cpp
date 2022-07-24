@@ -40,7 +40,20 @@ PowerMonitorSensor::PowerMonitorSensor(DEVICE_CONSTRUCTOR_ARGUMENTS)
 
 Measurements PowerMonitorSensor::measure()
 {
+    String s = HARDWARE_INFO + ": ";
+// until i will find esp32 equivalent for ESP.getVcc()
+#if defined(ESP8266)
     Measurements measurements(3);
+
+    Measurement input_voltage;
+    input_voltage.type = INPUT_VOLTAGE_KEY;
+    input_voltage.value = ESP.getVcc() / 10; // getVcc return voltage in mV
+    measurements.push_back(input_voltage);
+
+    s += "input voltage " + String(input_voltage.value) + "V, ";
+#else
+    Measurements measurements(2);
+#endif
 
     Measurement battery_level;
     battery_level.type = BATTERY_LEVEL_KEY;
@@ -53,15 +66,8 @@ Measurements PowerMonitorSensor::measure()
     battery_voltage.value = volt;
     measurements.push_back(battery_voltage);
 
-    Measurement input_voltage;
-    input_voltage.type = INPUT_VOLTAGE_KEY;
-    input_voltage.value = ESP.getVcc() / 10; // getVcc return voltage in mV
-    measurements.push_back(input_voltage);
-
-    String s = HARDWARE_INFO + ": " +
-               "battery voltage " + String(battery_voltage.value) + "V, " +
-               "input voltage " + String(input_voltage.value) + "V, " +
-               "battery level " + String(battery_level.value) + "V, ";
+    s += "battery voltage " + String(battery_voltage.value) + "V, " +
+         "battery level " + String(battery_level.value) + "V";
     Serial.println(s);
     return measurements;
 }
