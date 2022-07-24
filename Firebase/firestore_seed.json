@@ -13,12 +13,8 @@
                 "config": "{\"active\":true,\"bridge\":true,\"configured\":true,\"nickname\":\"test6\"}",
                 "__collections__": {}
             },
-            "2120314353": {
-                "config": "{\"active\":true,\"bridge\":false,\"configured\":false,\"nickname\":\"2120314353\",\"sensors\":{}}",
-                "__collections__": {}
-            },
             "2989123785": {
-                "config": "{\"active\":true,\"bridge\":false,\"configured\":false,\"nickname\":\"bridge\"}",
+                "config": "{\"bridge\":false,\"battery\":60,\"nickname\":\"bridge\",\"active\":true,\"configured\":false,\"network_config\":{\"firebase\":{\"user_password\":\"ioadmin\",\"firebase_project_id\":\"meshgarden-iot\",\"user_email\":\"ioadmin@ioadmin.com\",\"api_key\":\"AIzaSyCpnmHDV7B7oR6pnKXS0VBFoqaF174UzZM\"},\"mesh\":{\"mesh_port\":5555,\"mesh_password\":\"somethingSneaky\",\"mesh_prefix\":\"whateverYouLike\"},\"time\":{\"ntp_server\":\"pool.ntp.org\",\"daylight_offset_sec\":7200,\"gmt_offset_sec\":7200},\"wifi\":{\"ssid\":\"My_hotspot\",\"password\":\"mypassword\"}}}",
                 "__collections__": {}
             },
             "2989123787": {
@@ -34,19 +30,15 @@
                 "__collections__": {}
             },
             "3049688239": {
-                "config": "{\"active\":false,\"bridge\":false,\"configured\":false,\"nickname\":\"plant1\"}",
+                "config": "{\"configured\":false,\"nickname\":\"plant1\",\"battery\":77,\"active\":false,\"bridge\":false,\"network_config\":{\"firebase\":{\"user_email\":\"ioadmin@ioadmin.com\",\"firebase_project_id\":\"meshgarden-iot\",\"api_key\":\"AIzaSyCpnmHDV7B7oR6pnKXS0VBFoqaF174UzZM\",\"user_password\":\"ioadmin\"},\"mesh\":{\"mesh_password\":\"somethingSneaky\",\"mesh_prefix\":\"whateverYouLike\",\"mesh_port\":5555},\"time\":{\"daylight_offset_sec\":7200,\"gmt_offset_sec\":7200,\"ntp_server\":\"pool.ntp.org\"},\"wifi\":{\"password\":\"mypassword\",\"ssid\":\"My_hotspot\"}}}",
                 "__collections__": {}
             },
             "3049689558": {
-                "config": "{\"nickname\":\"best plant\",\"sensors\":{\"1\":{\"hardware_info\":\"Grove Soil Moisture Sensor v1\",\"pinout\":{\"VCC\":\"D5\"},\"sample_interval\":30,\"sensor_id\":1,\"sensor_type\":[\"Soil Moisture\"],\"units\":[\"%\"]}},\"mesh_port\": 5555,\"mesh_password\": \"somethingSneaky\",\"mesh_prefix\": \"whateverYouLike\",\"firmware\": \"esp8266_v0.1\"}",
-                "__collections__": {}
-            },
-            "3049737556": {
-                "config": "{\"active\":false,\"bridge\":false,\"configured\":false,\"nickname\":\"new plant\",\"sensors\":{\"1\":{\"hardware_info\":\"Grove Soil Moisture Sensor v1\",\"pinout\":{\"VCC\":\"D5\"},\"sample_interval\":30,\"sensor_id\":1,\"sensor_type\":[\"Soil Moisture\"],\"units\":[\"%\"]}}}",
+                "config": "{\"battery\":85,\"bridge\":false,\"configured\":false,\"active\":true,\"nickname\":\"3049689558\",\"network_config\":{\"firebase\":{\"firebase_project_id\":\"meshgarden-iot\",\"api_key\":\"AIzaSyCpnmHDV7B7oR6pnKXS0VBFoqaF174UzZM\",\"user_email\":\"ioadmin@ioadmin.com\",\"user_password\":\"ioadmin\"},\"mesh\":{\"mesh_prefix\":\"whateverYouLike\",\"mesh_port\":5555,\"mesh_password\":\"somethingSneaky\"},\"time\":{\"ntp_server\":\"pool.ntp.org\",\"daylight_offset_sec\":7200,\"gmt_offset_sec\":7200},\"wifi\":{\"ssid\":\"My_hotspot\",\"password\":\"mypassword\"}}}",
                 "__collections__": {}
             },
             "3049737557": {
-                "config": "{\"active\":true,\"bridge\":false,\"configured\":false,\"nickname\":\"plant 2\",\"sensors\":{}}",
+                "config": "{\"bridge\":false,\"battery\":100,\"sensors\":{},\"active\":true,\"nickname\":\"plant 2\",\"configured\":false,\"network_config\":{\"firebase\":{\"firebase_project_id\":\"meshgarden-iot\",\"api_key\":\"AIzaSyCpnmHDV7B7oR6pnKXS0VBFoqaF174UzZM\",\"user_password\":\"ioadmin\",\"user_email\":\"ioadmin@ioadmin.com\"},\"mesh\":{\"mesh_port\":5555,\"mesh_prefix\":\"whateverYouLike\",\"mesh_password\":\"somethingSneaky\"},\"time\":{\"gmt_offset_sec\":7200,\"daylight_offset_sec\":7200,\"ntp_server\":\"pool.ntp.org\"},\"wifi\":{\"password\":\"mypassword\",\"ssid\":\"My_hotspot\"}}}",
                 "__collections__": {}
             }
         },
@@ -61,117 +53,18 @@
         "Measurements": {
             "2989123787": {
                 "1": {
-                    "Air Temperature ": {
-                        "samples": [
-                            {
-                                "value": 0.8,
-                                "time": {
-                                    "__datatype__": "timestamp",
-                                    "value": {
-                                        "_seconds": 1653339600,
-                                        "_nanoseconds": 0
-                                    }
-                                }
-                            },
-                            {
-                                "time": {
-                                    "__datatype__": "timestamp",
-                                    "value": {
-                                        "_seconds": 1653340200,
-                                        "_nanoseconds": 0
-                                    }
-                                },
-                                "value": 0.7
-                            },
-                            {
-                                "value": 0.6,
-                                "time": {
-                                    "__datatype__": "timestamp",
-                                    "value": {
-                                        "_seconds": 1653340800,
-                                        "_nanoseconds": 0
-                                    }
-                                }
-                            },
-                            {
-                                "value": 0.5,
-                                "time": {
-                                    "__datatype__": "timestamp",
-                                    "value": {
-                                        "_seconds": 1653341400,
-                                        "_nanoseconds": 0
-                                    }
-                                }
-                            },
-                            {
-                                "value": 0.4,
-                                "time": {
-                                    "__datatype__": "timestamp",
-                                    "value": {
-                                        "_seconds": 1653342000,
-                                        "_nanoseconds": 0
-                                    }
-                                }
-                            }
-                        ]
-                    },
                     "Air Humidity": {
-                        "samples": [
-                            {
-                                "value": 0.8,
-                                "time": {
-                                    "__datatype__": "timestamp",
-                                    "value": {
-                                        "_seconds": 1653339600,
-                                        "_nanoseconds": 0
-                                    }
+                        "newSample": {
+                            "time": {
+                                "__datatype__": "timestamp",
+                                "value": {
+                                    "_seconds": 1656091856,
+                                    "_nanoseconds": 331000000
                                 }
                             },
-                            {
-                                "value": 0.7,
-                                "time": {
-                                    "__datatype__": "timestamp",
-                                    "value": {
-                                        "_seconds": 1653340200,
-                                        "_nanoseconds": 0
-                                    }
-                                }
-                            },
-                            {
-                                "value": 0.6,
-                                "time": {
-                                    "__datatype__": "timestamp",
-                                    "value": {
-                                        "_seconds": 1653340800,
-                                        "_nanoseconds": 0
-                                    }
-                                }
-                            },
-                            {
-                                "value": 0.5,
-                                "time": {
-                                    "__datatype__": "timestamp",
-                                    "value": {
-                                        "_seconds": 1653341400,
-                                        "_nanoseconds": 0
-                                    }
-                                }
-                            },
-                            {
-                                "value": 0.4,
-                                "time": {
-                                    "__datatype__": "timestamp",
-                                    "value": {
-                                        "_seconds": 1653342000,
-                                        "_nanoseconds": 0
-                                    }
-                                }
-                            }
-                        ]
-                    }
-                },
-                "2": {
-                    "Soil Moisture": {
+                            "value": 40
+                        },
+                        "units": "%",
                         "samples": [
                             {
                                 "value": 0.8,
@@ -214,6 +107,70 @@
                                 "value": 0.5
                             },
                             {
+                                "time": {
+                                    "__datatype__": "timestamp",
+                                    "value": {
+                                        "_seconds": 1653342000,
+                                        "_nanoseconds": 0
+                                    }
+                                },
+                                "value": 0.4
+                            }
+                        ]
+                    },
+                    "Air Temperature ": {
+                        "newSample": {
+                            "value": 24.4,
+                            "time": {
+                                "__datatype__": "timestamp",
+                                "value": {
+                                    "_seconds": 1656091912,
+                                    "_nanoseconds": 296000000
+                                }
+                            }
+                        },
+                        "samples": [
+                            {
+                                "value": 0.8,
+                                "time": {
+                                    "__datatype__": "timestamp",
+                                    "value": {
+                                        "_seconds": 1653339600,
+                                        "_nanoseconds": 0
+                                    }
+                                }
+                            },
+                            {
+                                "time": {
+                                    "__datatype__": "timestamp",
+                                    "value": {
+                                        "_seconds": 1653340200,
+                                        "_nanoseconds": 0
+                                    }
+                                },
+                                "value": 0.7
+                            },
+                            {
+                                "time": {
+                                    "__datatype__": "timestamp",
+                                    "value": {
+                                        "_seconds": 1653340800,
+                                        "_nanoseconds": 0
+                                    }
+                                },
+                                "value": 0.6
+                            },
+                            {
+                                "value": 0.5,
+                                "time": {
+                                    "__datatype__": "timestamp",
+                                    "value": {
+                                        "_seconds": 1653341400,
+                                        "_nanoseconds": 0
+                                    }
+                                }
+                            },
+                            {
                                 "value": 0.4,
                                 "time": {
                                     "__datatype__": "timestamp",
@@ -222,6 +179,74 @@
                                         "_nanoseconds": 0
                                     }
                                 }
+                            }
+                        ],
+                        "units": "C"
+                    }
+                },
+                "2": {
+                    "Soil Moisture": {
+                        "units": "%",
+                        "newSample": {
+                            "value": 20.5,
+                            "time": {
+                                "__datatype__": "timestamp",
+                                "value": {
+                                    "_seconds": 1656091980,
+                                    "_nanoseconds": 659000000
+                                }
+                            }
+                        },
+                        "samples": [
+                            {
+                                "value": 0.8,
+                                "time": {
+                                    "__datatype__": "timestamp",
+                                    "value": {
+                                        "_seconds": 1653339600,
+                                        "_nanoseconds": 0
+                                    }
+                                }
+                            },
+                            {
+                                "value": 0.7,
+                                "time": {
+                                    "__datatype__": "timestamp",
+                                    "value": {
+                                        "_seconds": 1653340200,
+                                        "_nanoseconds": 0
+                                    }
+                                }
+                            },
+                            {
+                                "value": 0.6,
+                                "time": {
+                                    "__datatype__": "timestamp",
+                                    "value": {
+                                        "_seconds": 1653340800,
+                                        "_nanoseconds": 0
+                                    }
+                                }
+                            },
+                            {
+                                "time": {
+                                    "__datatype__": "timestamp",
+                                    "value": {
+                                        "_seconds": 1653341400,
+                                        "_nanoseconds": 0
+                                    }
+                                },
+                                "value": 0.5
+                            },
+                            {
+                                "time": {
+                                    "__datatype__": "timestamp",
+                                    "value": {
+                                        "_seconds": 1653342000,
+                                        "_nanoseconds": 0
+                                    }
+                                },
+                                "value": 0.4
                             }
                         ]
                     }
@@ -230,17 +255,17 @@
             },
             "2989123788": {
                 "1": {
-                    "Air Temperature ": {
+                    "Air Humidity": {
                         "samples": [
                             {
-                                "value": 0.8,
                                 "time": {
                                     "__datatype__": "timestamp",
                                     "value": {
                                         "_seconds": 1653339600,
                                         "_nanoseconds": 0
                                     }
-                                }
+                                },
+                                "value": 0.8
                             },
                             {
                                 "time": {
@@ -284,73 +309,17 @@
                             }
                         ]
                     },
-                    "Air Humidity": {
+                    "Air Temperature ": {
                         "samples": [
                             {
+                                "value": 0.8,
                                 "time": {
                                     "__datatype__": "timestamp",
                                     "value": {
                                         "_seconds": 1653339600,
                                         "_nanoseconds": 0
                                     }
-                                },
-                                "value": 0.8
-                            },
-                            {
-                                "value": 0.7,
-                                "time": {
-                                    "__datatype__": "timestamp",
-                                    "value": {
-                                        "_seconds": 1653340200,
-                                        "_nanoseconds": 0
-                                    }
                                 }
-                            },
-                            {
-                                "time": {
-                                    "__datatype__": "timestamp",
-                                    "value": {
-                                        "_seconds": 1653340800,
-                                        "_nanoseconds": 0
-                                    }
-                                },
-                                "value": 0.6
-                            },
-                            {
-                                "time": {
-                                    "__datatype__": "timestamp",
-                                    "value": {
-                                        "_seconds": 1653341400,
-                                        "_nanoseconds": 0
-                                    }
-                                },
-                                "value": 0.5
-                            },
-                            {
-                                "value": 0.4,
-                                "time": {
-                                    "__datatype__": "timestamp",
-                                    "value": {
-                                        "_seconds": 1653342000,
-                                        "_nanoseconds": 0
-                                    }
-                                }
-                            }
-                        ]
-                    }
-                },
-                "2": {
-                    "Soil Moisture": {
-                        "samples": [
-                            {
-                                "time": {
-                                    "__datatype__": "timestamp",
-                                    "value": {
-                                        "_seconds": 1653339600,
-                                        "_nanoseconds": 0
-                                    }
-                                },
-                                "value": 0.8
                             },
                             {
                                 "time": {
@@ -373,14 +342,70 @@
                                 }
                             },
                             {
-                                "value": 0.5,
                                 "time": {
                                     "__datatype__": "timestamp",
                                     "value": {
                                         "_seconds": 1653341400,
                                         "_nanoseconds": 0
                                     }
+                                },
+                                "value": 0.5
+                            },
+                            {
+                                "time": {
+                                    "__datatype__": "timestamp",
+                                    "value": {
+                                        "_seconds": 1653342000,
+                                        "_nanoseconds": 0
+                                    }
+                                },
+                                "value": 0.4
+                            }
+                        ]
+                    }
+                },
+                "2": {
+                    "Soil Moisture": {
+                        "samples": [
+                            {
+                                "time": {
+                                    "__datatype__": "timestamp",
+                                    "value": {
+                                        "_seconds": 1653339600,
+                                        "_nanoseconds": 0
+                                    }
+                                },
+                                "value": 0.8
+                            },
+                            {
+                                "value": 0.7,
+                                "time": {
+                                    "__datatype__": "timestamp",
+                                    "value": {
+                                        "_seconds": 1653340200,
+                                        "_nanoseconds": 0
+                                    }
                                 }
+                            },
+                            {
+                                "value": 0.6,
+                                "time": {
+                                    "__datatype__": "timestamp",
+                                    "value": {
+                                        "_seconds": 1653340800,
+                                        "_nanoseconds": 0
+                                    }
+                                }
+                            },
+                            {
+                                "time": {
+                                    "__datatype__": "timestamp",
+                                    "value": {
+                                        "_seconds": 1653341400,
+                                        "_nanoseconds": 0
+                                    }
+                                },
+                                "value": 0.5
                             },
                             {
                                 "time": {
@@ -399,6 +424,60 @@
             },
             "2989123789": {
                 "1": {
+                    "Air Temperature ": {
+                        "samples": [
+                            {
+                                "time": {
+                                    "__datatype__": "timestamp",
+                                    "value": {
+                                        "_seconds": 1653339600,
+                                        "_nanoseconds": 0
+                                    }
+                                },
+                                "value": 0.8
+                            },
+                            {
+                                "value": 0.7,
+                                "time": {
+                                    "__datatype__": "timestamp",
+                                    "value": {
+                                        "_seconds": 1653340200,
+                                        "_nanoseconds": 0
+                                    }
+                                }
+                            },
+                            {
+                                "value": 0.6,
+                                "time": {
+                                    "__datatype__": "timestamp",
+                                    "value": {
+                                        "_seconds": 1653340800,
+                                        "_nanoseconds": 0
+                                    }
+                                }
+                            },
+                            {
+                                "time": {
+                                    "__datatype__": "timestamp",
+                                    "value": {
+                                        "_seconds": 1653341400,
+                                        "_nanoseconds": 0
+                                    }
+                                },
+                                "value": 0.5
+                            },
+                            {
+                                "time": {
+                                    "__datatype__": "timestamp",
+                                    "value": {
+                                        "_seconds": 1653342000,
+                                        "_nanoseconds": 0
+                                    }
+                                },
+                                "value": 0.4
+                            }
+                        ]
+                    },
                     "Air Humidity": {
                         "units": "%",
                         "samples": [
@@ -413,68 +492,14 @@
                                 "value": 0.8
                             },
                             {
+                                "value": 0.7,
                                 "time": {
                                     "__datatype__": "timestamp",
                                     "value": {
                                         "_seconds": 1653340200,
                                         "_nanoseconds": 0
                                     }
-                                },
-                                "value": 0.7
-                            },
-                            {
-                                "value": 0.6,
-                                "time": {
-                                    "__datatype__": "timestamp",
-                                    "value": {
-                                        "_seconds": 1653340800,
-                                        "_nanoseconds": 0
-                                    }
                                 }
-                            },
-                            {
-                                "value": 0.5,
-                                "time": {
-                                    "__datatype__": "timestamp",
-                                    "value": {
-                                        "_seconds": 1653341400,
-                                        "_nanoseconds": 0
-                                    }
-                                }
-                            },
-                            {
-                                "value": 0.4,
-                                "time": {
-                                    "__datatype__": "timestamp",
-                                    "value": {
-                                        "_seconds": 1653342000,
-                                        "_nanoseconds": 0
-                                    }
-                                }
-                            }
-                        ]
-                    },
-                    "Air Temperature ": {
-                        "samples": [
-                            {
-                                "time": {
-                                    "__datatype__": "timestamp",
-                                    "value": {
-                                        "_seconds": 1653339600,
-                                        "_nanoseconds": 0
-                                    }
-                                },
-                                "value": 0.8
-                            },
-                            {
-                                "time": {
-                                    "__datatype__": "timestamp",
-                                    "value": {
-                                        "_seconds": 1653340200,
-                                        "_nanoseconds": 0
-                                    }
-                                },
-                                "value": 0.7
                             },
                             {
                                 "time": {
@@ -513,14 +538,14 @@
                     "Soil Moisture": {
                         "samples": [
                             {
-                                "value": 0.5,
                                 "time": {
                                     "__datatype__": "timestamp",
                                     "value": {
                                         "_seconds": 1653341400,
                                         "_nanoseconds": 0
                                     }
-                                }
+                                },
+                                "value": 0.5
                             }
                         ]
                     }
@@ -543,28 +568,10 @@
                 },
                 "__collections__": {}
             },
-            "3049689558": {
-                "0": {
+            "3049737556": {
+                "1": {
                     "Soil Moisture": {
-                        "samples": [
-                            null
-                        ]
-                    }
-                },
-                "sensor1073683728": {
-                    "Soil Moisture": {
-                        "samples": [
-                            {
-                                "time": {
-                                    "__datatype__": "timestamp",
-                                    "value": {
-                                        "_seconds": 1655985336,
-                                        "_nanoseconds": 0
-                                    }
-                                },
-                                "value": 0.203333318
-                            }
-                        ]
+                        "units": "%"
                     }
                 },
                 "__collections__": {}
@@ -573,28 +580,28 @@
         "MeshNetwork": {
             "active": {
                 "2120314353": null,
-                "3049689558": null,
+                "3049737556": null,
                 "__collections__": {}
             }
         },
         "Network": {
             "firebase": {
                 "user_email": "ioadmin@ioadmin.com",
-                "user_password": "ioadmin",
                 "firebase_project_id": "meshgarden-iot",
                 "api_key": "AIzaSyCpnmHDV7B7oR6pnKXS0VBFoqaF174UzZM",
+                "user_password": "ioadmin",
                 "__collections__": {}
             },
             "mesh": {
                 "mesh_password": "somethingSneaky",
-                "mesh_prefix": "whateverYouLike",
                 "mesh_port": 5555,
+                "mesh_prefix": "whateverYouLike",
                 "__collections__": {}
             },
             "time": {
-                "ntp_server": "pool.ntp.org",
-                "daylight_offset_sec": 7200,
                 "gmt_offset_sec": 7200,
+                "daylight_offset_sec": 7200,
+                "ntp_server": "pool.ntp.org",
                 "__collections__": {}
             },
             "wifi": {
@@ -605,63 +612,69 @@
         },
         "Nodes": {
             "2120314353": {
-                "active": true,
-                "bridge": false,
-                "nickname": "2120314353",
                 "sensors": {},
+                "battery": 50,
                 "configured": false,
+                "nickname": "2120314353",
+                "bridge": false,
+                "active": true,
                 "__collections__": {}
             },
             "2989123785": {
                 "bridge": false,
-                "active": true,
-                "nickname": "bridge",
                 "configured": false,
+                "nickname": "bridge",
+                "battery": 60,
+                "active": true,
                 "__collections__": {}
             },
             "3049688239": {
-                "nickname": "plant1",
                 "active": false,
-                "configured": false,
+                "nickname": "plant1",
+                "battery": 77,
                 "bridge": false,
+                "configured": false,
                 "__collections__": {}
             },
             "3049689558": {
-                "configured": false,
-                "nickname": "3049689558",
-                "bridge": false,
+                "battery": 85,
                 "active": true,
+                "nickname": "3049689558",
+                "configured": false,
+                "bridge": false,
                 "__collections__": {}
             },
             "3049737556": {
+                "configured": false,
                 "active": true,
-                "nickname": "new plant",
+                "bridge": false,
                 "sensors": {
                     "1": {
-                        "sensor_id": 1,
-                        "hardware_info": "Grove Soil Moisture Sensor v1",
                         "sample_interval": 30,
+                        "hardware_info": "Grove Soil Moisture Sensor v1",
+                        "sensor_id": 1,
                         "units": [
                             "%"
                         ],
-                        "pinout": {
-                            "VCC": "D5"
-                        },
                         "sensor_type": [
                             "Soil Moisture"
-                        ]
+                        ],
+                        "pinout": {
+                            "VCC": "D5"
+                        }
                     }
                 },
-                "configured": false,
-                "bridge": false,
+                "battery": 22,
+                "nickname": "new plant",
                 "__collections__": {}
             },
             "3049737557": {
-                "nickname": "plant 2",
                 "sensors": {},
+                "bridge": false,
+                "nickname": "plant 2",
+                "battery": 100,
                 "configured": false,
                 "active": true,
-                "bridge": false,
                 "__collections__": {}
             }
         },
@@ -702,77 +715,6 @@
             },
             " 3049737557": {
                 "test": "hi test",
-                "__collections__": {}
-            }
-        },
-        "TestMeasurements": {
-            "12": {
-                "time": {
-                    "__datatype__": "timestamp",
-                    "value": {
-                        "_seconds": 1654596489,
-                        "_nanoseconds": 215000000
-                    }
-                },
-                "value": 0,
-                "measure type": "",
-                "__collections__": {}
-            },
-            "3049689558": {
-                "nodeId": "3049689558",
-                "sensor_type": "Soil Moisture",
-                "sesorId": 0,
-                "value": 0.356666625,
-                "time": {
-                    "__datatype__": "timestamp",
-                    "value": {
-                        "_seconds": 1656002219,
-                        "_nanoseconds": 0
-                    }
-                },
-                "__collections__": {
-                    "0": {
-                        "soil moisture": {
-                            "samples": [
-                                ""
-                            ],
-                            "__collections__": {}
-                        }
-                    }
-                }
-            },
-            " 2989123785": {
-                "__collections__": {}
-            },
-            "Plant1": {
-                "arr": [
-                    {
-                        "time": {
-                            "__datatype__": "timestamp",
-                            "value": {
-                                "_seconds": 1653339600,
-                                "_nanoseconds": 0
-                            }
-                        },
-                        "value": 0.23
-                    }
-                ],
-                "temperature": 24.6,
-                "map1": {
-                    "arr2": [
-                        {
-                            "value": 0.23,
-                            "time": {
-                                "__datatype__": "timestamp",
-                                "value": {
-                                    "_seconds": 1653339600,
-                                    "_nanoseconds": 0
-                                }
-                            }
-                        }
-                    ]
-                },
-                "humidity": 45.5,
                 "__collections__": {}
             }
         }
