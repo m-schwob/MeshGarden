@@ -1,10 +1,5 @@
 #include "mesh_garden.h"
 
-uint8_t pin(String pin)
-{
-    return pins_map[pin].as<uint8_t>();
-}
-
 MeshGarden::GenericSensor::GenericSensor(DEVICE_CONSTRUCTOR_ARGUMENTS)
     : Sensor(device_id, hardware_info, pinout, envelop) {}
 
@@ -56,7 +51,7 @@ bool MeshGarden::load_configuration()
     // https://arduinojson.org/v6/assistant/
     // https://arduinojson.org/v6/how-to/determine-the-capacity-of-the-jsondocument/
     config.~BasicJsonDocument();
-    config = DynamicJsonDocument(file.size()*2);
+    config = DynamicJsonDocument(file.size() * 2);
     // DynamicJsonDocument doc(file.size());
     DeserializationError error = deserializeJson(config, file);
     if (error)
@@ -192,6 +187,14 @@ void MeshGarden::log_config()
     }
 }
 
+void MeshGarden::init_power_monitor()
+{
+    StaticJsonDocument<100> pinout;
+    char json[] = "{\"BAT\":\"ADS3\"}";
+    deserializeJson(pinout, json);
+    power_monitor = new PowerMonitorSensor(0, "", pinout.as<JsonObject>(), DynamicJsonDocument(0));
+}
+
 void MeshGarden::init_mesh_connection()
 {
     // choose mesh node type to construct
@@ -259,8 +262,31 @@ void MeshGarden::begin()
     load_configuration();
     parse_config();
     Serial.println("serialization done, now init mesh");
+#if defined(ESP8266) //TODO solve differences with power monitor
+    init_power_monitor();
+#endif
+
     init_mesh_connection();
+
+#if defined(ESP8266) //TODO solve differences with power monitor
+    Measurements power_status = power_monitor->measure_wrapper();
+    for (Measurement meas : power_status)
+    {
+        if (meas.type == BATTERY_LEVEL_KEY)
+            network->get_battery_level(meas);
+    }
+#endif
     config.~DynamicJsonDocument();
+}
+
+std::list<String> MeshGarden::get_device_list()
+{
+    std::list<String> list;
+    for (Device *device : device_list)
+    {
+        list.push_back(device->HARDWARE_INFO);
+    }
+    return list;
 }
 
 void MeshGarden::update()

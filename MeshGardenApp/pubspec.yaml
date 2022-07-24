@@ -1,5 +1,5 @@
 name: iot_firestore_flutter_app
-description: www.that-project.com
+description: Mesh Garden IOT
 
 # The following line prevents the package from being accidentally published to
 # pub.dev using `pub publish`. This is preferred for private packages.
@@ -35,7 +35,14 @@ dependencies:
   adaptive_dialog: ^1.1.0
   font_awesome_flutter: ^10.1.0
   chart_sparkline: ^1.0.5
-  flutter_hooks: ^0.18.0
+#  flutter_hooks: ^0.18.0
+  intl: ^0.17.0
+  hawk_fab_menu: ^1.1.2
+  flutter_launcher_icons: ^0.9.0
+
+flutter_icons:
+  android: true
+  image_path: 'assets/icons/icon.png'
 
 dev_dependencies:
   flutter_test:

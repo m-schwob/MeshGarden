@@ -9,6 +9,8 @@
 
 #include "constants_utils.h"
 #include "pins_maps.h"
+#include "library_devices/ADS1X15.h"
+#include "library_devices/power_monitor_sensor.h"
 #include "device.h"
 #include "sensor.h"
 
@@ -18,7 +20,6 @@
 #include "mesh_node.h"
 #endif
 
-uint8_t pin(String pin);
 
 class MeshGarden
 {
@@ -49,15 +50,12 @@ public:
     };
 #define REGISTER_SENSOR(STR) REGISTER_DEVICE(MeshGarden::GenericSensor, STR);
 
+
 private:
     DynamicJsonDocument config;
-
-    // std::list<Device*> device_list; make private after test
+    std::list<Device *> device_list;
     std::map<String, Funcs> funcs_map;
-
-    String mesh_prefix;
-    String mesh_password;
-    size_t mesh_port;
+    PowerMonitorSensor *power_monitor = NULL;
 
 #ifdef ESP32
     MeshBridge *network = NULL;
@@ -70,12 +68,13 @@ private:
     bool load_configuration();
     void parse_config();
     void log_config();
+    void init_power_monitor();
     void init_mesh_connection();
 
 public:
-    std::list<Device *> device_list;
     MeshGarden();
     void add_sensor(String hardware_id, InitSensor init_sensor_func, Measure measure_func);
+    std::list<String> get_device_list();
     void update();
     void begin();
     int start = 0;

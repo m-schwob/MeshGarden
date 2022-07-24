@@ -1,5 +1,4 @@
-import 'package:flutter/material.dart';
-import 'package:iot_firestore_flutter_app/model/Sensor.dart';
+/*import 'package:iot_firestore_flutter_app/model/Sensor.dart';
 
 class Node {
   int? nodeID;
@@ -37,4 +36,4 @@ class Node {
     };
   }
 
-}
+}*/

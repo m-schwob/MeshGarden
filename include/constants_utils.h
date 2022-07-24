@@ -1,6 +1,12 @@
 #ifndef _CONSTANTS_UTILS_H_
 #define _CONSTANTS_UTILS_H_
 
+#include "library_devices/ADS1X15.h"
+
+extern ADS1X15 ads;
+float analog_read(uint16_t pin);
+// float analogRead(uint16_t pin);
+
 struct Time
 {
     int hours = 0;
@@ -9,6 +15,6 @@ struct Time
 };
 #define EEPROM_SIZE (sizeof(Time) + sizeof(int))
 
-float percentage(float value, float max, float min = 0);
+float percentage(float value, float max, float min);
 
 #endif /* _CONSTANTS_UTILS_H_ */

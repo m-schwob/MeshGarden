@@ -28,10 +28,12 @@ std::vector<String> Sensor::from_envelop(DynamicJsonDocument envelop, String key
 //     : Device(id, _DEVICE_TYPE, hardware_info, data_pins, power_pin), MEASUREMENTS_TYPE(measurements_type), UNITS(units) {}
 
 Measurements Sensor::measure_wrapper(){
+    power_on();
     Measurements measurements = measure();
     for(Measurement &meas : measurements){
         meas.sensor_id = DEVICE_ID;
     }
+    power_off();
     return measurements;
 }
 
