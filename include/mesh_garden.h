@@ -20,7 +20,6 @@
 #include "mesh_node.h"
 #endif
 
-
 class MeshGarden
 {
 public:
@@ -49,7 +48,6 @@ public:
         void set(Funcs func);
     };
 #define REGISTER_SENSOR(STR) REGISTER_DEVICE(MeshGarden::GenericSensor, STR);
-
 
 private:
     DynamicJsonDocument config;

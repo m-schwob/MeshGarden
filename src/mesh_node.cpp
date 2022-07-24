@@ -17,8 +17,8 @@ void MeshNode::printLocalTime()
 }
 
 /*
-must function for the painlessmesh network. 
-input:  uint32_t from - the node id of the node from whom we got the message (always will be the bridge id) 
+must function for the painlessmesh network.
+input:  uint32_t from - the node id of the node from whom we got the message (always will be the bridge id)
         String msg containing the message passed, the message is always in JSON format
 output: NONE
 the function will act differentelly according to the message it had recive.
@@ -57,12 +57,13 @@ void receivedCallback(uint32_t from, String &msg)
         node->AmPm = values[3];
         node->set_time = true;
 
-        if(node->node_battery_level!=-1){
+        if (node->node_battery_level != -1)
+        {
             DynamicJsonDocument battery_level(32);
             battery_level["battery"] = battery_level;
             Serial.println("created battery json");
             serializeJson(battery_level, Serial);
-            node->mesh.sendSingle(from,battery_level.as<String>());
+            node->mesh.sendSingle(from, battery_level.as<String>());
         }
     }
 
@@ -97,8 +98,7 @@ void nodeTimeAdjustedCallback(int32_t offset)
     Serial.printf("Adjusted time %u. Offset = %d\n", node->mesh.getNodeTime(), offset);
 }
 
-MeshNode::MeshNode() : counter(0){}
-
+MeshNode::MeshNode() : counter(0) {}
 
 void MeshNode::update()
 {
@@ -112,7 +112,7 @@ void MeshNode::update()
     {
         // put here store function
         Serial.println("die");
-        store_timing(time,die_interval);
+        store_timing(time, die_interval);
         ESP.deepSleep((die_interval)*1000000);
     }
     if (alive)
@@ -188,7 +188,6 @@ void MeshNode::load_timing(Time &time, int &sleep_time)
     Serial.println("time loaded");
 }
 
-
 vector<String> MeshNode::splitString(string str, string delimiter)
 {
     vector<String> ret;
@@ -237,13 +236,14 @@ void MeshNode::set_global_config(JsonObject global_config)
     Serial.println("config done");
 }
 
-void MeshNode::init_clock() {
+void MeshNode::init_clock()
+{
     Time t;
     load_timing(t, die_interval);
-    time.seconds = (t.seconds+die_interval)%60;
-    time.minutes = ((t.minutes+ ((t.seconds+die_interval)/60))%60);
-    time.hours = ((t.hours + ((t.minutes+ ((t.seconds+die_interval)/60))/60))%24);
-    time = t ;
+    time.seconds = (t.seconds + die_interval) % 60;
+    time.minutes = ((t.minutes + ((t.seconds + die_interval) / 60)) % 60);
+    time.hours = ((t.hours + ((t.minutes + ((t.seconds + die_interval) / 60)) / 60)) % 24);
+    time = t;
 }
 
 // void MeshNode::listenQueue()
@@ -265,7 +265,7 @@ void MeshNode::init_mesh()
     mesh.onChangedConnections(&changedConnectionCallback);
     mesh.onNodeTimeAdjusted(&nodeTimeAdjustedCallback);
     mesh.onDroppedConnection([](uint32_t nodeId)
-        { Serial.printf("node dropped:%u, at time: %u", nodeId, node->mesh.getNodeTime()); });
+                             { Serial.printf("node dropped:%u, at time: %u", nodeId, node->mesh.getNodeTime()); });
     // Task update_time(TASK_SECOND * 1, TASK_FOREVER, [this](){time_update();});
     // Task emptyQueue(TASK_SECOND * 5, TASK_FOREVER, [this](){ listenQueue(); });
     // userScheduler.addTask(update_time);
@@ -290,13 +290,13 @@ void MeshNode::send_values(std::function<Measurements()> get_values_callback)
             time1 += (time.hours < 10) ? "0" + String(time.hours - 3) + ":" : "0" + String(time.hours - 3) + ":";
 
             time1 += (time.minutes < 10) ? "0" + String(time.minutes) + ":" : String(time.minutes) + ":";
-            time1 += (time.seconds < 10) ? "0" + String(time.seconds)  : String(time.seconds);
+            time1 += (time.seconds < 10) ? "0" + String(time.seconds) : String(time.seconds);
         }
         else
         {
             time1 += String(time.hours + 12 - 3) + ":";
             time1 += (time.minutes < 10) ? "0" + String(time.minutes) + ":" : String(time.minutes) + ":";
-            time1 += (time.seconds < 10) ? "0" + String(time.seconds)  : String(time.seconds);
+            time1 += (time.seconds < 10) ? "0" + String(time.seconds) : String(time.seconds);
         }
         // Serial.println(time1);
         String timeStamp = date + "T" + time1 + "Z";
@@ -304,15 +304,15 @@ void MeshNode::send_values(std::function<Measurements()> get_values_callback)
         for (Measurement m : meas)
         {
             measure1["nodeId"] = mesh.getNodeId();
-           measure1["sensorId"] = "sensor" + String(m.sensor_id);
-            // measure1["sensorId"] = "sensor1";   
-           measure1["meassure_type"] = m.type;
-          String mtyp = "Soil Moisture";
-          std::string m_type = std::string(mtyp.c_str());
-          std::replace(m_type.begin(), m_type.end(), ' ', '_');
-          Serial.println("CONVERTED Soil Moisture into " + String(m_type.c_str()));
+            measure1["sensorId"] = "sensor" + String(m.sensor_id);
+            // measure1["sensorId"] = "sensor1";
+            measure1["meassure_type"] = m.type;
+            String mtyp = "Soil Moisture";
+            std::string m_type = std::string(mtyp.c_str());
+            std::replace(m_type.begin(), m_type.end(), ' ', '_');
+            Serial.println("CONVERTED Soil Moisture into " + String(m_type.c_str()));
             measure1["meassure_type"] = String(m_type.c_str());
-           measure1["value"] = m.value;
+            measure1["value"] = m.value;
             // measure1["value"] = time.minutes;
             measure1["time"]["timestampValue"] = timeStamp;
             if (measure1["meassure_type"].as<String>() != "" && mesh.isConnected(bridgeId))
@@ -321,7 +321,7 @@ void MeshNode::send_values(std::function<Measurements()> get_values_callback)
                 Serial.println("read message:");
                 Serial.println(measure1.as<String>());
                 myqueue.push(measure1.as<String>());
-                mesh.sendSingle(bridgeId,measure1.as<String>());
+                mesh.sendSingle(bridgeId, measure1.as<String>());
             }
         }
         Serial.println("done measure");
@@ -335,11 +335,12 @@ void MeshNode::add_measurement(std::function<Measurements()> callable, unsigned 
                 { send_values(callable); });
     userScheduler.addTask(measure);
     measure.enable();
-        Serial.println("adding measurement tast set");
+    Serial.println("adding measurement tast set");
 }
 
-void MeshNode::get_battery_level(Measurement battery_level){
+void MeshNode::get_battery_level(Measurement battery_level)
+{
     node_battery_level = battery_level.value;
 }
 
-void firestoreMapBatteryUpdate(String nodeId , float value){}
+void firestoreMapBatteryUpdate(String nodeId, float value) {}

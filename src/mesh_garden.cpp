@@ -262,13 +262,13 @@ void MeshGarden::begin()
     load_configuration();
     parse_config();
     Serial.println("serialization done, now init mesh");
-#if defined(ESP8266) //TODO solve differences with power monitor
+#if defined(ESP8266) // TODO solve differences with power monitor
     init_power_monitor();
 #endif
 
     init_mesh_connection();
 
-#if defined(ESP8266) //TODO solve differences with power monitor
+#if defined(ESP8266) // TODO solve differences with power monitor
     Measurements power_status = power_monitor->measure_wrapper();
     for (Measurement meas : power_status)
     {

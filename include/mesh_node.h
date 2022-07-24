@@ -62,17 +62,17 @@ public:
 	void set_global_config(JsonObject global_config);
 	void init_mesh();
 	void init_clock();
-	
+
 	// time variables:
 	unsigned long timeNow = 0;
 	unsigned long timeLast = 0;
 	int startingHour = 12; // set your starting hour here, not below at int hour. This ensures accurate daily correction of time
-	
+
 	Time time;
 	// int seconds = 0;
 	// int minutes = 0;
 	// int hours = startingHour;
-	
+
 	int days = 0;
 	String date;
 	String AmPm;
@@ -101,7 +101,6 @@ public:
 
 	void get_battery_level(Measurement battery_level);
 	float node_battery_level = -1;
-
 };
 
 #endif /* _MESHNODE_H_ */

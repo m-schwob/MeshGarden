@@ -85,15 +85,15 @@ private:
     String USER_EMAIL;
     String USER_PASSWORD;
 
-    int NODE_WAKE_TIME; //(recomended initial value 20)
-    int NODE_DEEP_SLEEP_TIME;//(reconemded initial value 40)
+    int NODE_WAKE_TIME;       //(recomended initial value 20)
+    int NODE_DEEP_SLEEP_TIME; //(reconemded initial value 40)
 
     // sync with the server, saving data variables
     int lasttime = 0; // initialized, used to messure time interaval for the disconnect
     // std::map<String,vector<String>> dict;
     std::list<String> mesh_values;
     // std::map<String, String> server_data;
-    queue<String> server_data ;
+    queue<String> server_data;
     // std::vector<String> server_data;
     friend void receivedCallback(uint32_t from, String &msg);
     friend void newConnectionCallback(uint32_t nodeId);
@@ -108,7 +108,7 @@ private:
     void firestoreReadChanges();
     bool firestoreReadNetwork(String &changes);
     void firestoreDataUpdate(String jsonVal);
-    void firestoreMapBatteryUpdate(String nodeId , float value);
+    void firestoreMapBatteryUpdate(String nodeId, float value);
     void firestoreUpdateLastMesh(String jsonVal);
 
     // bool get_node_changes(String node_id, String &changes);
@@ -127,7 +127,7 @@ public:
     void init_clock();
 
     void get_battery_level(Measurement battery_level);
-    std::map<String,float> battery_map;
+    std::map<String, float> battery_map;
 
     void init_mesh();
     void set_global_config(JsonObject global_config);
@@ -135,7 +135,7 @@ public:
 
     bool configure_ready = false;
     String config_string;
-    //vector<String> meassures;
+    // vector<String> meassures;
     int die_seconds = 0;
     int die_minutes = 0;
     int die_hours = 0;
