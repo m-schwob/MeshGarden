@@ -34,6 +34,7 @@ PowerMonitorSensor::PowerMonitorSensor(DEVICE_CONSTRUCTOR_ARGUMENTS)
     else
     {
         Serial.print(HARDWARE_INFO.c_str());
+        // TODO consider not setting default pin but disabling it
         Serial.println(":Warning: sensor pin not defined. set to 0 as default");
     }
 }

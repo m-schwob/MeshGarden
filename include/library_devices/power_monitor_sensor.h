@@ -15,9 +15,9 @@
 class PowerMonitorSensor : public Sensor
 {
 private:
-    uint8_t analog_pin;
+    uint8_t analog_pin = 0;
 
-    static const float full_voltage;  // volts
+    static const float full_voltage;    // volts
     static const float drained_voltage; // volts
     static const int map_steps;
     static const float map_step;

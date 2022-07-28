@@ -3,7 +3,7 @@
 #include "mesh_garden.h"
 
 #if defined(ESP8266)
-    ADC_MODE(ADC_VCC); // enable measure esp8266 supply input voltage
+ADC_MODE(ADC_VCC); // enable measure esp8266 supply input voltage
 #endif
 
 /*
@@ -49,7 +49,7 @@ Capacitance soil moisture sensor using ADS1X15 ADC extender.
 #define _MEASUREMENTS_TYPE "Soil Moisture"
 #define _UNITS "%"
 
-class SoilMoisureSensorGroveV1 : public Sensor
+class SoilMoistureSensorGroveV1 : public Sensor
 {
 private:
     uint8_t analog_pin = 0;
@@ -87,33 +87,31 @@ private:
     }
 
 public:
-    SoilMoisureSensorGroveV1(DEVICE_CONSTRUCTOR_ARGUMENTS)
+    SoilMoistureSensorGroveV1(DEVICE_CONSTRUCTOR_ARGUMENTS)
         : Sensor(device_id, hardware_info, pinout, envelop)
     {
-        init_adc();                                             // ADS1X15 related.
+        init_adc();                                               // ADS1X15 related.
         Serial.printf("%s: initalized\n", HARDWARE_INFO.c_str()); // add details about pins i.e.
     }
 
     Measurements measure()
     {
-        power_on();
         Measurements measurements(1);
         Measurement moisture;
         moisture.type = "Soil Moisture";
-        
+
         float volt = extender_measure(analog_pin);
         // TODO handle the case that the value go off range
         moisture.value = 1 - percentage(volt, C_air, C_water);
         measurements.push_back(moisture);
-        Serial.printf("%s: measure %f volts, %f/1 range\n", HARDWARE_INFO.c_str(), volt, moisture.value );
-        power_off();
+        Serial.printf("%s: measure %f volts, %f/1 range\n", HARDWARE_INFO.c_str(), volt, moisture.value);
         return measurements;
     }
 
     void calibrate() { calibrated = true; }
 };
 
-REGISTER_DEVICE(SoilMoisureSensorGroveV1, "Grove Soil Moisture Sensor v1");
+REGISTER_DEVICE(SoilMoistureSensorGroveV1, "Grove Soil Moisture Sensor v1");
 
 /*****************************************************/
 
@@ -185,7 +183,8 @@ void setup()
     garden.begin();
 
     Serial.println("printing device list");
-    for(String device : garden.get_device_list()){
+    for (String device : garden.get_device_list())
+    {
         Serial.println(device);
     }
 }
