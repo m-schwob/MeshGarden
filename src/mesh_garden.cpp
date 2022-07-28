@@ -258,6 +258,7 @@ void MeshGarden::begin()
     {
         Serial.println("started the file system");
     }
+    ads.begin();
 
     load_configuration();
     parse_config();

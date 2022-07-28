@@ -1,6 +1,8 @@
 #include "library_devices/ADS1X15.h"
 
-ADS1X15::ADS1X15()
+ADS1X15::ADS1X15() {}
+
+void ADS1X15::begin()
 {
     ads1x15.setGain(GAIN_ONE); // set gain to +/- 4.096 range
     if (!ads1x15.begin(0x4A))  // use address for (ADDR <-> SDA)
