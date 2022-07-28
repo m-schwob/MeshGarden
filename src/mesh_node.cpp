@@ -280,8 +280,8 @@ void MeshNode::init_mesh()
 
 void MeshNode::send_values(std::function<Measurements()> get_values_callback)
 {
-    if (mesh.isConnected(bridgeId) && set_time)
-    {
+    // if (mesh.isConnected(bridgeId) && set_time)
+    // {
         Measurements meas;
         meas = get_values_callback();
         String time1;
@@ -305,28 +305,29 @@ void MeshNode::send_values(std::function<Measurements()> get_values_callback)
         {
             measure1["nodeId"] = mesh.getNodeId();
             measure1["sensorId"] = "sensor" + String(m.sensor_id);
-            // measure1["sensorId"] = "sensor1";
             measure1["meassure_type"] = m.type;
-            String mtyp = "Soil Moisture";
-            std::string m_type = std::string(mtyp.c_str());
+            std::string m_type = std::string(m.type.c_str());
             std::replace(m_type.begin(), m_type.end(), ' ', '_');
-            Serial.println("CONVERTED Soil Moisture into " + String(m_type.c_str()));
             measure1["meassure_type"] = String(m_type.c_str());
             measure1["value"] = m.value;
-            // measure1["value"] = time.minutes;
             measure1["time"]["timestampValue"] = timeStamp;
             if (measure1["meassure_type"].as<String>() != "" && mesh.isConnected(bridgeId))
             {
                 String castString = measure1.as<String>();
                 Serial.println("read message:");
                 Serial.println(measure1.as<String>());
-                myqueue.push(measure1.as<String>());
                 mesh.sendSingle(bridgeId, measure1.as<String>());
+            }
+            else{
+                String castString = measure1.as<String>();
+                Serial.println("read message and set in queue:");
+                Serial.println(measure1.as<String>());
+                myqueue.push(measure1.as<String>());
             }
         }
         Serial.println("done measure");
     }
-}
+// }
 
 void MeshNode::add_measurement(std::function<Measurements()> callable, unsigned long interval, long iterations)
 {

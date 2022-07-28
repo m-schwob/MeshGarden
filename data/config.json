@@ -21,8 +21,8 @@
             "ssid": "My_hotspot"
         },
         "mesh_timing": {
-            "mesh_connection_time": 10,
-            "deep_sleep_time":20
+            "mesh_connection_time": 20,
+            "deep_sleep_time":40
         }
     }
 }
