@@ -121,7 +121,7 @@ class _SensorsScreenState extends State<SensorsScreen> {
                       },
                       icon: const Icon(Icons.add),
                       color: Colors.blue,
-                      labelColor: Colors.red,
+                      labelColor: Colors.black,
                       labelBackgroundColor: Colors.yellow,
                     ),
                     HawkFabMenuItem(
@@ -219,7 +219,7 @@ class _SensorsScreenState extends State<SensorsScreen> {
                     },
                     icon: const Icon(Icons.add),
                     color: Colors.blue,
-                    labelColor: Colors.red,
+                    labelColor: Colors.black,
                     labelBackgroundColor: Colors.yellow,
                   ),
                   HawkFabMenuItem(
