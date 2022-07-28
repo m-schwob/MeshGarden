@@ -30,20 +30,20 @@ exports.onConfigWrite = functions.firestore.document('/Network/{doc}').onWrite(a
     functions.logger.log("nodes configuration changed");
 });
 
-exports.onActivityChanged = functions.firestore.document('/MeshNetwork/active').onCreate(async (change, context) => {
+exports.onActivityChanged = functions.firestore.document('/MeshNetwork/active').onCreate(async (snap, context) => {
     const nodes_collection = admin.firestore().collection('Nodes');
 
     // get active/not active nodes from Nodes collection
     var active_before = [];
     var not_active_before = [];
     for (node of await nodes_collection.listDocuments()) {
-        if ((await node.get('active')) == true)
+        if ((await (await node.get()).get('active')) === true)
             active_before.push(node.id);
         else
             not_active_before.push(node.id);
     }
     // get active nodes from active document
-    const active_after = Object.keys(change.after.data());
+    const active_after = Object.keys(snap.data());
 
     //get differences
     const to_activate = not_active_before.filter(node => active_after.includes(node) === true);

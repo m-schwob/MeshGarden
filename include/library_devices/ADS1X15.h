@@ -13,7 +13,7 @@ private:
 
 public:
     ADS1X15();
-
+    void begin();
     float analog_read(uint16_t pin);
 };
 

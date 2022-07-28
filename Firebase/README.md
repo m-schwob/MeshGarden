@@ -22,7 +22,7 @@ firebase deploy --only functions
 
 firebase init emulators
 firebase emulators:export emulator_ex_data
-firebase emulators:start --import firebase_ex_data
+firebase emulators:start --import emulator_ex_data_db
 
 ### import/export from production database
 
