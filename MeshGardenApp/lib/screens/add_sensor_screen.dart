@@ -79,7 +79,7 @@ class _AddSensorScreenState extends State<AddSensorScreen> {
 
 
 
-            widget.sensorDoc.update({"sensors.${widget.sensorId}": sensor_json});
+            widget.sensorDoc.update({"sensors.sensor${widget.sensorId}": sensor_json});
             Navigator.pop(context);
           }
           catch(e) {print("");}

@@ -111,7 +111,7 @@ class _SensorsScreenState extends State<SensorsScreen> {
                       ontap: () {
                         Map<String, dynamic> sensor_json = UV_DEFAULT;
                         sensor_json["sensor_id"] = 1;
-                        snapshot.requireData.reference.update({"sensors.1": sensor_json});
+                        snapshot.requireData.reference.update({"sensors.sensor1": sensor_json});
 
                         ScaffoldMessenger.of(context).hideCurrentSnackBar();
                         ScaffoldMessenger.of(context).showSnackBar(
@@ -129,7 +129,7 @@ class _SensorsScreenState extends State<SensorsScreen> {
                       ontap: () {
                         Map<String, dynamic> sensor_json = DHT11_DEFAULT;
                         sensor_json["sensor_id"] = 1;
-                        snapshot.requireData.reference.update({"sensors.1": sensor_json});
+                        snapshot.requireData.reference.update({"sensors.sensor1": sensor_json});
 
                         ScaffoldMessenger.of(context).hideCurrentSnackBar();
                         ScaffoldMessenger.of(context).showSnackBar(
@@ -147,7 +147,7 @@ class _SensorsScreenState extends State<SensorsScreen> {
                       ontap: () {
                         Map<String, dynamic> sensor_json = SOIL_MOISTURE_DEFAULT;
                         sensor_json["sensor_id"] = 1;
-                        snapshot.requireData.reference.update({"sensors.1": sensor_json});
+                        snapshot.requireData.reference.update({"sensors.sensor1": sensor_json});
 
                         ScaffoldMessenger.of(context).hideCurrentSnackBar();
                         ScaffoldMessenger.of(context).showSnackBar(
@@ -209,7 +209,7 @@ class _SensorsScreenState extends State<SensorsScreen> {
                     ontap: () {
                       Map<String, dynamic> sensor_json = UV_DEFAULT;
                       sensor_json["sensor_id"] = max_id;
-                      snapshot.requireData.reference.update({"sensors.$max_id": sensor_json});
+                      snapshot.requireData.reference.update({"sensors.sensor$max_id": sensor_json});
 
                       ScaffoldMessenger.of(context).hideCurrentSnackBar();
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -227,7 +227,7 @@ class _SensorsScreenState extends State<SensorsScreen> {
                     ontap: () {
                       Map<String, dynamic> sensor_json = DHT11_DEFAULT;
                       sensor_json["sensor_id"] = max_id;
-                      snapshot.requireData.reference.update({"sensors.$max_id": sensor_json});
+                      snapshot.requireData.reference.update({"sensors.sensor$max_id": sensor_json});
 
                       ScaffoldMessenger.of(context).hideCurrentSnackBar();
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -245,7 +245,7 @@ class _SensorsScreenState extends State<SensorsScreen> {
                     ontap: () {
                       Map<String, dynamic> sensor_json = SOIL_MOISTURE_DEFAULT;
                       sensor_json["sensor_id"] = max_id;
-                      snapshot.requireData.reference.update({"sensors.$max_id": sensor_json});
+                      snapshot.requireData.reference.update({"sensors.sensor$max_id": sensor_json});
 
                       ScaffoldMessenger.of(context).hideCurrentSnackBar();
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -420,7 +420,7 @@ class _SensorsScreenState extends State<SensorsScreen> {
         TextButton(
           child: Text('Confirm'),
           onPressed: () {
-            snap.requireData.reference.update({"sensors.${sensor_id_string}": FieldValue.delete()});
+            snap.requireData.reference.update({"sensors.sensor${sensor_id_string}": FieldValue.delete()});
             Navigator.of(context).pop();
           },
         ),
