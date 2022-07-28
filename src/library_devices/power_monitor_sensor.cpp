@@ -7,14 +7,17 @@ const float PowerMonitorSensor::map_step = 0.1;
 const int PowerMonitorSensor::capacity_map[map_steps] = {0, 1, 2, 5, 13, 22, 39, 53, 62, 74, 84, 94, 100};
 
 // battery  is not linear. estimate ther percentage with the help of the capacity map
+//return 0-100 float value
 float PowerMonitorSensor::calculate_percentages(float voltage)
 {
     float index = (voltage - drained_voltage) / map_step;
     int upper_index = ceil(index);
     int lower_index = floor(index);
 
-    Serial.println("PowerMonitorSensor: indexes i-" + String(index) + "u-" + String(upper_index) + "l-" + String(lower_index));
-    return 0.5 * (capacity_map[lower_index] + capacity_map[upper_index]); // avg: lower + (upper-lower)/2 => 0.5*lower + 0.5*upper => 0.5*(upper+lower)
+    Serial.println("PowerMonitorSensor: indexes-> i-" + String(index) + ", u-" + String(upper_index) + ", l-" + String(lower_index));
+    // linear calculation between map indexes values
+    return capacity_map[lower_index] + (index - lower_index) * (capacity_map[upper_index] - capacity_map[lower_index]);
+    // return 0.5 * (capacity_map[lower_index] + capacity_map[upper_index]); // avg: lower + (upper-lower)/2 => 0.5*lower + 0.5*upper => 0.5*(upper+lower)
 }
 
 // measured voltage (VOUT) is not the real battery voltage since there is voltage divider
@@ -22,8 +25,10 @@ float PowerMonitorSensor::calculate_percentages(float voltage)
 // TODO check if input voltage ha effect on measurement
 float PowerMonitorSensor::real_voltage(float VOUT)
 {
-    int R1 = 36000, R2 = 100000; // ohm
-    return (1 + R2 / R1) * VOUT;
+    float R1 = 36000.0, R2 = 100000.0; // ohm
+    float _real_voltage = (1 + R1 / R2) * VOUT;
+    // Serial.println("VOUT: " + String(VOUT) + " real voltage calculated: " + String(_real_voltage));
+    return _real_voltage;
 }
 
 PowerMonitorSensor::PowerMonitorSensor(DEVICE_CONSTRUCTOR_ARGUMENTS)
@@ -47,7 +52,7 @@ Measurements PowerMonitorSensor::measure()
 
     Measurement input_voltage;
     input_voltage.type = INPUT_VOLTAGE_KEY;
-    input_voltage.value = ESP.getVcc() / 10; // getVcc return voltage in mV
+    input_voltage.value = ESP.getVcc() / 1000; // getVcc return voltage in mV
     measurements.push_back(input_voltage);
 
     s += "input voltage " + String(input_voltage.value) + "V, ";
@@ -55,19 +60,20 @@ Measurements PowerMonitorSensor::measure()
     Measurements measurements(2);
 #endif
 
-    Measurement battery_level;
-    battery_level.type = BATTERY_LEVEL_KEY;
     float volt = analog_read(analog_pin);
-    battery_level.value = 100 * calculate_percentages(real_voltage(volt)); // TODO calculate by non linear graph
-    measurements.push_back(battery_level);
 
     Measurement battery_voltage;
     battery_voltage.type = BATTERY_VOLTAGE_KEY;
-    battery_voltage.value = volt;
+    battery_voltage.value = real_voltage(volt);
     measurements.push_back(battery_voltage);
 
+    Measurement battery_level;
+    battery_level.type = BATTERY_LEVEL_KEY;
+    battery_level.value = calculate_percentages(battery_voltage.value); // TODO calculate by non linear graph
+    measurements.push_back(battery_level);
+
     s += "battery voltage " + String(battery_voltage.value) + "V, " +
-         "battery level " + String(battery_level.value) + "V";
+         "battery level " + String(battery_level.value) + "%";
     Serial.println(s);
     return measurements;
 }
