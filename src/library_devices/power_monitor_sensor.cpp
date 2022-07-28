@@ -11,8 +11,8 @@ const int PowerMonitorSensor::capacity_map[map_steps] = {0, 1, 2, 5, 13, 22, 39,
 float PowerMonitorSensor::calculate_percentages(float voltage)
 {
     float index = (voltage - drained_voltage) / map_step;
-    int upper_index = ceil(index);
-    int lower_index = floor(index);
+    int upper_index = ceil(index) >= map_steps? map_step: ceil(index);
+    int lower_index = floor(index) < 0? 0: floor(index);
 
     Serial.println("PowerMonitorSensor: indexes-> i-" + String(index) + ", u-" + String(upper_index) + ", l-" + String(lower_index));
     // linear calculation between map indexes values
