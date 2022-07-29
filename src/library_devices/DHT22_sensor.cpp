@@ -58,4 +58,4 @@ Measurements DHTxxSensor::measure()
     return measurements;
 }
 
-void DummySensor::calibrate(){ calibrated = true; }
+void DHTxxSensor::calibrate(){ calibrated = true; }
