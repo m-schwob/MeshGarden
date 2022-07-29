@@ -1,5 +1,7 @@
 #include "library_devices/soil_moisure_sensor.h"
 
+const String SoilMoistureSensor::HARDWARE_INFO = "Capacitive Soil Moisture Sensor";
+
 SoilMoistureSensor::SoilMoistureSensor(DEVICE_CONSTRUCTOR_ARGUMENTS)
     : Sensor(device_id, hardware_info, pinout, envelop)
 {
@@ -17,7 +19,7 @@ Measurements SoilMoistureSensor::measure()
 {
     Measurements measurements(1);
     Measurement moisture;
-    moisture.type = _MEASUREMENTS_TYPE;
+    moisture.type = SOIL_MOISTURE_KEY;
 
     float volt = analog_read(analog_pin);
     // TODO handle the case that the value go off range
