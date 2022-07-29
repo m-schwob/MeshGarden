@@ -60,7 +60,7 @@ void receivedCallback(uint32_t from, String &msg)
         if (node->node_battery_level != -1)
         {
             DynamicJsonDocument battery_level(32);
-            battery_level["battery"] = battery_level;
+            battery_level["battery"] = node->node_battery_level;
             Serial.println("created battery json");
             serializeJson(battery_level, Serial);
             node->mesh.sendSingle(from, battery_level.as<String>());
@@ -105,7 +105,7 @@ void MeshNode::update()
     if (millis() - lasttime >= 1000)
     {
         time_update();
-        printLocalTime();
+        // printLocalTime();
         lasttime = millis();
     }
     if ((die_time.hours == time.hours || die_time.hours - 12 == time.hours) && die_time.minutes == time.minutes && die_time.seconds == time.seconds)
@@ -233,6 +233,7 @@ void MeshNode::set_global_config(JsonObject global_config)
     MESH_PREFIX = global_config["mesh"]["mesh_prefix"].as<String>();
     MESH_PASSWORD = global_config["mesh"]["mesh_password"].as<String>();
     MESH_PORT = global_config["mesh"]["mesh_port"].as<size_t>();
+    sample_interval = global_config["mesh"]["mesh_connection_time"].as<int>();
     Serial.println("config done");
 }
 
@@ -341,7 +342,9 @@ void MeshNode::add_measurement(std::function<Measurements()> callable, unsigned 
 
 void MeshNode::get_battery_level(Measurement battery_level)
 {
+    Serial.println("set bettery level to: " + String(battery_level.value));
     node_battery_level = battery_level.value;
 }
 
 void firestoreMapBatteryUpdate(String nodeId, float value) {}
+

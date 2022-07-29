@@ -4,12 +4,15 @@
             "user_email": "ioadmin@ioadmin.com",
             "user_password": "ioadmin",
             "api_key": "AIzaSyCpnmHDV7B7oR6pnKXS0VBFoqaF174UzZM",
-            "firebase_project_id": "meshgarden-iot"
+            "firebase_project_id": "meshgarden-iot",
+            "project_location": "europe-west3"
         },
         "mesh": {
             "mesh_prefix": "whateverYouLike",
             "mesh_password": "somethingSneaky",
-            "mesh_port": 5555
+            "mesh_port": 5555,
+            "mesh_connection_time": 20,
+            "deep_sleep_time":40
         },
         "time": {
             "gmt_offset_sec": 3600,
@@ -19,10 +22,6 @@
         "wifi": {
             "password": "mypassword",
             "ssid": "My_hotspot"
-        },
-        "mesh_timing": {
-            "mesh_connection_time": 20,
-            "deep_sleep_time":40
         }
     }
 }
