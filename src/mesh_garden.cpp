@@ -51,7 +51,7 @@ bool MeshGarden::load_configuration()
     // https://arduinojson.org/v6/assistant/
     // https://arduinojson.org/v6/how-to/determine-the-capacity-of-the-jsondocument/
     config.~BasicJsonDocument();
-    config = DynamicJsonDocument(file.size() * 2);
+    config = DynamicJsonDocument(file.size() * 3);
     // DynamicJsonDocument doc(file.size());
     DeserializationError error = deserializeJson(config, file);
     if (error)
@@ -88,7 +88,7 @@ void MeshGarden::parse_config()
         JsonObject sensor = s.value().as<JsonObject>();
         const String hardware_info = sensor["hardware_info"].as<String>();
         const int sensor_id = sensor["sensor_id"].as<int>();
-        const int sample_interval = sensor["sample_interval"];
+        // const int sample_interval = sensor["sample_interval"];
 
         DynamicJsonDocument doc(sensor);
 
@@ -207,6 +207,9 @@ void MeshGarden::init_mesh_connection()
     // init mesh network
     network->set_global_config(config["network_config"]);
     network->init_clock();
+#ifdef ESP32
+    network->firebaseNetworkSet(config);
+#endif    
     network->init_mesh();
 
     // add devices functions to tasks. pseudo code:
@@ -258,8 +261,9 @@ void MeshGarden::begin()
     {
         Serial.println("started the file system");
     }
+#if defined(ESP8266) // TODO solve differences with power monitor
     ads.begin();
-
+#endif
     load_configuration();
     parse_config();
     Serial.println("serialization done, now init mesh");

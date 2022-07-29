@@ -84,6 +84,7 @@ private:
     String FIREBASE_PROJECT_ID;
     String USER_EMAIL;
     String USER_PASSWORD;
+    String FIREBASE_PROJECT_LOCATION;
 
     int NODE_WAKE_TIME;       //(recomended initial value 20)
     int NODE_DEEP_SLEEP_TIME; //(reconemded initial value 40)
@@ -131,6 +132,7 @@ public:
 
     void init_mesh();
     void set_global_config(JsonObject global_config);
+    void firebaseNetworkSet(DynamicJsonDocument config);
     void exit_mesh_connect_server();
 
     bool configure_ready = false;

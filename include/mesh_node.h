@@ -53,6 +53,7 @@ public:
 	bool initialized = false;
 	bool configure_ready = false;
 	String config_string;
+	int sample_interval=5;//default value 5 seconds
 	MeshNode();
 	void update();
 	void sendMessage();
