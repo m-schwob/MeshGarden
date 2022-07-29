@@ -17,6 +17,6 @@ float percentage(float value, float max, float min = 0)
     {
         if (min > value || value > max)
             return -1;
-        return (value - min) / (max - min);
+        return 100*(value - min) / (max - min);
     }
 

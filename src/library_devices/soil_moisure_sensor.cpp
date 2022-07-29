@@ -21,7 +21,7 @@ Measurements SoilMoistureSensor::measure()
 
     float volt = analog_read(analog_pin);
     // TODO handle the case that the value go off range
-    moisture.value = 1 - percentage(volt, C_air, C_water);
+    moisture.value = 100 - percentage(volt, C_air, C_water);
     measurements.push_back(moisture);
     Serial.printf("%s: measure %f volts, %f/1 range\n", HARDWARE_INFO.c_str(), volt, moisture.value);
     return measurements;
