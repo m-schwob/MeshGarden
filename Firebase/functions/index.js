@@ -4,7 +4,17 @@ const admin = require("firebase-admin");
 admin.initializeApp();
 
 
-
+exports.setNetworkConfig = functions.firestore.document('/initNetwork/network_string').onCreate(async (snap, context) => {
+    functions.logger.log(snap.get('network_string'));
+    var data = JSON.parse(snap.get('network_string'));
+    const batch = admin.firestore().batch();
+    for (key of Object.keys(data)) {
+        console.log(key);
+        console.log(data[key]);
+        batch.set(admin.firestore().collection('Network').doc(key), data[key]);
+    }
+    batch.commit();
+});
 
 exports.onNodeWrite = functions.firestore.document('/Nodes/{node_id}').onWrite(async (change, context) => {
     // preform actions only for changes in 'sensors' field.
