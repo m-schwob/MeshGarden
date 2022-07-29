@@ -207,9 +207,9 @@ void MeshGarden::init_mesh_connection()
     // init mesh network
     network->set_global_config(config["network_config"]);
     network->init_clock();
-// #ifdef ESP32
-//     network->firebaseNetworkSet(config);
-// #endif    
+#ifdef ESP32
+    network->firebaseNetworkSet(config);
+#endif    
     network->init_mesh();
 
     // add devices functions to tasks. pseudo code:

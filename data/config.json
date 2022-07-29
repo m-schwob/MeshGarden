@@ -4,9 +4,8 @@
             "user_email": "ioadmin@ioadmin.com",
             "user_password": "ioadmin",
             "api_key": "AIzaSyCpnmHDV7B7oR6pnKXS0VBFoqaF174UzZM",
-            "firebase_project_id": "meshgarden-iot",
-            "project_location": "europe-west3"
-        },
+            "firebase_project_id": "meshgarden-iot"
+                },
         "mesh": {
             "mesh_prefix": "whateverYouLike",
             "mesh_password": "somethingSneaky",

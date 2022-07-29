@@ -731,26 +731,26 @@ void MeshBridge::firestoreMapBatteryUpdate(String nodeId, float value)
     }
 }
 
-/*  
-on first use we would like to be able to set the network and DB configurations over the firebase. 
-in case of wifi or configuration change
-*/
 void MeshBridge::firebaseNetworkSet(DynamicJsonDocument config){
     firebaseInit();
     if (WiFi.status() == WL_CONNECTED && Firebase.ready())
     {
-    Serial.println("setting Network detatils");
-    if (Firebase.Functions.callFunction(&fbdo, FIREBASE_PROJECT_ID, FIREBASE_PROJECT_LOCATION, "set_network_config" , config.as<String>() /* data pass to Cloud function (serialized JSON string) */))
-        {    
-            Serial.println("success");
-            Serial.printf("ok\n%s\n\n", fbdo.payload().c_str());
+        // part1: initializing empty Node in the node list dedicated for the bridge
+        String documentPath = "initNetwork/network_string";
+        FirebaseJson content;
+        bool response;
+        content.set("fields/network_string/stringValue/", config.as<String>());
+        if (Firebase.Firestore.createDocument(&fbdo, FIREBASE_PROJECT_ID, "", documentPath.c_str(), content.raw()))
+        {
+            Serial.printf("initializing bridge succeed\n");
+            initialized = true;
+            return;
         }
-    else
-    {
-        Serial.println("failed");
-        Serial.println(fbdo.errorReason());
+        else
+        {
+            Serial.println(fbdo.errorReason());
+        }
     }
     WiFi.disconnect(true);
     WiFi.mode(WIFI_OFF);
     }
-}

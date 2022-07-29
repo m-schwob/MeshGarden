@@ -233,8 +233,8 @@ void MeshNode::set_global_config(JsonObject global_config)
     MESH_PREFIX = global_config["mesh"]["mesh_prefix"].as<String>();
     MESH_PASSWORD = global_config["mesh"]["mesh_password"].as<String>();
     MESH_PORT = global_config["mesh"]["mesh_port"].as<size_t>();
-    sample_interval = global_config["mesh"]["mesh_connection_time"].as<int>();
-    Serial.println("config done");
+    sample_interval = global_config["mesh"]["mesh_connection_time"].as<int>()/2;
+    Serial.println("config done, sample interval=" + String(sample_interval));
 }
 
 void MeshNode::init_clock()
@@ -333,7 +333,7 @@ void MeshNode::send_values(std::function<Measurements()> get_values_callback)
 void MeshNode::add_measurement(std::function<Measurements()> callable, unsigned long interval, long iterations)
 {
     Serial.println("adding measurement task");
-    measure.set(TASK_SECOND * 5, TASK_FOREVER, [this, callable]()
+    measure.set(TASK_SECOND * sample_interval, TASK_FOREVER, [this, callable]()
                 { send_values(callable); });
     userScheduler.addTask(measure);
     measure.enable();
