@@ -79,8 +79,8 @@ void MeshGarden::parse_config()
 {
     Serial.println("start of parse config, the log config is:");
     // TODO calling it only in debug mode.
-    log_config(); // TODO check why this function fail (make the the co)
-    Serial.println("log config done");
+    log_config(); 
+    Serial.println("log config done"); delay(2000);
 
     JsonObject sensors = config["sensors"];
     for (JsonPair s : sensors)
@@ -114,11 +114,6 @@ void MeshGarden::parse_config()
             Serial.println("fail to initialize sensor " + hardware_info);
         }
     }
-
-    Serial.println("end of parse config, the log config is:");
-    // TODO calling it only in debug mode.
-    log_config(); // TODO check why this function fail (make the the co)
-    Serial.println("log config done");
 }
 
 // TODO move to utils

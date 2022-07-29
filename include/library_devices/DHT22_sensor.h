@@ -7,13 +7,13 @@
 #include "Device.h"
 #include "Sensor.h"
 
+#define DHT22_AIR_HUMIDITY_AND_TEMPERATURE_SENSOR "DHT22 Air Humidity and Temperature Sensor"
+
 #define TEMPERATURE_KEY "Temperature"
 #define HUMIDITY_KEY "Humidity"
 
 class DHTxxSensor : public Sensor
 {
-public:
-    static const String HARDWARE_INFO;
 
 private:
     DHT *dht;
@@ -24,6 +24,6 @@ public:
     void calibrate();
 };
 
-REGISTER_DEVICE(DHTxxSensor, DHTxxSensor::HARDWARE_INFO);
+REGISTER_DEVICE(DHTxxSensor, DHT22_AIR_HUMIDITY_AND_TEMPERATURE_SENSOR);
 
 #endif /* _DHTXX_H_ */

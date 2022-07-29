@@ -233,7 +233,7 @@ void MeshNode::set_global_config(JsonObject global_config)
     MESH_PREFIX = global_config["mesh"]["mesh_prefix"].as<String>();
     MESH_PASSWORD = global_config["mesh"]["mesh_password"].as<String>();
     MESH_PORT = global_config["mesh"]["mesh_port"].as<size_t>();
-    sample_interval = global_config["mesh"]["mesh_connection_time"].as<int>()/2;
+    sample_interval = global_config["mesh"]["mesh_connection_time"].as<int>() / 2;
     Serial.println("config done, sample interval=" + String(sample_interval));
 }
 
@@ -281,8 +281,8 @@ void MeshNode::init_mesh()
 
 void MeshNode::send_values(std::function<Measurements()> get_values_callback)
 {
-    // if (mesh.isConnected(bridgeId) && set_time)
-    // {
+    if (mesh.isConnected(bridgeId) && set_time)
+    {
         Measurements meas;
         meas = get_values_callback();
         String time1;
@@ -319,7 +319,8 @@ void MeshNode::send_values(std::function<Measurements()> get_values_callback)
                 Serial.println(measure1.as<String>());
                 mesh.sendSingle(bridgeId, measure1.as<String>());
             }
-            else{
+            else
+            {
                 String castString = measure1.as<String>();
                 Serial.println("read message and set in queue:");
                 Serial.println(measure1.as<String>());
@@ -328,16 +329,17 @@ void MeshNode::send_values(std::function<Measurements()> get_values_callback)
         }
         Serial.println("done measure");
     }
-// }
+}
 
 void MeshNode::add_measurement(std::function<Measurements()> callable, unsigned long interval, long iterations)
 {
     Serial.println("adding measurement task");
-    measure.set(TASK_SECOND * sample_interval, TASK_FOREVER, [this, callable]()
-                { send_values(callable); });
-    userScheduler.addTask(measure);
-    measure.enable();
-    Serial.println("adding measurement tast set");
+    // measure.push_front(Task(TASK_SECOND * 5, TASK_FOREVER, [this, callable]()
+    //                        { send_values(callable); }));
+    // Task& m = *measure.begin();
+    // userScheduler.addTask(m);
+    // m.enable();
+    send_values(callable);
 }
 
 void MeshNode::get_battery_level(Measurement battery_level)
@@ -347,4 +349,3 @@ void MeshNode::get_battery_level(Measurement battery_level)
 }
 
 void firestoreMapBatteryUpdate(String nodeId, float value) {}
-

@@ -1,7 +1,5 @@
 #include "library_devices/uvi_sensor.h"
 
-const String UViSensor::HARDWARE_INFO = "UVi Sensor";
-
 UViSensor::UViSensor(DEVICE_CONSTRUCTOR_ARGUMENTS)
     : Sensor(device_id, hardware_info, pinout, envelop)
 {

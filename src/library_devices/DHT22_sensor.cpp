@@ -2,8 +2,6 @@
 
 #define DHTPIN 2
 
-const String DHTxxSensor::HARDWARE_INFO = "DHT22 Air Humidity and Temperature Sensor";
-
 DHTxxSensor::DHTxxSensor(DEVICE_CONSTRUCTOR_ARGUMENTS)
     : Sensor(device_id, hardware_info, pinout, envelop)
 {

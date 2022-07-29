@@ -1,10 +1,13 @@
 #include "library_devices/soil_moisure_sensor.h"
 
-const String SoilMoistureSensor::HARDWARE_INFO = "Capacitive Soil Moisture Sensor";
-
 SoilMoistureSensor::SoilMoistureSensor(DEVICE_CONSTRUCTOR_ARGUMENTS)
     : Sensor(device_id, hardware_info, pinout, envelop)
 {
+
+    // temp fix
+    pinMode(D5, OUTPUT);
+    digitalWrite(D5, HIGH);
+
     if (pinout.containsKey("AOUT"))
         analog_pin = pin(pinout["AOUT"].as<String>());
     else

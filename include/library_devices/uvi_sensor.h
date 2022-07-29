@@ -7,12 +7,12 @@
 #include "Device.h"
 #include "Sensor.h"
 
+#define UVI_SENSOR "UVi Sensor"
+
 #define UVI_KEY "UVi"
 
 class UViSensor : public Sensor
 {
-public:
-    static const String HARDWARE_INFO;
 
 private:
     VEML6075 uv;
@@ -23,6 +23,6 @@ public:
     void calibrate();
 };
 
-REGISTER_DEVICE(UViSensor, UViSensor::HARDWARE_INFO);
+REGISTER_DEVICE(UViSensor, UVI_SENSOR);
 
 #endif /* _UVI_SENSOR_H_ */
