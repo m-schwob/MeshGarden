@@ -58,40 +58,16 @@ class MeasurementCard extends StatelessWidget {
           height: 270,
           child: Row(
             children: [
-              // IconButton(
-              //   onPressed: () {
-              //     _openGraph(context, chart);
-              //   },
-              //   icon: Icon(
-              //     Icons.add_circle,
-              //     color: Colors.blue,
-              //   ),
-              // ),
               Expanded(
                 flex: 1,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    // IconButton(
-                    //   onPressed: () {
-                    //     _openGraph(context, chart);
-                    //   },
-                    //   icon: Icon(
-                    //     Icons.add_circle,
-                    //     color: Colors.blue,
-                    //   ),
-                    // ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        // Image(
-                        //   width: 60,
-                        //   image: AssetImage(
-                        //     assetImage,
-                        //   ),
-                        // ),
                         IconButton(
                           // padding: EdgeInsets.R,
                           iconSize: 30,
@@ -100,10 +76,6 @@ class MeasurementCard extends StatelessWidget {
                           },
                           icon: FaIcon(FontAwesomeIcons.chartLine,
                               color: Colors.blueAccent),
-                          // icon: Icon(
-                          //   Icons.chart,
-                          //   color: Colors.blue,
-                          // ),
                         ),
                       ],
                     ),
@@ -120,63 +92,14 @@ class MeasurementCard extends StatelessWidget {
                     SizedBox(
                       height: 10,
                     ),
-                    Text('$value$unit',
+                      // ?.toStringAsPrecision(2)
+                    Text('${value?.toStringAsPrecision(3)}$unit',
                         style: kHeadline.copyWith(color: Colors.white)),
                     Text(DateFormat('MMM d, h:mm a').format(date_time!),
                         style: kSensorText.copyWith(color: Colors.grey)),
                   ],
                 ),
               ),
-              // Expanded(
-              //   flex: 1,
-              //   child: Container(
-              //     padding:
-              //     const EdgeInsets.symmetric(vertical: 30, horizontal: 8),
-              //     child: Sparkline(
-              //       data: trendData,
-              //       lineWidth: 5.0,
-              //       lineColor: Colors.white,
-              //       averageLine: false,
-              //       enableGridLines: true,
-              //       gridLineLabelPrecision: 3,
-              //       fillMode: FillMode.none,
-              //       sharpCorners: false,
-              //       pointsMode: PointsMode.last,
-              //       pointSize: 20,
-              //       pointColor: linePoint,
-              //       useCubicSmoothing: true,
-              //     ),
-              //   ),
-              // ),
-              // Expanded(
-              //   flex: 1,
-              //   child: Container(
-              //     padding:
-              //     const EdgeInsets.symmetric(vertical: 30, horizontal: 8),
-              //     child: Column(
-              //         mainAxisSize: MainAxisSize.max,
-              //         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              //         crossAxisAlignment: CrossAxisAlignment.stretch,
-              //         children: [
-              //           Expanded(child: AnimatedLineChart(
-              //             chart,
-              //             key: UniqueKey(),
-              //             gridColor: Colors.white,
-              //             // textStyle: TextStyle(fontSize: 10, color: Colors.white),
-              //             toolTipColor: Colors.white,
-              //             toolTipColor: Colors.white,
-              //           ),),
-              //         ]
-              //     ),
-              //     // child: AnimatedLineChart(
-              //     //   chart,
-              //     //   key: UniqueKey(),
-              //     //   gridColor: Colors.white,
-              //     //   // textStyle: TextStyle(fontSize: 10, color: Colors.white),
-              //     //   toolTipColor: Colors.white,
-              //     // ),
-              //   ),
-              // ),
             ],
           ),
         ));
@@ -184,21 +107,11 @@ class MeasurementCard extends StatelessWidget {
 
   Future _openGraph(BuildContext context) => showDialog(
         context: context,
-        // barrierDismissible: false,
-        // builder: (context) => showGeneralDialog(
-        //     context: context,
-        //
-        //
-        // )
         builder: (context) => AlertDialog(
           contentPadding: EdgeInsets.zero,
           backgroundColor: kMainBG,
           scrollable: true,
-          // title: Center( child: Text("Time and Value Chart")),
           content: Card(
-              // shape: RoundedRectangleBorder(
-              //   borderRadius: BorderRadius.circular(18),
-              // ),
               shadowColor: Colors.white,
               elevation: 24,
               color: kMainBG,
@@ -226,8 +139,8 @@ class MeasurementCard extends StatelessWidget {
                                       tooltipBehavior:
                                           TooltipBehavior(enable: true,color: Colors.redAccent,header: "Time : Value"),
                                       primaryXAxis: DateTimeAxis(
-                                        autoScrollingMode:
-                                            AutoScrollingMode.start,
+                                        // autoScrollingMode:
+                                        //     AutoScrollingMode.start,
                                         dateFormat: DateFormat('MMM d, h:mm a'),
                                       ),
                                       series: <ChartSeries>[
@@ -251,17 +164,6 @@ class MeasurementCard extends StatelessWidget {
                               ),
                             ]),
                       ),
-                      // child: Container(
-                      //   padding: const EdgeInsets.symmetric(
-                      //       vertical: 30, horizontal: 8),
-                      //   child: AnimatedLineChart(
-                      //     chart,
-                      //     key: UniqueKey(),
-                      //     gridColor: Colors.white,
-                      //     // textStyle: TextStyle(fontSize: 10, color: Colors.white),
-                      //     toolTipColor: Colors.white,
-                      //   ),
-                      // ),
                     ),
                   ],
                 ),
