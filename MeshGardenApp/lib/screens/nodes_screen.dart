@@ -12,6 +12,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import 'package:iot_firestore_flutter_app/screens/measurements_screen.dart';
 import '../const/custom_colors.dart';
+import '../const/image_path.dart';
 
 class NodesScreen extends StatefulWidget {
   const NodesScreen({Key? key}) : super(key: key);
@@ -64,7 +65,28 @@ class _NodesScreenState extends State<NodesScreen> {
             return const Center(child: CircularProgressIndicator());
           }
 
-          return Padding(
+          if(snapshot.data!.docs.isEmpty){
+            return Container(
+              child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Center(
+                      child:
+                      Text("No Nodes for display", style: kBodyText2.copyWith(fontSize: 26)),
+                    ),
+                    Center(
+                      child: Image(
+                        // width: 60,
+                        image: AssetImage(
+                          BoredBabyPlant,
+                        ),
+                      ),
+                    ),
+                  ]),
+            );
+          }
+          else return Padding(
               padding: const EdgeInsets.only(
                   left: 16, right: 16, top: 20, bottom: 30),
               child: ListView(

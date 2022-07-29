@@ -11,8 +11,7 @@ var DHT22_DEFAULT= {
 var SOIL_MOISTURE_DEFAULT= {
   "hardware_info": "Capacitive Soil Moisture Sensor",
   "sample_interval": 30,
-  "pinout": {"AOUT": "ADS0",
-    "VCC": "D5"},
+  "pinout": {"AOUT": "ADS0"},
   "sensor_type": ["Soil_Moisture"],
   "units": ["%"],
 };
