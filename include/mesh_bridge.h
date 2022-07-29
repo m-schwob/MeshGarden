@@ -61,7 +61,6 @@ private:
     ESP32Time rtc;
     Scheduler userScheduler; // to control your personal task
     painlessMesh mesh;
-    unsigned long myTime; // timer to check how long it takes to initialize mesh network
     Task taskSendMessage;
     // firebase global variables
     FirebaseData fbdo;
@@ -141,6 +140,7 @@ public:
     int die_seconds = 0;
     int die_minutes = 0;
     int die_hours = 0;
+
     void calculate_death(int ttd);
     ~MeshBridge();
 };

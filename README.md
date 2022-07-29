@@ -96,3 +96,25 @@ firebase_project_id - the firebase progect id
 
 # MeshGarden - add new sensor guide
 
+* build a new ESP8266 micro controller with the new hardware for your new sensor.
+
+* follow the instructions in the main.cpp file to create your own sensor class by programing the following functions:
+
+* make sure to upload the code to the micro controller and connect it to the mesh network
+
+* enter the MeshGarden app find the designated node, and set the sensor as descripted in the pictures bellow
+
+## BE AWARE: in the type value every new word has to start with a capital letter from A-Z and use underscore " _ " insted of space bar
+
+<table>
+  <tr>
+    <td>enter the sensors list</td>
+     <td>you can choose from prepared sensors or create your own</td>
+     <td>set the pins and attributes for your sensor</td>
+  </tr>
+  <tr>
+    <td valign="top"><img src="docs/images/sensor screen.jpg"></td>
+    <td valign="top"><img src="docs/images/add sensor.jpg"></td>
+    <td valign="top"><img src="docs/images/add sensor screen.jpg"></td>
+  </tr>
+ </table>
