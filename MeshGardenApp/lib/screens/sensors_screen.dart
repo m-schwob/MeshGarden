@@ -121,19 +121,19 @@ class _SensorsScreenState extends State<SensorsScreen> {
                       },
                       icon: const Icon(Icons.add),
                       color: Colors.blue,
-                      labelColor: Colors.red,
+                      labelColor: Colors.black,
                       labelBackgroundColor: Colors.yellow,
                     ),
                     HawkFabMenuItem(
-                      label: 'DHT 11',
+                      label: 'DHT 22',
                       ontap: () {
-                        Map<String, dynamic> sensor_json = DHT11_DEFAULT;
+                        Map<String, dynamic> sensor_json = DHT22_DEFAULT;
                         sensor_json["sensor_id"] = 1;
                         snapshot.requireData.reference.update({"sensors.sensor1": sensor_json});
 
                         ScaffoldMessenger.of(context).hideCurrentSnackBar();
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('DHT 11 added'),
+                          const SnackBar(content: Text('DHT 22 added'),
                           duration: const Duration(milliseconds: 1000),),
                         );
                       },
@@ -219,19 +219,19 @@ class _SensorsScreenState extends State<SensorsScreen> {
                     },
                     icon: const Icon(Icons.add),
                     color: Colors.blue,
-                    labelColor: Colors.red,
+                    labelColor: Colors.black,
                     labelBackgroundColor: Colors.yellow,
                   ),
                   HawkFabMenuItem(
-                    label: 'DHT 11',
+                    label: 'DHT 22',
                     ontap: () {
-                      Map<String, dynamic> sensor_json = DHT11_DEFAULT;
+                      Map<String, dynamic> sensor_json = DHT22_DEFAULT;
                       sensor_json["sensor_id"] = max_id;
                       snapshot.requireData.reference.update({"sensors.sensor$max_id": sensor_json});
 
                       ScaffoldMessenger.of(context).hideCurrentSnackBar();
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('DHT 11 added'),
+                        const SnackBar(content: Text('DHT 22 added'),
                           duration: const Duration(milliseconds: 1000),),
                       );
                     },

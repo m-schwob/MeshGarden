@@ -1,27 +1,26 @@
 /** Library sensors */
 
-var DHT11_DEFAULT= {
-  "hardware_info": "DHT11",
+var DHT22_DEFAULT= {
+  "hardware_info": "DHT22 Air Humidity and Temperature Sensor",
   "sample_interval": 30,
-  "pinout": {"DAT": "D1"},
-  "sensor_type": ["Air Humidity", "Air Temperature"],
+  "pinout": {"DAT": "D6"},
+  "sensor_type": ["Air_Humidity", "Air_Temperature"],
   "units": ["%", "C"],
 };
 
 var SOIL_MOISTURE_DEFAULT= {
-  "hardware_info": "Grove Soil Moisture Sensor v1",
+  "hardware_info": "Capacitive Soil Moisture Sensor",
   "sample_interval": 30,
-  "pinout": {"AOUT": "ADS",
-    "VCC": "V1"},
-  "sensor_type": ["Soil Moisture"],
+  "pinout": {"AOUT": "ADS0",
+    "VCC": "D5"},
+  "sensor_type": ["Soil_Moisture"],
   "units": ["%"],
 };
 
 var UV_DEFAULT= {
-  "hardware_info": "UV",
+  "hardware_info": "UVi Sensor",
   "sample_interval": 30,
-  "pinout": {"DAT": "D1",
-    "VCC": "V1"},
-  "sensor_type": ["UVA","UVB"],
-  "units": ["UVi","UVi"],
+  "pinout": {},
+  "sensor_type": ["UVi"],
+  "units": ["UVi"],
 };
