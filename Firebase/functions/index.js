@@ -1,18 +1,31 @@
+const _ = require('lodash');
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 admin.initializeApp();
 
 
+exports.setNetworkConfig = functions.firestore.document('/initNetwork/network_string').onCreate(async (snap, context) => {
+    functions.logger.log(snap.get('network_string'));
+    var data = JSON.parse(snap.get('network_string'));
+    const batch = admin.firestore().batch();
+    for (key of Object.keys(data)) {
+        console.log(key);
+        console.log(data[key]);
+        batch.set(admin.firestore().collection('Network').doc(key), data[key]);
+    }
+    batch.commit();
+});
+
 exports.onNodeWrite = functions.firestore.document('/Nodes/{node_id}').onWrite(async (change, context) => {
-    // skip if trigger by change in active field 
-    const before = await change.before.get('active');
-    const after = await change.after.get('active');
+    // preform actions only for changes in 'sensors' field.
+    const before = await change.before.get('sensors');
+    const after = await change.after.get('sensors');
     functions.logger.log(`before: ${before}, after: ${after}`);
-    if (before == after) {
+    if (!_.isEqual(before, after)) {
         const node_id = context.params.node_id;
         if (change.after.exists) {
             const global_config = await get_global_config();
-            await update_changes_collection(change.after.ref, global_config);
+            await update_changes_collection(change.after, global_config);
             await update_measurements_collection(change, node_id);
             functions.logger.log("node " + node_id + " changed");
         } else {
@@ -25,7 +38,7 @@ exports.onConfigWrite = functions.firestore.document('/Network/{doc}').onWrite(a
     const global_config = await get_global_config();
     const nodes = admin.firestore().collection('/Nodes');
     for (doc of await nodes.listDocuments()) {
-        await update_changes_collection(doc, global_config);
+        await update_changes_collection(await doc.get(), global_config);
     }
     functions.logger.log("nodes configuration changed");
 });
@@ -72,13 +85,13 @@ async function get_global_config() {
     return Object.assign({}, ...global_config.docs.map(doc => ({ [doc.id]: doc.data() })));
 }
 
-async function update_changes_collection(node_document_ref, global_config) {
+async function update_changes_collection(node_document_snap, global_config) {
     // get nodes config data
-    const node_doc = await node_document_ref.get();
+    const sensors_field = await node_document_snap.get('sensors');
 
     // set config to changes collections
-    const doc = admin.firestore().collection('Changes').doc(node_doc.id);
-    doc.set({ 'config': JSON.stringify({ ...node_doc.data(), ...{ network_config: global_config } }) });
+    const doc = admin.firestore().collection('Changes').doc(node_document_snap.id);
+    doc.set({ 'config': JSON.stringify({ sensors: sensors_field, ...{ network_config: global_config } }) });
 }
 
 async function update_measurements_collection(change, node_id) {
