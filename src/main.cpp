@@ -49,7 +49,7 @@ Capacitance soil moisture sensor using ADS1X15 ADC extender.
 #define _MEASUREMENTS_TYPE "Soil Moisture"
 #define _UNITS "%"
 
-class SoilMoisureSensorGroveV1 : public Sensor
+class SoilMoistureSensorGroveV1 : public Sensor
 {
 private:
     uint8_t analog_pin = 0;
@@ -87,7 +87,7 @@ private:
     }
 
 public:
-    SoilMoisureSensorGroveV1(DEVICE_CONSTRUCTOR_ARGUMENTS)
+    SoilMoistureSensorGroveV1(DEVICE_CONSTRUCTOR_ARGUMENTS)
         : Sensor(device_id, hardware_info, pinout, envelop)
     {
         init_adc();                                               // ADS1X15 related.
@@ -96,7 +96,6 @@ public:
 
     Measurements measure()
     {
-        power_on();
         Measurements measurements(1);
         Measurement moisture;
         moisture.type = "Soil Moisture";
@@ -106,14 +105,13 @@ public:
         moisture.value = 1 - percentage(volt, C_air, C_water);
         measurements.push_back(moisture);
         Serial.printf("%s: measure %f volts, %f/1 range\n", HARDWARE_INFO.c_str(), volt, moisture.value);
-        power_off();
         return measurements;
     }
 
     void calibrate() { calibrated = true; }
 };
 
-REGISTER_DEVICE(SoilMoisureSensorGroveV1, "Grove Soil Moisture Sensor v1");
+REGISTER_DEVICE(SoilMoistureSensorGroveV1, "Grove Soil Moisture Sensor v1");
 
 /*****************************************************/
 
