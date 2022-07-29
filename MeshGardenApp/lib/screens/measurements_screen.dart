@@ -7,6 +7,8 @@ import 'package:iot_firestore_flutter_app/widgets/measurement_card.dart';
 import '../const/custom_colors.dart';
 import 'package:iot_firestore_flutter_app/const/image_path.dart';
 
+import '../model/MeasuresData.dart';
+
 class MeasurementsScreen extends StatefulWidget {
   const MeasurementsScreen(
       {Key? key, required this.nodeId, required this.hasMeasurements})
@@ -225,7 +227,7 @@ class _MeasurementsScreenState extends State<MeasurementsScreen> {
                 child: ListView.builder(
                   itemCount: measurements_list.length,
                   itemBuilder: (BuildContext ctx, int index) {
-                    if (measurements_list[index].newSample == null){ return SizedBox(
+                    if (measurements_list[index].newSample == null){ return SizedBox( //TODO check if needed also samples == null check
                       height: 20,
                     );}
                       return Container(
@@ -236,7 +238,7 @@ class _MeasurementsScreenState extends State<MeasurementsScreen> {
                               MeasurementCard(
                                 value:
                                     measurements_list[index].newSample?.value,
-                                // date_time: measurements_list[index].newSample?.time?.toDate().add(Duration(hours: 3)),
+                                // date_time: measurements_list[index].newSample?.time?.toDate().add(Duration(hours: 3)), TODO check if needed
                                 date_time: measurements_list[index]
                                     .newSample
                                     ?.time
@@ -244,6 +246,8 @@ class _MeasurementsScreenState extends State<MeasurementsScreen> {
                                 unit: measurements_list[index].units,
                                 name: measurements_list[index].type,
                                 assetImage: measurements_list[index].imagePath,
+                                // data_map: samplesListToMap(measurements_list[index].samples),
+                                chart_data: samplesListToChartData(measurements_list[index].samples),
                                 // trendData: rhList!,
                                 // linePoint: Colors.blueAccent,
                               ),
@@ -263,4 +267,24 @@ class _MeasurementsScreenState extends State<MeasurementsScreen> {
       );
     }
   }
+}
+
+// Map<DateTime,double> samplesListToMap(List<Sample>? samples){
+//   Map<DateTime,double> data= {};
+//   if (samples == null) return data;
+//   samples.forEach((sample) {
+//     DateTime date = sample.time!.toDate();
+//     data[date] = sample.value!.toDouble();
+//   });
+//   return data;
+// }
+
+List<MeasuresData> samplesListToChartData(List<Sample>? samples){
+  List<MeasuresData> data= [];
+  if (samples == null) return data;
+  samples.forEach((sample) {
+    DateTime date = sample.time!.toDate();
+    data.add(MeasuresData(date, sample.value!.toDouble()));
+  });
+  return data;
 }
