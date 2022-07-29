@@ -45,7 +45,7 @@ class SensorMeasurements {
     else if(type.trim() == "Soil Moisture"){
       return "%";
     }
-    else if(type.trim() == "UVA" || type.trim() == "UVB"){
+    else if(type.trim() == "UVi"){
       return "\'UVi";
     }
     return "";
@@ -68,7 +68,7 @@ class SensorMeasurements {
     else if(type.trim() == "Soil Moisture"){
       return SoilMoisturePath;
     }
-    else if(type.trim() == "UVA" || type.trim() == "UVB"){
+    else if(type.trim() == "UVi"){
       return UVPath;
     }
     return DefaultSensorPath;

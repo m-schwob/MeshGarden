@@ -27,9 +27,9 @@ private:
 	Scheduler userScheduler; // to control your personal task
 	// Task taskSendMessage;
 	// TODO should be list or set of tasks here
-	Task measure;
+	// Task measure;
 	Task get_value;
-	// std::list<Task> tasks_holder;
+	std::list<Task> measure;
 	int counter = 0;
 	bool alive = false;
 	bool set_time = false;

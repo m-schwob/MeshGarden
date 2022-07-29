@@ -6,12 +6,12 @@
 #include "Device.h"
 #include "Sensor.h"
 
+#define CAPACITIVE_SOIL_MOISTURE_SENSOR "Capacitive Soil Moisture Sensor"
+
 #define SOIL_MOISTURE_KEY "Soil Moisture"
 
 class SoilMoistureSensor : public Sensor
 {
-public:
-    static const String HARDWARE_INFO;
 
 private:
     uint8_t analog_pin = 0;
@@ -25,6 +25,6 @@ public:
     void calibrate();
 };
 
-REGISTER_DEVICE(SoilMoistureSensor, SoilMoistureSensor::HARDWARE_INFO);
+REGISTER_DEVICE(SoilMoistureSensor, CAPACITIVE_SOIL_MOISTURE_SENSOR);
 
 #endif /* _SOIL_MOISTURE_SENSOR_H_ */
