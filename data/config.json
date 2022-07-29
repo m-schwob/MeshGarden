@@ -10,7 +10,7 @@
             "mesh_prefix": "whateverYouLike",
             "mesh_password": "somethingSneaky",
             "mesh_port": 5555,
-            "mesh_connection_time": 20,
+            "mesh_connection_time": 25,
             "deep_sleep_time":40
         },
         "time": {

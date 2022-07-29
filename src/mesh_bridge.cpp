@@ -739,11 +739,10 @@ void MeshBridge::firebaseNetworkSet(DynamicJsonDocument config){
         String documentPath = "initNetwork/network_string";
         FirebaseJson content;
         bool response;
-        content.set("fields/network_string/stringValue/", config.as<String>());
-        if (Firebase.Firestore.createDocument(&fbdo, FIREBASE_PROJECT_ID, "", documentPath.c_str(), content.raw()))
+        content.set("fields/network_string/stringValue/", config["network_config"].as<String>());
+        if (Firebase.Firestore.patchDocument(&fbdo, FIREBASE_PROJECT_ID, "", documentPath.c_str(), content.raw(),"network_string"))
         {
-            Serial.printf("initializing bridge succeed\n");
-            initialized = true;
+            Serial.printf("set network values succeed\n");
             return;
         }
         else
