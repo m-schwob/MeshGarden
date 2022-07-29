@@ -1,104 +1,88 @@
-{
-    "Measurements": {
-        "1": {
-            "Air Humidity": {
-                "samples": [
-                    {
-                        "time": "2022-05-23T21:00:00Z",
-                        "value": 0.8
-                    },
-                    {
-                        "time": "2022-05-23T21:10:00Z",
-                        "value": 0.7
-                    },
-                    {}
-                ]
-            },
-            "Air Temperature ": {
-                "samples": []
-            }
+@startjson
+
+{   
+    "Measurements": 
+    {      
+        "nodeId":
+        {
+        "sensor id":{  
+        "sensor Type":{  
+        "units": "%",
+        "newSample":{
+            "measure value": "value",
+            "measure time": "time"
+        }   ,    
+        "samples": [
+        {
+            "measure value": "value",
+            "measure time": "time"
         },
-        "2": {
-            "Soil Moisture": {
-                "samples": []
-            }
+        {
+            "measure value": "value",
+            "measure time": "time"
+        }
+        ]
+        }
+        }
         }
     },
-    "Nodes": {
-        "nodeId1": {
-            "nickname": "tester",
-            "sensors": [
+    "Nodes":
+    {    
+        "nodeId":
+        {
+            "nickname": "nick",
+            "active" : "true",  
+            "bridge" : "false",
+            "battery":"50",
+            "sensors" : [
                 {
-                    "pinout": {
-                        "DAT": "D1"
-                    },
-                    "sensor_type": [
-                        "Air Humidity",
-                        "Air Temperature"
-                    ],
+                    "hardware info": "Grove Soil Moisture Sensor v1",
                     "sensor_id": "1",
-                    "sample_interval": "30",
-                    "units": [
-                        "%",
-                        "C"
-                    ],
-                    "hardware_info": " DHT22"
-                },
-                {
+                    "measurement type": "Humidity",
+                    "sensor_time_interval": "40",
+                    "sensor units": "%",
                     "pinout": {
-                        "VCC": "D4",
-                        "DAT": "D1"
+                        "AOUT": "A0",
+                        "VCC": "D4"
                     },
-                    "sensor_type": [
-                        "Soil Moisture"
-                    ],
-                    "sensor_id": "2",
-                    "sample_interval": "30",
-                    "units": [
-                        "%"
-                    ],
-                    "hardware_info": " Grove Soil Moisture"
+                    "sensor type":["Soil Moisture"]
                 }
-            ],
-            "firmware": "esp8266_v0.1"
-        },
-        "nodeId2": {
-            "...": "..."
-        },
-        "...": {
-            "...": "..."
+                ] 
         }
     },
-    "NodesNicknames": [
-        {
-            "nodeId": "nickname"
-        },
-        {
-            "nodeId2": "nickname"
-        },
-        {
-            "nodeId3": "nickname"
-        }
-    ],
-    "Network": {
-        "mesh": {
-            "mesh_prefix": "whateverYouLike",
-            "mesh_password": "somethingSneaky",
-            "mesh_port": 5555
+    "Mesh Network": { 
+        "active":{
+        "node1": "null",
+        "nodeId2": "null",
+        "nodeId3": "null"
         }
     },
-    "MeshNetwork": {
-        "nodeId1": "",
-        "nodeId2": "",
-        "...": ""
+    "Nodes changes": {
+            "nodeId": "change string",
+            "nodeId2": "change string"
     },
-    "Changes": {
-        "nodeId1": {
-            "config": "{\"node_id\": \" ... }"
+    "Network" : {
+        "firebase":{
+            "api_key": "",
+            "firebase_project_id": "",
+            "user_email": "",
+            "user_password": ""
+            },
+        "mesh":{
+            "mesh_password":"",
+            "mesh port":"",
+            "mesh_prefix": ""
         },
-        "nodeId2": {
-            "config": "{\"node_id\": \" ... }"
+        "time":{
+            "daylight_offset_sec": 7200,
+            "gmt_offset_sec" :3600,
+            "ntp_server":"pool.ntp.org"
         },
-        "...": {}
+        "wifi":{
+            "ssid":"",
+            "password":""
+        }
     }
 }
+
+@endjson

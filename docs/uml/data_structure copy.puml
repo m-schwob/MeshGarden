@@ -7,7 +7,11 @@
         {
         "sensor id":{  
         "sensor Type":{  
-        "units": "%",       
+        "units": "%",
+        "newSample":{
+            "measure value": "value",
+            "measure time": "time"
+        }   ,    
         "samples": [
         {
             "measure value": "value",
@@ -29,6 +33,7 @@
             "nickname": "nick",
             "active" : "true",  
             "bridge" : "false",
+            "battery":"50",
             "sensors" : [
                 {
                     "hardware info": "Grove Soil Moisture Sensor v1",

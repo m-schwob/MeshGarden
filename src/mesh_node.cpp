@@ -60,7 +60,7 @@ void receivedCallback(uint32_t from, String &msg)
         if (node->node_battery_level != -1)
         {
             DynamicJsonDocument battery_level(32);
-            battery_level["battery"] = battery_level;
+            battery_level["battery"] = node->node_battery_level;
             Serial.println("created battery json");
             serializeJson(battery_level, Serial);
             node->mesh.sendSingle(from, battery_level.as<String>());
@@ -105,7 +105,7 @@ void MeshNode::update()
     if (millis() - lasttime >= 1000)
     {
         time_update();
-        printLocalTime();
+        // printLocalTime();
         lasttime = millis();
     }
     if ((die_time.hours == time.hours || die_time.hours - 12 == time.hours) && die_time.minutes == time.minutes && die_time.seconds == time.seconds)
@@ -233,7 +233,8 @@ void MeshNode::set_global_config(JsonObject global_config)
     MESH_PREFIX = global_config["mesh"]["mesh_prefix"].as<String>();
     MESH_PASSWORD = global_config["mesh"]["mesh_password"].as<String>();
     MESH_PORT = global_config["mesh"]["mesh_port"].as<size_t>();
-    Serial.println("config done");
+    sample_interval = global_config["mesh"]["mesh_connection_time"].as<int>()/2;
+    Serial.println("config done, sample interval=" + String(sample_interval));
 }
 
 void MeshNode::init_clock()
@@ -332,7 +333,7 @@ void MeshNode::send_values(std::function<Measurements()> get_values_callback)
 void MeshNode::add_measurement(std::function<Measurements()> callable, unsigned long interval, long iterations)
 {
     Serial.println("adding measurement task");
-    measure.set(TASK_SECOND * 5, TASK_FOREVER, [this, callable]()
+    measure.set(TASK_SECOND * sample_interval, TASK_FOREVER, [this, callable]()
                 { send_values(callable); });
     userScheduler.addTask(measure);
     measure.enable();
@@ -341,7 +342,9 @@ void MeshNode::add_measurement(std::function<Measurements()> callable, unsigned 
 
 void MeshNode::get_battery_level(Measurement battery_level)
 {
+    Serial.println("set bettery level to: " + String(battery_level.value));
     node_battery_level = battery_level.value;
 }
 
 void firestoreMapBatteryUpdate(String nodeId, float value) {}
+
