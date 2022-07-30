@@ -109,6 +109,7 @@ Components:
 > The LED use as indicator and connected in parallel to ESP32 module build in LED. So it can be skipped if the build in LED visible.
 
 Assembly:
+![](/docs/hardware/fritzing/bridge_bb.jpg)
 
 ## Node Components and assembly:
 Nodes can be assembled in many ways using any sensor. Some component are is required for the system operation and some are optional. The require components are listed in the *Basic Node Module* section below and the optional are exampled in the *Sensors Options* section.
@@ -135,6 +136,8 @@ Components:
 > The LED use as indicator and connected in parallel to ESP8266 module build in LED. So it can be skipped if the build in LED visible.
 
 Assembly:
+![](/docs/hardware/fritzing/basic_node_bb.jpg)
+
 
 > the on/off switch (or jumper) required for the micro-controller programming since it cannot be program while D0 and RST pin are connected.
 
@@ -147,6 +150,8 @@ Optional Build in Sensors:
 - VEML6075 UV sensor
 
 Optional Build in Sensors Assembly (in additional to the Base module!!):
+![](/docs/hardware/fritzing/library_sensors_node_bb.jpg)
+
 
 ## build a new ESP8266 micro controller with the new hardware for your new sensor.
 
