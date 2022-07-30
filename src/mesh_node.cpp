@@ -265,7 +265,6 @@ void MeshNode::init_mesh()
     mesh.onNodeTimeAdjusted(&nodeTimeAdjustedCallback);
     mesh.onDroppedConnection([](uint32_t nodeId)
                              { Serial.printf("node dropped:%u, at time: %u", nodeId, node->mesh.getNodeTime()); });
-    Serial.print(mesh.getNodeTime());
     Serial.println("node id: " + String(mesh.getNodeId()));
     node = this;
     alive = true;
