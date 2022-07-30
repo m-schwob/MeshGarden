@@ -29,6 +29,22 @@ that are interconnected.
 
 * fbiego/ESP32Time@^1.1.0
 
+# MeshGardenAPP - library dependency
+* cupertino_icons: ^1.0.2  
+* firebase_auth: ^3.1.0   
+* firebase_core: ^1.6.0   
+* cloud_firestore: ^3.1.14  
+* google_fonts: ^2.1.0    
+* adaptive_dialog: ^1.1.0  
+* font_awesome_flutter: ^10.1.0  
+* chart_sparkline: ^1.0.5  
+* intl: ^0.17.0  
+* hawk_fab_menu: ^1.1.2  
+* flutter_launcher_icons: ^0.9.0  
+* charts_flutter: ^0.12.0  
+* syncfusion_flutter_charts: 20.1.55  
+* syncfusion_flutter_core: 20.1.55  
+
 # MeshGarden - features
 Mesh network features:
 
