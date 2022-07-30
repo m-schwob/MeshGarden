@@ -91,7 +91,7 @@ public:
 
 	Time die_time;
 	int die_interval = 10000;
-	std::map<String,queue<String>> myqueue;
+	std::map<String,queue<Measurement>> myqueue;
 	Time calculate_time();
 
 	void get_battery_level(Measurement battery_level);

@@ -279,43 +279,17 @@ void MeshNode::send_values(std::function<Measurements()> get_values_callback)
 {
         Measurements meas;
         meas = get_values_callback();
-        String time1;
-        // printLocalTime();
-        if (AmPm == "AM")
-        {
-            time1 += (time.hours < 10) ? "0" + String(time.hours - 3) + ":" : "0" + String(time.hours - 3) + ":";
-            time1 += (time.minutes < 10) ? "0" + String(time.minutes) + ":" : String(time.minutes) + ":";
-            time1 += (time.seconds < 10) ? "0" + String(time.seconds) : String(time.seconds);
-        }
-        else
-        {
-            time1 += String(time.hours + 12 - 3) + ":";
-            time1 += (time.minutes < 10) ? "0" + String(time.minutes) + ":" : String(time.minutes) + ":";
-            time1 += (time.seconds < 10) ? "0" + String(time.seconds) : String(time.seconds);
-        }
-        String timeStamp = date + "T" + time1 + "Z";
-        DynamicJsonDocument measure1(256); // ameassure sample Json
-        Serial.println("Sensor took " +String(meas.size()) + " measures");
-        for (Measurement m : meas)
-        {
 
-            measure1["nodeId"] = mesh.getNodeId();
-            measure1["sensorId"] = "sensor" + String(m.sensor_id);
-            measure1["meassure_type"] = m.type;
-            std::string m_type = std::string(m.type.c_str());
-            std::replace(m_type.begin(), m_type.end(), ' ', '_');
-            measure1["meassure_type"] = String(m_type.c_str());
-            measure1["value"] = m.value;
-            measure1["time"]["timestampValue"] = timeStamp;
-            String mapKey = String(m.sensor_id)+"_"+String(m_type.c_str());
-            if (measure1["meassure_type"].as<String>() != "")
-            {
-                String castString = measure1.as<String>();
-                Serial.println("read message and set in queue:");
-                Serial.println(measure1.as<String>());
-                myqueue[mapKey].push(measure1.as<String>());
-            }
-        Serial.println("for key: " +String(mapKey) + " the queue contains: " + String(myqueue[mapKey].size()) );
+    for (Measurement m : meas)
+    {            
+        if (m.type != "")
+        {
+            String mapKey = String(m.sensor_id)+"_"+String(m.type.c_str());
+            m.time= time;
+            Serial.println("read message and set in queue:");
+            Serial.println(String(m.sensor_id) + " " + String(m.type));
+            myqueue[mapKey].push(m);
+        }
     }
 }
 
@@ -363,13 +337,38 @@ void MeshNode::call_measurements(){
 }
 
 void MeshNode::emptyQueue(){
-    for(std::map<String,queue<String>>::iterator iter = myqueue.begin(); iter != myqueue.end(); ++iter){
+
+    for(std::map<String,queue<Measurement>>::iterator iter = myqueue.begin(); iter != myqueue.end(); ++iter){
         while(!iter->second.empty() && mesh.isConnected(bridgeId)){
-            mesh.sendSingle(bridgeId, iter->second.front());
+            Measurement meas = iter->second.front();
+            String time1;
+            if (AmPm == "AM")
+            {
+                time1 += (meas.time.hours < 10) ? "0" + String(meas.time.hours - 3) + ":" : "0" + String(meas.time.hours - 3) + ":";
+                time1 += (meas.time.minutes < 10) ? "0" + String(meas.time.minutes) + ":" : String(meas.time.minutes) + ":";
+                time1 += (meas.time.seconds < 10) ? "0" + String(meas.time.seconds) : String(meas.time.seconds);
+            }
+            else
+            {
+                time1 += String(meas.time.hours + 12 - 3) + ":";
+                time1 += (meas.time.minutes < 10) ? "0" + String(meas.time.minutes) + ":" : String(meas.time.minutes) + ":";
+                time1 += (meas.time.seconds < 10) ? "0" + String(meas.time.seconds) : String(meas.time.seconds);
+            }
+            String timeStamp = date + "T" + time1 + "Z";
+            DynamicJsonDocument measure1(256); // ameassure sample Json
+            measure1["nodeId"] = mesh.getNodeId();
+            measure1["sensorId"] = "sensor" + String(meas.sensor_id);
+            std::string m_type = std::string(meas.type.c_str());
+            std::replace(m_type.begin(), m_type.end(), ' ', '_');
+            measure1["meassure_type"] = String(m_type.c_str());
+            measure1["value"] = meas.value;
+            measure1["time"]["timestampValue"] = timeStamp;
+
+            mesh.sendSingle(bridgeId, measure1.as<String>());
             iter->second.pop();
         }
     }
-        for(std::map<String,queue<String>>::iterator iter = myqueue.begin(); iter != myqueue.end(); ++iter){
+        for(std::map<String,queue<Measurement>>::iterator iter = myqueue.begin(); iter != myqueue.end(); ++iter){
             if(iter->second.empty())
                 myqueue.erase(iter->first);
         }
