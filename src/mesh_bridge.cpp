@@ -33,9 +33,10 @@ void receivedCallback(uint32_t from, String &msg)
     }
     else
     {
-        String key = doc["sensorId"].as<String>()+"_"+doc["meassure_type"].as<String>();
+        String key = doc["nodeId"].as<String>() + "_" + doc["sensorId"].as<String>()+"_"+doc["meassure_type"].as<String>();
         node->server_data[key].push(doc.as<String>());
-        serializeJson(doc, Serial);
+        Serial.println("server data has: " + String(node->server_data.size()) + " keys");
+        Serial.println("key: " + key + " has " + String(node->server_data[key].size()) + " values");
     }
 }
 // event driven function for the mesh
@@ -521,7 +522,7 @@ void MeshBridge::set_bridge_in_firebase(String nodeId)
         content.set("fields/nickname/stringValue/", nodeId.c_str());
         content.set("fields/bridge/booleanValue/", true);
         content.set("fields/active/booleanValue/", true);
-        content.set("fields/active/doubleValue/", 100);
+        content.set("fields/battery/doubleValue/", 100);
         if (Firebase.Firestore.createDocument(&fbdo, FIREBASE_PROJECT_ID, "", documentPath.c_str(), content.raw()))
         {
             Serial.printf("initializing bridge succeed\n");

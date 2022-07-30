@@ -20,6 +20,32 @@ void MeshNode::printLocalTime()
 }
 
 /*
+input: 2 time structs , int value of the number of minutes between them
+output: true - if between the two time frames there were less then those minutes
+false- otherwise
+*/
+bool computeTimeDifference(Time t1, Time t2, int acceptable_difference_minutes){
+    
+    Time difftime;
+    if(t2.seconds > t1.seconds)
+    {
+        --t1.minutes;
+        t1.seconds += 60;
+    }
+
+    difftime.seconds= t1.seconds - t2.seconds;
+    if(t2.minutes > t1.minutes)
+    {
+        --t1.hours;
+        t1.minutes += 60;
+    }
+    difftime.minutes= t1.minutes-t2.minutes;
+    difftime.hours= t1.hours-t2.hours;
+    if (difftime.hours ==0 && difftime.minutes<=acceptable_difference_minutes)
+        return true;
+    return false;
+}
+/*
 must function for the painlessmesh network.
 input:  uint32_t from - the node id of the node from whom we got the message (always will be the bridge id)
         String msg containing the message passed, the message is always in JSON format
@@ -91,7 +117,14 @@ void receivedCallback(uint32_t from, String &msg)
         Serial.println("end read confugires:\n");
         node->configure_ready = true;
     }
-    node->emptyQueue();
+
+    if(!node->myqueue.empty() &&(node->time , node->myqueue.back().time, 5)){
+        node->emptyQueue();
+    }
+    else{
+        node->call_measurements();
+        node->emptyQueue();
+    }
 }
 void newConnectionCallback(uint32_t nodeId)
 {
@@ -193,6 +226,8 @@ void MeshNode::store_timing(Time &time, int &sleep_time, int& lost_connection_in
     EEPROM.put(0, sleep_time);
     EEPROM.put(sizeof(sleep_time), time);
     EEPROM.put(sizeof(time),lost_connection_interval_counter);
+    //int size_of_queue = (sizeof(Measurement)*myqueue.size())*2;
+    //EEPROM.put(size_of_queue,myqueue);
     EEPROM.commit();
     EEPROM.end();
     Serial.println("time stored");
@@ -326,27 +361,6 @@ void MeshNode::get_battery_level(Measurement battery_level)
 
 void firestoreMapBatteryUpdate(String nodeId, float value) {}
 
-bool computeTimeDifference(Time t1, Time t2, int acceptable_difference_minutes){
-    
-    Time difftime;
-    if(t2.seconds > t1.seconds)
-    {
-        --t1.minutes;
-        t1.seconds += 60;
-    }
-
-    difftime.seconds= t1.seconds - t2.seconds;
-    if(t2.minutes > t1.minutes)
-    {
-        --t1.hours;
-        t1.minutes += 60;
-    }
-    difftime.minutes= t1.minutes-t2.minutes;
-    difftime.hours= t1.hours-t2.hours;
-    if (difftime.hours ==0 && difftime.minutes<=acceptable_difference_minutes)
-        return true;
-    return false;
-}
 
 void MeshNode::call_measurements(){
     for(list<std::function<Measurements()>>::iterator iter = funcs.begin(); iter != funcs.end(); ++iter)
