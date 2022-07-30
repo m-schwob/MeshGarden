@@ -33,9 +33,9 @@ void receivedCallback(uint32_t from, String &msg)
     }
     else
     {
-        node->server_data.push(doc.as<String>());
+        String key = doc["sensorId"].as<String>()+"_"+doc["meassure_type"].as<String>();
+        node->server_data[key].push(doc.as<String>());
         serializeJson(doc, Serial);
-        Serial.println("recieved measure from node " + String(from));
     }
 }
 // event driven function for the mesh
@@ -207,6 +207,7 @@ void MeshBridge::init_clock()
     struct tm timeinfo;
     printLocalTime();
     calculate_death(NODE_WAKE_TIME);
+    Serial.println("next death time: " + String(die_hours) +":"+String(die_minutes)+":"+String(die_seconds));
     got_time = true;
     // disconnect WiFi as it's no longer needed
 }
@@ -339,7 +340,6 @@ void MeshBridge::get_mesh_nodes()
     }
     Serial.printf("%s", String(mesh.getNodeId()));
     mesh_values.push_back(String(mesh.getNodeId()));
-    ;
 }
 
 /*
@@ -532,7 +532,9 @@ void MeshBridge::exit_mesh_connect_server()
 {
     String nodeId = String(mesh.getNodeId());
     mesh.stop();
+    printLocalTime();
     calculate_death(NODE_WAKE_TIME + NODE_DEEP_SLEEP_TIME);
+    Serial.println("next death time: " + String(die_hours) +":"+String(die_minutes)+":"+String(die_seconds));
     // // Connect to Wi-Fi
     Serial.print("Connecting to ");
     Serial.println(ssid);
@@ -574,19 +576,20 @@ void MeshBridge::exit_mesh_connect_server()
     firestoreMeshCollectionClear();
     firestoreMeshCollectionUpdate();
     //*************updating Measurements and battery collections****************//
-    Serial.printf("sending %d cached messages:\n", server_data.size());
-    // Serial.println(server_data.front());
 
-    while (!server_data.empty())
-    {
-        String front = server_data.front();
-        firestoreDataUpdate(front);
-        if (server_data.size() == 1)
-        {
-            firestoreUpdateLastMesh(front);
+    for(std::map<String,queue<String>>::iterator iter = server_data.begin(); iter != server_data.end(); ++iter){
+        Serial.println("node "+ iter->first+" has " + iter->second.size() +" cached messages");
+        while(!iter->second.empty()){
+            String value = iter->second.front();
+            firestoreDataUpdate(value);
+            if (iter->second.size() == 1)
+                {
+                    firestoreUpdateLastMesh(value);
+                }
+            iter->second.pop();
         }
-        server_data.pop();
     }
+    server_data.clear();
 
     Serial.printf("sending %d battey messages..\n", battery_map.size());
     for (std::map<String, float>::iterator iter = battery_map.begin(); iter != battery_map.end(); ++iter)
@@ -677,3 +680,6 @@ void MeshBridge::firebaseNetworkSet(DynamicJsonDocument config){
     WiFi.disconnect(true);
     WiFi.mode(WIFI_OFF);
     }
+
+
+    

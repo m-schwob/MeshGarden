@@ -79,8 +79,8 @@ void MeshGarden::parse_config()
 {
     Serial.println("start of parse config, the log config is:");
     // TODO calling it only in debug mode.
-    log_config(); 
-    Serial.println("log config done"); delay(2000);
+    log_config();
+    Serial.println("log config done");
 
     JsonObject sensors = config["sensors"];
     for (JsonPair s : sensors)
@@ -202,12 +202,10 @@ void MeshGarden::init_mesh_connection()
     // init mesh network
     network->set_global_config(config["network_config"]);
     network->init_clock();
-#ifdef ESP32
-    network->firebaseNetworkSet(config);
-#endif    
-    network->init_mesh();
+    #ifdef ESP32
+        network->firebaseNetworkSet(config);
+    #endif
 
-    // add devices functions to tasks. pseudo code:
 #ifdef ESP8266
     for (Device *device : device_list)
     {
@@ -217,7 +215,19 @@ void MeshGarden::init_mesh_connection()
         }
     }
 #endif
-    Serial.println("init mesh connection done");
+
+    Serial.print("init mesh..");
+    network->printLocalTime();
+
+    network->init_mesh();
+
+    Serial.println("init mesh connection done. taking measurements..");
+    network->printLocalTime();
+
+    network->call_measurements();
+
+    Serial.println("done measurements mesh connection done..");
+    network->printLocalTime();
 }
 
 MeshGarden::MeshGarden() : config(0)

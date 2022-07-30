@@ -5,8 +5,8 @@ SoilMoistureSensor::SoilMoistureSensor(DEVICE_CONSTRUCTOR_ARGUMENTS)
 {
 
     // temp fix
-    pinMode(D5, OUTPUT);
-    digitalWrite(D5, HIGH);
+    // pinMode(D5, OUTPUT);
+    // digitalWrite(D5, HIGH);
 
     if (pinout.containsKey("AOUT"))
         analog_pin = pin(pinout["AOUT"].as<String>());
