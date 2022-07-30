@@ -63,6 +63,9 @@ site in order to find the server that provide the minimal latency
 
 video 2:
 connect the firebase to the app https://www.youtube.com/watch?v=nsopdabOcug&t=3s 
+*Note* : The files provided in the MeshGaredApp directory are source code *only*, so in order to use them,
+create a new flutter project and follow the above video  
+
 
 ## **step 2:** create an account in the MeshGarden app with your own usermane and password
 
