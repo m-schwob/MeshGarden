@@ -193,7 +193,7 @@ void MeshGarden::init_power_monitor()
 void MeshGarden::init_mesh_connection()
 {
     // choose mesh node type to construct
-#ifdef ESP32
+#if defined(ESP32)
     network = new MeshBridge();
 #else
     network = new MeshNode();
@@ -203,11 +203,11 @@ void MeshGarden::init_mesh_connection()
     network->set_global_config(config["network_config"]);
     network->init_clock();
    
-#ifdef ESP32
+#if defined(ESP32)
     network->firebaseNetworkSet(config);
 #endif 
 
-#ifdef ESP8266
+#if defined(ESP8266)
     for (Device *device : device_list)
     {
         if (device->DEVICE_TYPE.equals(DEVICE_TYPE_SENSOR))
@@ -219,7 +219,7 @@ void MeshGarden::init_mesh_connection()
     network->init_mesh();
 
     Serial.println("init mesh connection done");
-#ifdef ESP8266
+#if defined(ESP8266)
     network->call_measurements();
 #endif
 
@@ -242,7 +242,7 @@ void MeshGarden::begin()
 {
     pinMode(LED_BUILTIN, OUTPUT);
 
-#ifdef ESP32
+#if defined(ESP32)
     digitalWrite(LED_BUILTIN, HIGH); // turn the LED on (HIGH is the voltage level)
 
 #else
