@@ -12,7 +12,7 @@ struct Time
     int hours = 0;
     int minutes = 0;
     int seconds = 0;
-    
+    bool Am = 1; //Am=1 refers to "Am", Am=0 refers to "Pm"
 };
 #define EEPROM_SIZE (sizeof(Time) + sizeof(int))
 

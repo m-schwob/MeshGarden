@@ -90,6 +90,34 @@ void newConnectionCallback(uint32_t nodeId)
 void changedConnectionCallback()
 {
     Serial.printf("Changed connections\n");
+        char s[100];
+    struct tm timeinfo;
+   if (!getLocalTime(&timeinfo))
+    {
+        Serial.println("Failed to obtain time try again");
+        return;
+    }
+    int rc = strftime(s, sizeof(s), "20%y--%d at %r", &timeinfo);
+    String firebaseReadyDate = String(s);
+    int monthId = timeinfo.tm_mon + 1;
+    if (monthId < 10)
+        firebaseReadyDate = firebaseReadyDate.substring(0, 5) + "0" + String(monthId) + firebaseReadyDate.substring(5);
+    else
+        firebaseReadyDate = firebaseReadyDate.substring(0, 5) + String(monthId) + firebaseReadyDate.substring(5);
+    Serial.println("current time:" + firebaseReadyDate);
+    DynamicJsonDocument timer(firebaseReadyDate.length() + 32);
+    timer["clock"] = firebaseReadyDate;
+    Serial.println("created clock json");
+    serializeJson(timer, Serial);
+    node->mesh.sendBroadcast(timer.as<String>());
+
+    DynamicJsonDocument death_time(NEXT_DEATH_JSON);
+    death_time["d"]["m"] = node->die_minutes;
+    death_time["d"]["h"] = node->die_hours;
+    death_time["d"]["s"] = node->die_seconds;
+    death_time["d"]["st"] = (node->NODE_DEEP_SLEEP_TIME-1); // send the sleep time
+    node->mesh.sendBroadcast(death_time.as<String>());
+    Serial.println("next death time:" + death_time.as<String>());
 }
 // event driven functions for the mesh
 void nodeTimeAdjustedCallback(int32_t offset)
@@ -493,6 +521,7 @@ void MeshBridge::set_bridge_in_firebase(String nodeId)
         content.set("fields/nickname/stringValue/", nodeId.c_str());
         content.set("fields/bridge/booleanValue/", true);
         content.set("fields/active/booleanValue/", true);
+        content.set("fields/active/doubleValue/", 100);
         if (Firebase.Firestore.createDocument(&fbdo, FIREBASE_PROJECT_ID, "", documentPath.c_str(), content.raw()))
         {
             Serial.printf("initializing bridge succeed\n");
@@ -516,7 +545,7 @@ void MeshBridge::set_in_firebase(String nodeId)
         content.set("fields/nickname/stringValue/", nodeId.c_str());
         content.set("fields/bridge/booleanValue/", false);
         content.set("fields/active/booleanValue/", true);
-        content.set("fields/battery/doubleValue/", 0.1);
+        content.set("fields/battery/doubleValue/", 100.0);
         if (Firebase.Firestore.createDocument(&fbdo, FIREBASE_PROJECT_ID, "", documentPath.c_str(), content.raw()))
         {
             Serial.printf("initialize node:%s\n", nodeId.c_str());

@@ -60,7 +60,7 @@ public:
 	void remove_task();
 	vector<String> splitString(string str, string delimiter = " ");
 	list<std::function<Measurements()>> funcs;
-	void setTimeVal(string str, string delimiter = ":");
+	void setTimeVal(string str,String AmPm, string delimiter = ":");
 	void set_global_config(JsonObject global_config);
 	void init_mesh();
 	void init_clock();
@@ -73,7 +73,6 @@ public:
 	Time time;
 	int days = 0;
 	String date;
-	String AmPm = "AM";
 
 	// Accuracy settings
 	int dailyErrorFast = 0;	  // set the average number of milliseconds your microcontroller's time is fast on a daily basis
@@ -90,7 +89,7 @@ public:
 
 	Time die_time;
 	int die_interval = 10000;
-	std::map<String,queue<Measurement>> myqueue;
+	queue<Measurement> myqueue;
 	Time calculate_time();
 
 	void get_battery_level(Measurement battery_level);
