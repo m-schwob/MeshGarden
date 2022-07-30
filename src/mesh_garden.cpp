@@ -214,12 +214,13 @@ void MeshGarden::init_mesh_connection()
             network->add_measurement(((Sensor *)device)->get_measure_callback(), 5, 5);
         }
     }
-    // network->call_measurements();
 #endif
 
     network->init_mesh();
 
     Serial.println("init mesh connection done");
+        network->call_measurements();
+
 }
 
 MeshGarden::MeshGarden() : config(0)

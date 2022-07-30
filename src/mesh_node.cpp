@@ -84,8 +84,7 @@ void receivedCallback(uint32_t from, String &msg)
         Serial.println("end read confugires:\n");
         node->configure_ready = true;
     }
-    Serial.println("starts measures");
-    node->call_measurements();
+    Serial.println("sends measures");
     node->emptyQueue();
 }
 void newConnectionCallback(uint32_t nodeId)
@@ -252,6 +251,7 @@ void MeshNode::init_clock()
     time.minutes = ((t.minutes + ((t.seconds + die_interval) / 60)) % 60);
     time.hours = ((t.hours + ((t.minutes + ((t.seconds + die_interval) / 60)) / 60)) % 24);
     time = t;
+    printLocalTime();
 }
 
 void MeshNode::init_mesh()
@@ -276,10 +276,10 @@ void MeshNode::send_values(std::function<Measurements()> get_values_callback)
         Measurements meas;
         meas = get_values_callback();
         String time1;
+        // printLocalTime();
         if (AmPm == "AM")
         {
             time1 += (time.hours < 10) ? "0" + String(time.hours - 3) + ":" : "0" + String(time.hours - 3) + ":";
-
             time1 += (time.minutes < 10) ? "0" + String(time.minutes) + ":" : String(time.minutes) + ":";
             time1 += (time.seconds < 10) ? "0" + String(time.seconds) : String(time.seconds);
         }
@@ -294,6 +294,7 @@ void MeshNode::send_values(std::function<Measurements()> get_values_callback)
         Serial.println("Sensor took " +String(meas.size()) + " measures");
         for (Measurement m : meas)
         {
+
             measure1["nodeId"] = mesh.getNodeId();
             measure1["sensorId"] = "sensor" + String(m.sensor_id);
             measure1["meassure_type"] = m.type;
