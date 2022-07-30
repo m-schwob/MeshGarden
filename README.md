@@ -56,13 +56,13 @@ App screenshots:
 follow the instruction in the videos bellow by "That Project" in order to setup your own firestore server
 
 video 1:
-set a firebase server https://www.youtube.com/watch?v=KV0D8nrsBLg&t=0s
+set a firebase server https://www.youtube.com/watch?v=KV0D8nrsBLg&t=0s  
 *TIP* : when choosing the cloud firestore location use the https://www.gcping.com 
 site in order to find the server that provide the minimal latency 
 
 
 video 2:
-connect the firebase to the app https://www.youtube.com/watch?v=nsopdabOcug&t=3s 
+connect the firebase to the app https://www.youtube.com/watch?v=nsopdabOcug&t=3s   
 *Note* : The files provided in the MeshGaredApp directory are source code *only*, so in order to use them,
 create a new flutter project and follow the above video  
 
