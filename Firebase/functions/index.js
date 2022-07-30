@@ -6,8 +6,9 @@ admin.initializeApp();
 
 exports.setNetworkConfig = functions.firestore.document('/initNetwork/network_string').onWrite(async (change, context) => {
     var snap = change.after;
-    functions.logger.log("snap.get('network_string')");
+    functions.logger.log(snap.get('network_string'));
     var data = JSON.parse(snap.get('network_string'));
+    console.log(data);
     const batch = admin.firestore().batch();
     for (key of Object.keys(data)) {
         console.log(key);
