@@ -7,6 +7,7 @@
 #include <list>
 #include <vector>
 #include <queue>
+#include <map>
 #include <iostream>
 #include "time.h"
 #include "EEPROM.h"
@@ -20,7 +21,6 @@ using namespace std;
 // #define MESH_PREFIX "whateverYouLike"
 // #define MESH_PASSWORD "somethingSneaky"
 // #define MESH_PORT 5555
-
 class MeshNode
 {
 private:
@@ -59,6 +59,7 @@ public:
 	void sendMessage();
 	void remove_task();
 	vector<String> splitString(string str, string delimiter = " ");
+	list<std::function<Measurements()>> funcs;
 	void setTimeVal(string str, string delimiter = ":");
 	void set_global_config(JsonObject global_config);
 	void init_mesh();
@@ -70,13 +71,9 @@ public:
 	int startingHour = 12; // set your starting hour here, not below at int hour. This ensures accurate daily correction of time
 
 	Time time;
-	// int seconds = 0;
-	// int minutes = 0;
-	// int hours = startingHour;
-
 	int days = 0;
 	String date;
-	String AmPm;
+	String AmPm = "AM";
 
 	// Accuracy settings
 	int dailyErrorFast = 0;	  // set the average number of milliseconds your microcontroller's time is fast on a daily basis
@@ -96,11 +93,12 @@ public:
 	// int die_second = 0;
 	Time die_time;
 	int die_interval = 10000;
-	std::queue<String> myqueue;
-	void listenQueue();
+	std::map<String,queue<String>> myqueue;
 	Time calculate_time();
 
 	void get_battery_level(Measurement battery_level);
+	void call_measurements();
+	void emptyQueue();
 	float node_battery_level = -1;
 };
 

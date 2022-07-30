@@ -205,9 +205,7 @@ void MeshGarden::init_mesh_connection()
 #ifdef ESP32
     network->firebaseNetworkSet(config);
 #endif    
-    network->init_mesh();
 
-    // add devices functions to tasks. pseudo code:
 #ifdef ESP8266
     for (Device *device : device_list)
     {
@@ -216,7 +214,11 @@ void MeshGarden::init_mesh_connection()
             network->add_measurement(((Sensor *)device)->get_measure_callback(), 5, 5);
         }
     }
+    // network->call_measurements();
 #endif
+
+    network->init_mesh();
+
     Serial.println("init mesh connection done");
 }
 

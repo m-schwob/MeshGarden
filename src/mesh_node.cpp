@@ -84,6 +84,10 @@ void receivedCallback(uint32_t from, String &msg)
         Serial.println("end read confugires:\n");
         node->configure_ready = true;
     }
+    Serial.println("starts measures");
+    delay(1000);
+    node->call_measurements();
+    node->emptyQueue();
 }
 void newConnectionCallback(uint32_t nodeId)
 {
@@ -247,15 +251,6 @@ void MeshNode::init_clock()
     time = t;
 }
 
-// void MeshNode::listenQueue()
-// {
-//     if (mesh.isConnected(bridgeId) && !myqueue.empty())
-//     {
-//         mesh.sendSingle(bridgeId, myqueue.front());
-//         myqueue.pop();
-//     }
-// }
-
 void MeshNode::init_mesh()
 {
     // mesh.setDebugMsgTypes( ERROR | MESH_STATUS | CONNECTION | SYNC | COMMUNICATION | GENERAL | MSG_TYPES | REMOTE ); // all types on
@@ -281,8 +276,6 @@ void MeshNode::init_mesh()
 
 void MeshNode::send_values(std::function<Measurements()> get_values_callback)
 {
-    if (mesh.isConnected(bridgeId) && set_time)
-    {
         Measurements meas;
         meas = get_values_callback();
         String time1;
@@ -299,8 +292,8 @@ void MeshNode::send_values(std::function<Measurements()> get_values_callback)
             time1 += (time.minutes < 10) ? "0" + String(time.minutes) + ":" : String(time.minutes) + ":";
             time1 += (time.seconds < 10) ? "0" + String(time.seconds) : String(time.seconds);
         }
-        // Serial.println(time1);
         String timeStamp = date + "T" + time1 + "Z";
+        ;
         DynamicJsonDocument measure1(256); // ameassure sample Json
         for (Measurement m : meas)
         {
@@ -312,21 +305,14 @@ void MeshNode::send_values(std::function<Measurements()> get_values_callback)
             measure1["meassure_type"] = String(m_type.c_str());
             measure1["value"] = m.value;
             measure1["time"]["timestampValue"] = timeStamp;
-            if (measure1["meassure_type"].as<String>() != "" && mesh.isConnected(bridgeId))
-            {
-                String castString = measure1.as<String>();
-                Serial.println("read message:");
-                Serial.println(measure1.as<String>());
-                mesh.sendSingle(bridgeId, measure1.as<String>());
-            }
-            else
+            String mapKey = String(m.sensor_id)+"_"+String(m_type.c_str());
+            if (measure1["meassure_type"].as<String>() != "")
             {
                 String castString = measure1.as<String>();
                 Serial.println("read message and set in queue:");
                 Serial.println(measure1.as<String>());
-                myqueue.push(measure1.as<String>());
+                myqueue[mapKey].push(measure1.as<String>());
             }
-        }
         Serial.println("done measure");
     }
 }
@@ -334,12 +320,7 @@ void MeshNode::send_values(std::function<Measurements()> get_values_callback)
 void MeshNode::add_measurement(std::function<Measurements()> callable, unsigned long interval, long iterations)
 {
     Serial.println("adding measurement task");
-    // measure.push_front(Task(TASK_SECOND * 5, TASK_FOREVER, [this, callable]()
-    //                        { send_values(callable); }));
-    // Task& m = *measure.begin();
-    // userScheduler.addTask(m);
-    // m.enable();
-    send_values(callable);
+    funcs.push_back(callable);
 }
 
 void MeshNode::get_battery_level(Measurement battery_level)
@@ -349,3 +330,46 @@ void MeshNode::get_battery_level(Measurement battery_level)
 }
 
 void firestoreMapBatteryUpdate(String nodeId, float value) {}
+
+bool computeTimeDifference(Time t1, Time t2, int acceptable_difference_minutes){
+    
+    Time difftime;
+    if(t2.seconds > t1.seconds)
+    {
+        --t1.minutes;
+        t1.seconds += 60;
+    }
+
+    difftime.seconds= t1.seconds - t2.seconds;
+    if(t2.minutes > t1.minutes)
+    {
+        --t1.hours;
+        t1.minutes += 60;
+    }
+    difftime.minutes= t1.minutes-t2.minutes;
+    difftime.hours= t1.hours-t2.hours;
+    if (difftime.hours ==0 && difftime.minutes<=acceptable_difference_minutes)
+        return true;
+    return false;
+}
+
+void MeshNode::call_measurements(){
+    for(list<std::function<Measurements()>>::iterator iter = funcs.begin(); iter != funcs.end(); ++iter)
+    {
+        node->send_values(*iter);
+    }
+    // int s = funcs.size();
+    // for(int i=0;i<s;i++){
+    //     node->send_values(funcs[i]);
+    // }
+}
+
+void MeshNode::emptyQueue(){
+    for(std::map<String,queue<String>>::iterator iter = myqueue.begin(); iter != myqueue.end(); ++iter){
+        while(!iter->second.empty() && mesh.isConnected(bridgeId)){
+            mesh.sendSingle(bridgeId, iter->second.front());
+            iter->second.pop();
+        }
+    }
+    myqueue.clear();
+}
