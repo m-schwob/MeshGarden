@@ -49,7 +49,11 @@ Application features:
 
 App screenshots:
 
-
+ <tr>
+    <td valign="top"><img src="docs/images/sensor screen.jpg"></td>
+    <td valign="top"><img src="docs/images/add sensor.jpg"></td>
+    <td valign="top"><img src="docs/images/add sensor screen.jpg"></td>
+  </tr>
 
 ## **step 1: ** setup firebase server
 
