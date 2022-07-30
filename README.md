@@ -49,20 +49,34 @@ Application features:
 
 App screenshots:
 
-
+ <table>
+  <tr>
+    <td>DHT22 Measurements</td>
+     <td>UVi and Soli Moisture Measurements</td>
+     <td>Time Series chart</td>
+  </tr>
+  <tr>
+    <td valign="top"><img src="docs/images/DHT22 Measurements.jpg"></td>
+    <td valign="top"><img src="docs/images/UVi and Soli Moisture Measurements.jpg"></td>
+    <td valign="top"><img src="docs/images/Time Series chart.jpg"></td>
+  </tr>
+ </table>
 
 ## **step 1: ** setup firebase server
 
 follow the instruction in the videos bellow by "That Project" in order to setup your own firestore server
 
 video 1:
-set a firebase server https://www.youtube.com/watch?v=KV0D8nrsBLg&t=0s
+set a firebase server https://www.youtube.com/watch?v=KV0D8nrsBLg&t=0s  
 *TIP* : when choosing the cloud firestore location use the https://www.gcping.com 
 site in order to find the server that provide the minimal latency 
 
 
 video 2:
-connect the firebase to the app https://www.youtube.com/watch?v=nsopdabOcug&t=3s 
+connect the firebase to the app https://www.youtube.com/watch?v=nsopdabOcug&t=3s   
+*Note* : The files provided in the MeshGaredApp directory are source code *only*, so in order to use them,
+create a new flutter project and follow the above video  
+
 
 ## **step 2:** create an account in the MeshGarden app with your own usermane and password
 
