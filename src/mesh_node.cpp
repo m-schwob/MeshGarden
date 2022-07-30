@@ -29,7 +29,7 @@ if got a "change" message - that mean the user changed the configurations of the
 void receivedCallback(uint32_t from, String &msg)
 {
     Serial.printf("startHere: Received from %u msg=%s\n", from, msg.c_str());
-
+    node->connected_to_bridge=true;
     DynamicJsonDocument message(msg.length() + 64);
     DeserializationError error = deserializeJson(message, msg);
     Serial.println("\nJSON DESERIALIZED");
@@ -85,7 +85,6 @@ void receivedCallback(uint32_t from, String &msg)
         node->configure_ready = true;
     }
     Serial.println("starts measures");
-    delay(1000);
     node->call_measurements();
     node->emptyQueue();
 }
@@ -99,7 +98,7 @@ void changedConnectionCallback()
 }
 void nodeTimeAdjustedCallback(int32_t offset)
 {
-    Serial.printf("Adjusted time %u. Offset = %d\n", node->mesh.getNodeTime(), offset);
+    // Serial.printf("Adjusted time %u. Offset = %d\n", node->mesh.getNodeTime(), offset);
 }
 
 MeshNode::MeshNode() : counter(0) {}
@@ -109,13 +108,17 @@ void MeshNode::update()
     if (millis() - lasttime >= 1000)
     {
         time_update();
-        // printLocalTime();
         lasttime = millis();
+    }
+    if(millis()-time_with_no_connections>=(sample_interval*1000) && !connected_to_bridge){
+        Serial.println("entering deep sleep for no connection to bridge");
+        store_timing(time, die_interval);
+        ESP.deepSleep((sample_interval)*1000000);
     }
     if ((die_time.hours == time.hours || die_time.hours - 12 == time.hours) && die_time.minutes == time.minutes && die_time.seconds == time.seconds)
     {
         // put here store function
-        Serial.println("die");
+        Serial.println("entering deep sleep for timeout");
         store_timing(time, die_interval);
         ESP.deepSleep((die_interval)*1000000);
     }
@@ -237,7 +240,7 @@ void MeshNode::set_global_config(JsonObject global_config)
     MESH_PREFIX = global_config["mesh"]["mesh_prefix"].as<String>();
     MESH_PASSWORD = global_config["mesh"]["mesh_password"].as<String>();
     MESH_PORT = global_config["mesh"]["mesh_port"].as<size_t>();
-    sample_interval = global_config["mesh"]["mesh_connection_time"].as<int>() / 2;
+    sample_interval = global_config["mesh"]["mesh_connection_time"].as<int>() + global_config["mesh"]["deep_sleep_time"].as<int>();
     Serial.println("config done, sample interval=" + String(sample_interval));
 }
 
@@ -262,12 +265,6 @@ void MeshNode::init_mesh()
     mesh.onNodeTimeAdjusted(&nodeTimeAdjustedCallback);
     mesh.onDroppedConnection([](uint32_t nodeId)
                              { Serial.printf("node dropped:%u, at time: %u", nodeId, node->mesh.getNodeTime()); });
-    // Task update_time(TASK_SECOND * 1, TASK_FOREVER, [this](){time_update();});
-    // Task emptyQueue(TASK_SECOND * 5, TASK_FOREVER, [this](){ listenQueue(); });
-    // userScheduler.addTask(update_time);
-    // update_time.enable();
-    // userScheduler.addTask(emptyQueue);
-    // emptyQueue.enable();
     Serial.print(mesh.getNodeTime());
     Serial.println("node id: " + String(mesh.getNodeId()));
     node = this;
@@ -293,8 +290,8 @@ void MeshNode::send_values(std::function<Measurements()> get_values_callback)
             time1 += (time.seconds < 10) ? "0" + String(time.seconds) : String(time.seconds);
         }
         String timeStamp = date + "T" + time1 + "Z";
-        ;
         DynamicJsonDocument measure1(256); // ameassure sample Json
+        Serial.println("Sensor took " +String(meas.size()) + " measures");
         for (Measurement m : meas)
         {
             measure1["nodeId"] = mesh.getNodeId();
@@ -313,7 +310,7 @@ void MeshNode::send_values(std::function<Measurements()> get_values_callback)
                 Serial.println(measure1.as<String>());
                 myqueue[mapKey].push(measure1.as<String>());
             }
-        Serial.println("done measure");
+        Serial.println("for key: " +String(mapKey) + " the queue contains: " + String(myqueue[mapKey].size()) );
     }
 }
 
@@ -358,10 +355,6 @@ void MeshNode::call_measurements(){
     {
         node->send_values(*iter);
     }
-    // int s = funcs.size();
-    // for(int i=0;i<s;i++){
-    //     node->send_values(funcs[i]);
-    // }
 }
 
 void MeshNode::emptyQueue(){
@@ -371,5 +364,8 @@ void MeshNode::emptyQueue(){
             iter->second.pop();
         }
     }
-    myqueue.clear();
+        for(std::map<String,queue<String>>::iterator iter = myqueue.begin(); iter != myqueue.end(); ++iter){
+            if(iter->second.empty())
+                myqueue.erase(iter->first);
+        }
 }

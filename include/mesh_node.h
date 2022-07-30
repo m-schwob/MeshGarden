@@ -49,7 +49,8 @@ private:
 public:
 	painlessMesh mesh;
 	int lasttime = 0;
-	bool dead = false;
+	int time_with_no_connections = 0;
+	bool connected_to_bridge = false;
 	bool initialized = false;
 	bool configure_ready = false;
 	String config_string;

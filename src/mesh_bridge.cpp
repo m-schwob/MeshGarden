@@ -36,7 +36,6 @@ void receivedCallback(uint32_t from, String &msg)
         String key = doc["sensorId"].as<String>()+"_"+doc["meassure_type"].as<String>();
         node->server_data[key].push(doc.as<String>());
         serializeJson(doc, Serial);
-        Serial.println("recieved measure from node " + String(from));
     }
 }
 // event driven function for the mesh
@@ -208,6 +207,7 @@ void MeshBridge::init_clock()
     struct tm timeinfo;
     printLocalTime();
     calculate_death(NODE_WAKE_TIME);
+    Serial.println("next death time: " + String(die_hours) +":"+String(die_minutes)+":"+String(die_seconds));
     got_time = true;
     // disconnect WiFi as it's no longer needed
 }
@@ -532,7 +532,9 @@ void MeshBridge::exit_mesh_connect_server()
 {
     String nodeId = String(mesh.getNodeId());
     mesh.stop();
+    printLocalTime();
     calculate_death(NODE_WAKE_TIME + NODE_DEEP_SLEEP_TIME);
+    Serial.println("next death time: " + String(die_hours) +":"+String(die_minutes)+":"+String(die_seconds));
     // // Connect to Wi-Fi
     Serial.print("Connecting to ");
     Serial.println(ssid);
