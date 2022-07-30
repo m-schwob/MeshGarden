@@ -9,8 +9,8 @@
 
 #define DHT22_AIR_HUMIDITY_AND_TEMPERATURE_SENSOR "DHT22 Air Humidity and Temperature Sensor"
 
-#define TEMPERATURE_KEY "Temperature"
-#define HUMIDITY_KEY "Humidity"
+#define TEMPERATURE_KEY "Air Temperature"
+#define HUMIDITY_KEY "Air Humidity"
 
 class DHTxxSensor : public Sensor
 {
