@@ -49,11 +49,18 @@ Application features:
 
 App screenshots:
 
- <tr>
-    <td valign="top"><img src="docs/images/sensor screen.jpg"></td>
-    <td valign="top"><img src="docs/images/add sensor.jpg"></td>
-    <td valign="top"><img src="docs/images/add sensor screen.jpg"></td>
+ <table>
+  <tr>
+    <td>DHT22 Measurements</td>
+     <td>UVi and Soli Moisture Measurements</td>
+     <td>Time Series chart</td>
   </tr>
+  <tr>
+    <td valign="top"><img src="docs/images/DHT22 Measurements.jpg"></td>
+    <td valign="top"><img src="docs/images/UVi and Soli Moisture Measurements.jpg"></td>
+    <td valign="top"><img src="docs/images/Time Series chart.jpg"></td>
+  </tr>
+ </table>
 
 ## **step 1: ** setup firebase server
 
