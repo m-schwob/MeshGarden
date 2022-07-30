@@ -54,7 +54,6 @@ public:
 	bool initialized = false;
 	bool configure_ready = false;
 	String config_string;
-	int sample_interval=5;//default value 5 seconds
 	MeshNode();
 	void update();
 	void sendMessage();
@@ -81,8 +80,8 @@ public:
 	int dailyErrorBehind = 0; // set the average number of milliseconds your microcontroller's time is behind on a daily basis
 	int correctedToday = 1;	  // do not change this variable, one means that the time has already been corrected today for the error in your boards crystal. This is true for the first day because you just set the time when you uploaded the sketch.
 	void time_update();
-	void store_timing(Time &time, int &sleep_time);
-	void load_timing(Time &time, int &sleep_time);
+	void store_timing(Time &time, int &sleep_time,int& lost_connection_interval_counter);
+	void load_timing(Time &time, int &sleep_time,int& lost_connection_interval_counter);
 	void printLocalTime();
 	uint32_t bridgeId = 0;
 	// measurment settings:
@@ -99,6 +98,10 @@ public:
 	void emptyQueue();
 	float node_battery_level = -1;
 	void calculate_death();
+
+	int wake_up_time;
+	int deep_sleep_time;
+	int lost_connection_interval_counter=0;
 };
 
 #endif /* _MESHNODE_H_ */

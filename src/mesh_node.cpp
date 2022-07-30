@@ -30,6 +30,7 @@ void receivedCallback(uint32_t from, String &msg)
 {
     Serial.printf("startHere: Received from %u msg=%s\n", from, msg.c_str());
     node->connected_to_bridge=true;
+    node->lost_connection_interval_counter=0;
     DynamicJsonDocument message(msg.length() + 64);
     DeserializationError error = deserializeJson(message, msg);
     Serial.println("\nJSON DESERIALIZED");
@@ -75,6 +76,7 @@ void receivedCallback(uint32_t from, String &msg)
     node->die_time.seconds = (r_sec + 1) % 60;
     node->die_time.minutes = ((r_min + ((r_sec + 1) / 60)) % 60);
     node->die_time.hours = ((r_hour + ((r_min + ((r_sec + 1) / 60)) / 60)));
+    node->die_interval = message["d"]["st"].as<int>();
     Serial.println(String(node->die_time.hours) + ":" + String(node->die_time.minutes) + ":" + String(node->die_time.seconds));
     }
     if (message.containsKey("change"))
@@ -111,18 +113,20 @@ void MeshNode::update()
     {
         time_update();
         lasttime = millis();
+        printLocalTime();
     }
-    if(millis() - time_with_no_connections>=(sample_interval*1000) && !connected_to_bridge){
+    if(millis() - time_with_no_connections>=(wake_up_time*1000) && !connected_to_bridge){
 
-        Serial.println("entering deep sleep for no connection to bridge + sample_interaval is:" + String(sample_interval*1000));
-        store_timing(time, die_interval);
-        ESP.deepSleep((sample_interval)*1000000);
+        Serial.println("entering deep sleep for no connection to bridge + was up for:" + String(millis() - time_with_no_connections)+ " lcic " + String(lost_connection_interval_counter));
+        lost_connection_interval_counter+=1;
+        store_timing(time, die_interval, lost_connection_interval_counter);
+        ESP.deepSleep((deep_sleep_time)*1000000);
     }
     if ((die_time.hours == time.hours || die_time.hours - 12 == time.hours) && die_time.minutes == time.minutes && die_time.seconds == time.seconds)
     {
         // put here store function
-        Serial.println("entering deep sleep for timeout");
-        store_timing(time, die_interval);
+        Serial.println("entering deep sleep for timeout for " + String(die_interval) + " lcic " + String(lost_connection_interval_counter));
+        store_timing(time, die_interval,lost_connection_interval_counter);
         ESP.deepSleep((die_interval)*1000000);
     }
     if (alive)
@@ -179,21 +183,23 @@ void MeshNode::time_update()
     //  would continue to correct for an entire hour that is 24 - startingHour.
 }
 
-void MeshNode::store_timing(Time &time, int &sleep_time)
+void MeshNode::store_timing(Time &time, int &sleep_time, int& lost_connection_interval_counter)
 {
     EEPROM.begin(EEPROM_SIZE);
     EEPROM.put(0, sleep_time);
     EEPROM.put(sizeof(sleep_time), time);
+    EEPROM.put(sizeof(int),lost_connection_interval_counter);
     EEPROM.commit();
     EEPROM.end();
     Serial.println("time stored");
 }
 
-void MeshNode::load_timing(Time &time, int &sleep_time)
+void MeshNode::load_timing(Time &time, int &sleep_time, int& lost_connection_interval_counter)
 {
     EEPROM.begin(EEPROM_SIZE);
     EEPROM.get(0, sleep_time);
     EEPROM.get(sizeof(sleep_time), time);
+    EEPROM.get(sizeof(int),lost_connection_interval_counter);
     EEPROM.end();
     Serial.println("time loaded");
 }
@@ -243,14 +249,14 @@ void MeshNode::set_global_config(JsonObject global_config)
     MESH_PREFIX = global_config["mesh"]["mesh_prefix"].as<String>();
     MESH_PASSWORD = global_config["mesh"]["mesh_password"].as<String>();
     MESH_PORT = global_config["mesh"]["mesh_port"].as<size_t>();
-    sample_interval = global_config["mesh"]["mesh_connection_time"].as<int>() + global_config["mesh"]["deep_sleep_time"].as<int>();
-    Serial.println("config done, sample interval=" + String(sample_interval));
+    wake_up_time =  global_config["mesh"]["mesh_connection_time"].as<int>();
+    deep_sleep_time = global_config["mesh"]["deep_sleep_time"].as<int>();
 }
 
 void MeshNode::init_clock()
 {
     Time t;
-    load_timing(t, die_interval);
+    load_timing(t, die_interval,lost_connection_interval_counter);
     time.seconds = (t.seconds + die_interval) % 60;
     time.minutes = ((t.minutes + ((t.seconds + die_interval) / 60)) % 60);
     time.hours = ((t.hours + ((t.minutes + ((t.seconds + die_interval) / 60)) / 60)) % 24);
@@ -273,6 +279,10 @@ void MeshNode::init_mesh()
     Serial.println("node id: " + String(mesh.getNodeId()));
     node = this;
     alive = true;
+    if(lost_connection_interval_counter >=3){
+        deep_sleep_time =deep_sleep_time+wake_up_time; 
+        wake_up_time=deep_sleep_time;
+    }
 }
 
 void MeshNode::send_values(std::function<Measurements()> get_values_callback)

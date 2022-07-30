@@ -69,7 +69,7 @@ void newConnectionCallback(uint32_t nodeId)
     death_time["d"]["m"] = node->die_minutes;
     death_time["d"]["h"] = node->die_hours;
     death_time["d"]["s"] = node->die_seconds;
-    death_time["d"]["st"] = node->NODE_DEEP_SLEEP_TIME; // send the sleep time
+    death_time["d"]["st"] = (node->NODE_DEEP_SLEEP_TIME-1); // send the sleep time
     node->mesh.sendSingle(nodeId,death_time.as<String>());
     Serial.println("next death time:" + death_time.as<String>());
 
