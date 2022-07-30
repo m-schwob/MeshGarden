@@ -94,8 +94,17 @@ class _NodesScreenState extends State<NodesScreen> {
                     .map((DocumentSnapshot node_document) {
                       Map<String, dynamic> node_data =
                           node_document.data()! as Map<String, dynamic>;
-                      bool is_active = node_data['active'];
-                      bool is_bridge = node_data['bridge'];
+                      bool is_active;
+                      bool is_bridge;
+                      if(node_data['active'] == null || node_data['bridge'] == null){
+                        node_data['nickname'] = "ERROR, Don't use!";
+                        is_active = false;
+                        is_bridge = false;
+                      }
+                      else{
+                        is_active = node_data['active'];
+                        is_bridge = node_data['bridge'];
+                      }
                       num battery_level = node_data['battery'] == null
                           ? 100
                           : node_data['battery'] as num;
@@ -190,8 +199,8 @@ class _NodesScreenState extends State<NodesScreen> {
                                       ),
                                     );
                                   },
-                                  title: Text(node_data['nickname'],
-                                      style: kBodyText2),
+                                  title: node_data['nickname'] != null? Text(node_data['nickname'], style: kBodyText2) :
+                                  Text("ERROR, Don't use!",style: kBodyText2),
                                 ),
                                 ListTile(
                                   dense: true,
