@@ -49,7 +49,7 @@ private:
 public:
 	painlessMesh mesh;
 	int lasttime = 0;
-	int time_with_no_connections = 0;
+	unsigned long time_with_no_connections = 0;
 	bool connected_to_bridge = false;
 	bool initialized = false;
 	bool configure_ready = false;
@@ -89,9 +89,6 @@ public:
 	void add_measurement(std::function<Measurements()> callable, unsigned long interval, long iterations);
 	void send_values(std::function<Measurements()> get_values_callback);
 
-	// int die_minute = 0;
-	// int die_hour = 25;
-	// int die_second = 0;
 	Time die_time;
 	int die_interval = 10000;
 	std::map<String,queue<String>> myqueue;
@@ -101,6 +98,7 @@ public:
 	void call_measurements();
 	void emptyQueue();
 	float node_battery_level = -1;
+	void calculate_death();
 };
 
 #endif /* _MESHNODE_H_ */

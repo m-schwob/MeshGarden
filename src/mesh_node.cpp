@@ -69,10 +69,13 @@ void receivedCallback(uint32_t from, String &msg)
 
     if (message.containsKey("d"))
     {
-        node->die_time.minutes = message["d"]["m"].as<int>();
-        node->die_time.hours = message["d"]["h"].as<int>();
-        node->die_time.seconds = message["d"]["s"].as<int>();
-        node->die_interval = message["d"]["st"].as<int>();
+    int r_sec = message["d"]["s"].as<int>();
+    int r_min = message["d"]["m"].as<int>();
+    int r_hour= message["d"]["h"].as<int>();
+    node->die_time.seconds = (r_sec + 1) % 60;
+    node->die_time.minutes = ((r_min + ((r_sec + 1) / 60)) % 60);
+    node->die_time.hours = ((r_hour + ((r_min + ((r_sec + 1) / 60)) / 60)));
+    Serial.println(String(node->die_time.hours) + ":" + String(node->die_time.minutes) + ":" + String(node->die_time.seconds));
     }
     if (message.containsKey("change"))
     {
@@ -109,8 +112,9 @@ void MeshNode::update()
         time_update();
         lasttime = millis();
     }
-    if(millis()-time_with_no_connections>=(sample_interval*1000) && !connected_to_bridge){
-        Serial.println("entering deep sleep for no connection to bridge");
+    if(millis() - time_with_no_connections>=(sample_interval*1000) && !connected_to_bridge){
+
+        Serial.println("entering deep sleep for no connection to bridge + sample_interaval is:" + String(sample_interval*1000));
         store_timing(time, die_interval);
         ESP.deepSleep((sample_interval)*1000000);
     }
@@ -370,3 +374,4 @@ void MeshNode::emptyQueue(){
                 myqueue.erase(iter->first);
         }
 }
+
