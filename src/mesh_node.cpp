@@ -377,7 +377,10 @@ void MeshNode::emptyQueue(){
             Serial.println("meas time:" + String(meas.time.hours) + ":" + String(meas.time.minutes)+ ":" + String(meas.time.seconds));
             if (time.Am == 1)
             {
-                time1 += (meas.time.hours < 10) ? "0" + String(meas.time.hours - 3) + ":" : "0" + String(meas.time.hours - 3) + ":";
+                if(((meas.time.hours +24 - 3)%12) > 10)
+                    time1 += String((meas.time.hours +24 - 3)%12)+ ":";
+                else
+                    time1 += "0" + String((meas.time.hours +24 - 3)%12)+ ":";
                 time1 += (meas.time.minutes < 10) ? "0" + String(meas.time.minutes) + ":" : String(meas.time.minutes) + ":";
                 time1 += (meas.time.seconds < 10) ? "0" + String(meas.time.seconds) : String(meas.time.seconds);
             }
