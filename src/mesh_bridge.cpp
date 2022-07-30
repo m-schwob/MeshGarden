@@ -123,7 +123,7 @@ void changedConnectionCallback()
 // event driven functions for the mesh
 void nodeTimeAdjustedCallback(int32_t offset)
 {
-    Serial.printf("Adjusted time %u. Offset = %d\n", node->mesh.getNodeTime(), offset);
+    //Serial.printf("Adjusted time %u. Offset = %d\n", node->mesh.getNodeTime(), offset);
 }
 
 // input: Json contains the configuration of the Node
@@ -176,13 +176,10 @@ void MeshBridge::init_mesh()
     mesh.onChangedConnections(&changedConnectionCallback);
     mesh.onNodeTimeAdjusted(&nodeTimeAdjustedCallback);
     mesh.onDroppedConnection([](uint32_t nodeId)
-                             {
+    {
    // Do something with the event
-   Serial.print("changed connectioמ with node" + String(nodeId)+ "at time: "+ node->mesh.getNodeTime()); });
-    mesh.onNodeDelayReceived([](uint32_t nodeId, int delay)
-                             {
-       // Do something with the event
-    Serial.println(String(delay)); });
+   Serial.print("changed connectioמ with node" + String(nodeId)); });
+
     // Bridge node, should (in most cases) be a root node. See [the wiki](https://gitlab.com/painlessMesh/painlessMesh/wikis/Possible-challenges-in-mesh-formation) for some background
     mesh.setRoot(true);
     // This node and all other nodes should ideally know the mesh contains a root, so call this on all nodes
@@ -266,10 +263,8 @@ void MeshBridge::firestoreDataUpdate(String jsonVal) // TEMP parameters edited h
             Serial.print(F("deserializeJson() failed: "));
             Serial.println(error.f_str());
         }
-
         // The dyamic array of write object fb_esp_firestore_document_write_t.
         std::vector<struct fb_esp_firestore_document_write_t> writes;
-
         // A write object that will be written to the document.
         struct fb_esp_firestore_document_write_t transform_write;
         // Set the write object write operation type.
@@ -277,20 +272,15 @@ void MeshBridge::firestoreDataUpdate(String jsonVal) // TEMP parameters edited h
         // fb_esp_firestore_document_write_type_delete,
         // fb_esp_firestore_document_write_type_transform
         transform_write.type = fb_esp_firestore_document_write_type_transform;
-
         // Set the document path of document to write (transform)
         transform_write.document_transform.transform_document_path = "Measurements/" + doc["nodeId"].as<String>();
-
         // Set a transformation of a field of the document.
         struct fb_esp_firestore_document_write_field_transforms_t field_transforms;
         // Set field path to write.
-
         String f_path = doc["sensorId"].as<String>() + "." + doc["meassure_type"].as<String>() + ".samples";
         // field_transforms.fieldPath = doc["sensorId"].as<String>()+ ".Soil_Moisture.samples";
         field_transforms.fieldPath = f_path;
-
         // field_transforms.fieldPath = "appended_data";
-
         // Set the transformation type.
         // fb_esp_firestore_transform_type_set_to_server_value,
         // fb_esp_firestore_transform_type_increment,
@@ -299,21 +289,16 @@ void MeshBridge::firestoreDataUpdate(String jsonVal) // TEMP parameters edited h
         // fb_esp_firestore_transform_type_append_missing_elements,
         // fb_esp_firestore_transform_type_remove_all_from_array
         field_transforms.transform_type = fb_esp_firestore_transform_type_append_missing_elements;
-
         // For the usage of FirebaseJson, see examples/FirebaseJson/BasicUsage/Create.ino
         FirebaseJson content;
         content.set("values/[0]/mapValue/fields/time/timestampValue/", doc["time"]["timestampValue"].as<String>());
         content.set("values/[0]/mapValue/fields/value/doubleValue/", doc["value"].as<double>());
-
         // Set the transformation content.
         field_transforms.transform_content = content.raw();
-
         // Add a field transformation object to a write object.
         transform_write.document_transform.field_transforms.push_back(field_transforms);
-
         // Add a write object to a write array.
         writes.push_back(transform_write);
-
         if (Firebase.Firestore.commitDocument(&fbdo, FIREBASE_PROJECT_ID, "", writes /* dynamic array of fb_esp_firestore_document_write_t */, "" /* transaction */))
             Serial.printf("commit succeeded\n");
         else
@@ -479,38 +464,6 @@ void MeshBridge::firestoreReadChanges()
         }
     }
 }
-
-/*
-input: NONE
-output: NONE
-the function will set the network details in the database
-*/
-void MeshBridge::firestoreNetworkDataCollectionUpdate()
-{
-    if (WiFi.status() == WL_CONNECTED && Firebase.ready())
-    {
-        String documentPathNetwork = "Network/mesh";
-        FirebaseJson content_m;
-        bool response2;
-        String prefix = MESH_PREFIX;
-        String password = MESH_PASSWORD;
-        int port = MESH_PORT;
-        content_m.set("fields/mesh_prefix/stringValue/", prefix.c_str());
-        content_m.set("fields/mesh_password/stringValue/", password.c_str());
-        content_m.set("fields/mesh_port/integerValue/", port);
-
-        if (Firebase.Firestore.createDocument(&fbdo, FIREBASE_PROJECT_ID, "", documentPathNetwork.c_str(), content_m.raw()))
-        {
-            Serial.printf("network data collection update succeeded");
-            return;
-        }
-        else
-        {
-            Serial.println(fbdo.errorReason());
-        }
-    }
-}
-
 void MeshBridge::set_bridge_in_firebase(String nodeId)
 {
     if (WiFi.status() == WL_CONNECTED && Firebase.ready())
@@ -607,7 +560,9 @@ void MeshBridge::exit_mesh_connect_server()
     firestoreMeshCollectionClear();
     firestoreMeshCollectionUpdate();
     //*************updating Measurements and battery collections****************//
-
+    Serial.println("before clear has:" + String(server_data.size()));
+    clearRedundentMeasures();
+    Serial.println("after clear has:" + String(server_data.size()));
     for(std::map<String,queue<String>>::iterator iter = server_data.begin(); iter != server_data.end(); ++iter){
         Serial.println("node "+ iter->first+" has " + iter->second.size() +" cached messages");
         while(!iter->second.empty()){
@@ -735,5 +690,48 @@ void MeshBridge::set_default_nickname(String nodeId)
     }
 }
 
+void MeshBridge::clearRedundentMeasures(){
+    for(std::map<String,queue<String>>::iterator iter = server_data.begin(); iter != server_data.end(); ++iter){
+        vector<String> node_sensorId = splitString( iter->first.c_str(),"_");
+        if(!firebaseCheckSensorExistance(node_sensorId[0],node_sensorId[1]))
+            server_data.erase(iter->first);
+    }
+}
 
+vector<String> MeshBridge::splitString(string str, string delimiter)
+{
+    vector<String> ret;
+    int start = 0;
+    int end = str.find(delimiter);
+    while (end != -1)
+    {
+        ret.push_back(String((str.substr(start, end - start).c_str())));
+        start = end + delimiter.size();
+        end = str.find(delimiter, start);
+    }
+    ret.push_back(String((str.substr(start, end - 2 - start)).c_str()));
+    return ret;
+}
+bool MeshBridge::firebaseCheckSensorExistance(String nodeId , String sensorId){
+
+        String documentPath = "Nodes/" + nodeId;
+        String mask = "sensors";
+        FirebaseJson content;
+        FirebaseJson json;
+        bool response;
+        FirebaseJsonData data;
+        if (Firebase.Firestore.getDocument(&fbdo, FIREBASE_PROJECT_ID, "", documentPath.c_str(), mask.c_str())){
+            std::string s = fbdo.payload().c_str(); 
+            size_t found = s.find(sensorId.c_str());
+            if( found != string::npos){
+                return true;
+            }
+            else 
+                return false;
+            }
+        else{
+            Serial.println(fbdo.errorReason());
+            return false;
+        }
+    }
     

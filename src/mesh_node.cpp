@@ -118,10 +118,11 @@ void receivedCallback(uint32_t from, String &msg)
         node->configure_ready = true;
     }
 
-    if(!node->myqueue.empty() &&(node->time , node->myqueue.back().time, 5)){
+        if(time , node->myqueue.back().time, 5){
         node->emptyQueue();
     }
     else{
+        while(!node->myqueue.empty()) node->myqueue.pop();
         node->call_measurements();
         node->emptyQueue();
     }
@@ -138,6 +139,11 @@ void nodeTimeAdjustedCallback(int32_t offset)
 {
     // Serial.printf("Adjusted time %u. Offset = %d\n", node->mesh.getNodeTime(), offset);
 }
+void clear( std::queue<int> &q )
+{
+   std::queue<int> empty;
+   std::swap( q, empty );
+}
 
 MeshNode::MeshNode() : counter(0) {}
 
@@ -149,6 +155,7 @@ void MeshNode::update()
         lasttime = millis();
         printLocalTime();
     }
+
     if(millis() - time_with_no_connections>=(wake_up_time*1000) && !connected_to_bridge){
 
         Serial.println("entering deep sleep for no connection to bridge + was up for:" + String(millis() - time_with_no_connections)+ " lcic " + String(lost_connection_interval_counter));
@@ -374,8 +381,6 @@ void MeshNode::emptyQueue(){
         while(!myqueue.empty() && mesh.isConnected(bridgeId)){
             Measurement meas = myqueue.front();
             String time1;
-            Serial.println("sending values we are at: " + time.Am);
-            Serial.println("meas time:" + String(meas.time.hours) + ":" + String(meas.time.minutes)+ ":" + String(meas.time.seconds));
             if (time.Am == 1)
             {
                 time1 += (meas.time.hours < 10) ? "0" + String(meas.time.hours - 3) + ":" : "0" + String(meas.time.hours - 3) + ":";
@@ -392,13 +397,14 @@ void MeshNode::emptyQueue(){
             String timeStamp = date + "T" + time1 + "Z";
             DynamicJsonDocument measure1(256); // ameassure sample Json
             measure1["nodeId"] = mesh.getNodeId();
+            Serial.println("from sensor:" + String(meas.sensor_id) + " of type: " + String(meas.type));
             measure1["sensorId"] = "sensor" + String(meas.sensor_id);
             std::string m_type = std::string(meas.type.c_str());
             std::replace(m_type.begin(), m_type.end(), ' ', '_');
             measure1["meassure_type"] = String(m_type.c_str());
             measure1["value"] = meas.value;
             measure1["time"]["timestampValue"] = timeStamp;
-
+            Serial.println("send meas");
             mesh.sendSingle(bridgeId, measure1.as<String>());
             myqueue.pop();
         }

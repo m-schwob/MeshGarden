@@ -102,12 +102,14 @@ private:
     void firebaseInit();
     void firestoreMeshCollectionClear();
     void firestoreMeshCollectionUpdate();
-    void firestoreNetworkDataCollectionUpdate();
     void firestoreReadChanges();
     bool firestoreReadNetwork(String &changes);
     void firestoreDataUpdate(String jsonVal);
     void firestoreMapBatteryUpdate(String nodeId, float value);
     void firestoreUpdateLastMesh(String jsonVal);
+    void clearRedundentMeasures();
+    bool firebaseCheckSensorExistance(String nodeId , String sensorId);
+	vector<String> splitString(string str, string delimiter);
 
     // bool get_node_changes(String node_id, String &changes);
     vector<String> split(String s, String delimiter);
