@@ -50,8 +50,9 @@ Application features:
 App screenshots:
 
 
+# Installation
 
-## **step 1: ** setup firebase server
+## **step 1:** setup firebase server
 
 follow the instruction in the videos bellow by "That Project" in order to setup your own firestore server
 
@@ -68,7 +69,7 @@ connect the firebase to the app https://www.youtube.com/watch?v=nsopdabOcug&t=3s
 
 ## **step 3:** bui 
 
-## **step 4:** change the configue.json to fit your own project.
+## **step 4:** prepare the configure.json file
 
 config json for example
 
@@ -94,15 +95,70 @@ firebase_project_id - the firebase progect id
 
 **ssid,password** - the local Wi-Fi ssid and password. Connects the bridge to the internet 
 
-# MeshGarden - add new sensor guide
+# MeshGarden - Hardware
+## Basic Required Hardware
 
-* build a new ESP8266 micro controller with the new hardware for your new sensor.
+The system must contain at exactly one bridge (ESP32) and at least one node (ESP8266). The bridge is powered by fix power supply since its power consumption is high and can hold for long on battery. The nodes are powered by batteries and to be portable .
 
-* follow the instructions in the main.cpp file to create your own sensor class by programing the following functions:
+## Bridge Components and Assembly:
+Components:
+- ESP32 micro-controller module
+- USB 4V 1A power adapter.
+- LED + matched resistor (for example 1.8 green LED with 330ohm resistor)
 
-* make sure to upload the code to the micro controller and connect it to the mesh network
+> The LED use as indicator and connected in parallel to ESP32 module build in LED. So it can be skipped if the build in LED visible.
 
-* enter the MeshGarden app find the designated node, and set the sensor as descripted in the pictures bellow
+Assembly:
+
+## Node Components and assembly:
+Nodes can be assembled in many ways using any sensor. Some component are is required for the system operation and some are optional. The require components are listed in the *Basic Node Module* section below and the optional are exampled in the *Sensors Options* section.
+
+### Basic Node Module
+The below component are the base hardware of the node and required for its operations. 
+
+Components:
+- ESP8266 micro-controller module
+- ADS1115 ADC expender module
+- 3.7V lithium battery (2000mAh and greater is recommended)
+- TP4056 lithium charging module
+- MCP1700-3302E LDO 3.3V voltage regulator
+- 100uF capacitor
+- 1uF capacitor
+- 36k resistor
+- 100k resistor
+- on/off switch
+- NC switch or jumper 
+- LED + matched resistor (for example 1.8 green LED with 330ohm resistor)
+
+> all capacitor must be at least 5V rated.
+
+> The LED use as indicator and connected in parallel to ESP8266 module build in LED. So it can be skipped if the build in LED visible.
+
+Assembly:
+
+> the on/off switch (or jumper) required for the micro-controller programming since it cannot be program while D0 and RST pin are connected.
+
+### Sensors Options
+After assembling the base node, basically any sensor can be added to the node. the library supports some sensors as build in. Using those sensor require minimal setup without writing any code. Any other sensor will require writing some code and configuration as will be explained later. 
+
+Optional Build in Sensors:
+- DHT22 humidly and temperature sensor
+- Capacitive soil moisture sensor
+- VEML6075 UV sensor
+
+Optional Build in Sensors Assembly (in additional to the Base module!!):
+
+## build a new ESP8266 micro controller with the new hardware for your new sensor.
+
+
+
+### Basic Aardware
+
+## follow the instructions in the main.cpp file to create your own sensor class by programing the following functions:
+
+## make sure to upload the code to the micro controller and connect it to the mesh network
+
+## enter the MeshGarden app find the designated node, and set the sensor as descripted in the pictures bellow
 
 ## BE AWARE: in the type value every new word has to start with a capital letter from A-Z and use underscore " _ " insted of space bar
 
@@ -117,4 +173,4 @@ firebase_project_id - the firebase progect id
     <td valign="top"><img src="docs/images/add sensor.jpg"></td>
     <td valign="top"><img src="docs/images/add sensor screen.jpg"></td>
   </tr>
- </table>
+ </table>ppoi
