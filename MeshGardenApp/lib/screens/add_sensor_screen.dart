@@ -5,7 +5,7 @@ import 'package:iot_firestore_flutter_app/const/custom_colors.dart';
 import 'package:iot_firestore_flutter_app/model/Sensor.dart';
 
 
-
+// TODO check if needed adding "_" between words in the type
 class AddSensorScreen extends StatefulWidget {
   const AddSensorScreen(
       {Key? key, required this.sensorDoc, required this.sensorId})
@@ -79,7 +79,7 @@ class _AddSensorScreenState extends State<AddSensorScreen> {
 
 
 
-            widget.sensorDoc.update({"sensors.${widget.sensorId}": sensor_json});
+            widget.sensorDoc.update({"sensors.sensor${widget.sensorId}": sensor_json});
             Navigator.pop(context);
           }
           catch(e) {print("");}

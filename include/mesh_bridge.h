@@ -61,7 +61,6 @@ private:
     ESP32Time rtc;
     Scheduler userScheduler; // to control your personal task
     painlessMesh mesh;
-    unsigned long myTime; // timer to check how long it takes to initialize mesh network
     Task taskSendMessage;
     // firebase global variables
     FirebaseData fbdo;
@@ -84,6 +83,7 @@ private:
     String FIREBASE_PROJECT_ID;
     String USER_EMAIL;
     String USER_PASSWORD;
+    String FIREBASE_PROJECT_LOCATION;
 
     int NODE_WAKE_TIME;       //(recomended initial value 20)
     int NODE_DEEP_SLEEP_TIME; //(reconemded initial value 40)
@@ -92,9 +92,7 @@ private:
     int lasttime = 0; // initialized, used to messure time interaval for the disconnect
     // std::map<String,vector<String>> dict;
     std::list<String> mesh_values;
-    // std::map<String, String> server_data;
-    queue<String> server_data;
-    // std::vector<String> server_data;
+    std::map<String,queue<String>> server_data;
     friend void receivedCallback(uint32_t from, String &msg);
     friend void newConnectionCallback(uint32_t nodeId);
     friend void changedConnectionCallback();
@@ -131,6 +129,7 @@ public:
 
     void init_mesh();
     void set_global_config(JsonObject global_config);
+    void firebaseNetworkSet(DynamicJsonDocument config);
     void exit_mesh_connect_server();
 
     bool configure_ready = false;
@@ -139,6 +138,7 @@ public:
     int die_seconds = 0;
     int die_minutes = 0;
     int die_hours = 0;
+
     void calculate_death(int ttd);
     ~MeshBridge();
 };

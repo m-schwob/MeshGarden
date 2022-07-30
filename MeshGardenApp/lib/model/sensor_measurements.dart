@@ -18,14 +18,24 @@ class SensorMeasurements {
 
   SensorMeasurements.fromJson(Map<String, Object?> json, String type)
       : this(
-    type: type,
+    type: SensorMeasurements.modify_type(type),
     samples:json['samples'] == null? []: Sample.fromJsonArray(json['samples']! as List<dynamic>),
     units: SensorMeasurements.modify_units(type),
     newSample:json['newSample'] == null? null: Sample.fromNewSample(json['newSample']! as Map<String, Object?>),
     imagePath: SensorMeasurements.chooseImage(type),
   );
 
+  static String modify_type(String type){
+    String modified_type;
+    if(type.contains("_")){
+      modified_type = type.substring(0,type.indexOf("_")) + " " + type.substring(type.indexOf("_")+1,type.length);
+      return modified_type;
+    }
+    return type;
+  }
+
   static String modify_units(String type){
+    type = SensorMeasurements.modify_type(type);
     if(type.trim() == "Air Humidity"){
       return "%";
     }
@@ -35,7 +45,7 @@ class SensorMeasurements {
     else if(type.trim() == "Soil Moisture"){
       return "%";
     }
-    else if(type.trim() == "UVA" || type.trim() == "UVB"){
+    else if(type.trim() == "UVi"){
       return "\'UVi";
     }
     return "";
@@ -48,6 +58,7 @@ class SensorMeasurements {
   }
 
   static String chooseImage(String type){
+    type = SensorMeasurements.modify_type(type);
     if(type.trim() == "Air Humidity"){
       return AirHumidityPath;
     }
@@ -57,7 +68,7 @@ class SensorMeasurements {
     else if(type.trim() == "Soil Moisture"){
       return SoilMoisturePath;
     }
-    else if(type.trim() == "UVA" || type.trim() == "UVB"){
+    else if(type.trim() == "UVi"){
       return UVPath;
     }
     return DefaultSensorPath;

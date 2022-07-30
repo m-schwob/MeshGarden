@@ -12,6 +12,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import 'package:iot_firestore_flutter_app/screens/measurements_screen.dart';
 import '../const/custom_colors.dart';
+import '../const/image_path.dart';
 
 class NodesScreen extends StatefulWidget {
   const NodesScreen({Key? key}) : super(key: key);
@@ -64,7 +65,28 @@ class _NodesScreenState extends State<NodesScreen> {
             return const Center(child: CircularProgressIndicator());
           }
 
-          return Padding(
+          if(snapshot.data!.docs.isEmpty){
+            return Container(
+              child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Center(
+                      child:
+                      Text("No Nodes for display", style: kBodyText2.copyWith(fontSize: 26)),
+                    ),
+                    Center(
+                      child: Image(
+                        // width: 60,
+                        image: AssetImage(
+                          BoredBabyPlant,
+                        ),
+                      ),
+                    ),
+                  ]),
+            );
+          }
+          else return Padding(
               padding: const EdgeInsets.only(
                   left: 16, right: 16, top: 20, bottom: 30),
               child: ListView(
@@ -72,8 +94,17 @@ class _NodesScreenState extends State<NodesScreen> {
                     .map((DocumentSnapshot node_document) {
                       Map<String, dynamic> node_data =
                           node_document.data()! as Map<String, dynamic>;
-                      bool is_active = node_data['active'];
-                      bool is_bridge = node_data['bridge'];
+                      bool is_active;
+                      bool is_bridge;
+                      if(node_data['active'] == null || node_data['bridge'] == null){
+                        node_data['nickname'] = "ERROR, Don't use!";
+                        is_active = false;
+                        is_bridge = false;
+                      }
+                      else{
+                        is_active = node_data['active'];
+                        is_bridge = node_data['bridge'];
+                      }
                       num battery_level = node_data['battery'] == null
                           ? 100
                           : node_data['battery'] as num;
@@ -168,8 +199,8 @@ class _NodesScreenState extends State<NodesScreen> {
                                       ),
                                     );
                                   },
-                                  title: Text(node_data['nickname'],
-                                      style: kBodyText2),
+                                  title: node_data['nickname'] != null? Text(node_data['nickname'], style: kBodyText2) :
+                                  Text("ERROR, Don't use!",style: kBodyText2),
                                 ),
                                 ListTile(
                                   dense: true,

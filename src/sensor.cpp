@@ -29,6 +29,7 @@ std::vector<String> Sensor::from_envelop(DynamicJsonDocument envelop, String key
 
 Measurements Sensor::measure_wrapper()
 {
+    Serial.printf("%s: measure wrapper called\n", HARDWARE_INFO.c_str());
     power_on();
     Measurements measurements = measure();
     for (Measurement &meas : measurements)

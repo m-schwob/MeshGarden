@@ -51,7 +51,7 @@ bool MeshGarden::load_configuration()
     // https://arduinojson.org/v6/assistant/
     // https://arduinojson.org/v6/how-to/determine-the-capacity-of-the-jsondocument/
     config.~BasicJsonDocument();
-    config = DynamicJsonDocument(file.size() * 2);
+    config = DynamicJsonDocument(file.size() * 3);
     // DynamicJsonDocument doc(file.size());
     DeserializationError error = deserializeJson(config, file);
     if (error)
@@ -79,7 +79,7 @@ void MeshGarden::parse_config()
 {
     Serial.println("start of parse config, the log config is:");
     // TODO calling it only in debug mode.
-    log_config(); // TODO check why this function fail (make the the co)
+    log_config();
     Serial.println("log config done");
 
     JsonObject sensors = config["sensors"];
@@ -88,7 +88,7 @@ void MeshGarden::parse_config()
         JsonObject sensor = s.value().as<JsonObject>();
         const String hardware_info = sensor["hardware_info"].as<String>();
         const int sensor_id = sensor["sensor_id"].as<int>();
-        const int sample_interval = sensor["sample_interval"];
+        // const int sample_interval = sensor["sample_interval"];
 
         DynamicJsonDocument doc(sensor);
 
@@ -114,11 +114,6 @@ void MeshGarden::parse_config()
             Serial.println("fail to initialize sensor " + hardware_info);
         }
     }
-
-    Serial.println("end of parse config, the log config is:");
-    // TODO calling it only in debug mode.
-    log_config(); // TODO check why this function fail (make the the co)
-    Serial.println("log config done");
 }
 
 // TODO move to utils
@@ -207,9 +202,10 @@ void MeshGarden::init_mesh_connection()
     // init mesh network
     network->set_global_config(config["network_config"]);
     network->init_clock();
-    network->init_mesh();
+    #ifdef ESP32
+        network->firebaseNetworkSet(config);
+    #endif
 
-    // add devices functions to tasks. pseudo code:
 #ifdef ESP8266
     for (Device *device : device_list)
     {
@@ -219,7 +215,19 @@ void MeshGarden::init_mesh_connection()
         }
     }
 #endif
-    Serial.println("init mesh connection done");
+
+    Serial.print("init mesh..");
+    network->printLocalTime();
+
+    network->init_mesh();
+
+    Serial.println("init mesh connection done. taking measurements..");
+    network->printLocalTime();
+
+    network->call_measurements();
+
+    Serial.println("done measurements mesh connection done..");
+    network->printLocalTime();
 }
 
 MeshGarden::MeshGarden() : config(0)
@@ -258,7 +266,9 @@ void MeshGarden::begin()
     {
         Serial.println("started the file system");
     }
-
+#if defined(ESP8266) // TODO solve differences with power monitor
+    ads.begin();
+#endif
     load_configuration();
     parse_config();
     Serial.println("serialization done, now init mesh");
