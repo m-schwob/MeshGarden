@@ -13,9 +13,38 @@ void MeshNode::printLocalTime()
     Serial.print(":");
     Serial.print(time.seconds);
     Serial.print(" ");
-    Serial.println(AmPm);
+    if(time.Am)
+        Serial.print("AM\n");
+    else
+        Serial.print("PM\n");
 }
 
+/*
+input: 2 time structs , int value of the number of minutes between them
+output: true - if between the two time frames there were less then those minutes
+false- otherwise
+*/
+bool computeTimeDifference(Time t1, Time t2, int acceptable_difference_minutes){
+    
+    Time difftime;
+    if(t2.seconds > t1.seconds)
+    {
+        --t1.minutes;
+        t1.seconds += 60;
+    }
+
+    difftime.seconds= t1.seconds - t2.seconds;
+    if(t2.minutes > t1.minutes)
+    {
+        --t1.hours;
+        t1.minutes += 60;
+    }
+    difftime.minutes= t1.minutes-t2.minutes;
+    difftime.hours= t1.hours-t2.hours;
+    if (difftime.hours ==0 && difftime.minutes<=acceptable_difference_minutes)
+        return true;
+    return false;
+}
 /*
 must function for the painlessmesh network.
 input:  uint32_t from - the node id of the node from whom we got the message (always will be the bridge id)
@@ -30,6 +59,7 @@ void receivedCallback(uint32_t from, String &msg)
 {
     Serial.printf("startHere: Received from %u msg=%s\n", from, msg.c_str());
     node->connected_to_bridge=true;
+    node->lost_connection_interval_counter=0;
     DynamicJsonDocument message(msg.length() + 64);
     DeserializationError error = deserializeJson(message, msg);
     Serial.println("\nJSON DESERIALIZED");
@@ -52,9 +82,8 @@ void receivedCallback(uint32_t from, String &msg)
         Serial.println(message["clock"].as<String>());
         Serial.println("clock message end\n");
 
-        node->setTimeVal((values[2]).c_str());
+        node->setTimeVal((values[2]).c_str(), values[3]);
         node->date = values[0];
-        node->AmPm = values[3];
         node->set_time = true;
 
         if (node->node_battery_level != -1)
@@ -69,10 +98,14 @@ void receivedCallback(uint32_t from, String &msg)
 
     if (message.containsKey("d"))
     {
-        node->die_time.minutes = message["d"]["m"].as<int>();
-        node->die_time.hours = message["d"]["h"].as<int>();
-        node->die_time.seconds = message["d"]["s"].as<int>();
-        node->die_interval = message["d"]["st"].as<int>();
+    int r_sec = message["d"]["s"].as<int>();
+    int r_min = message["d"]["m"].as<int>();
+    int r_hour= message["d"]["h"].as<int>();
+    node->die_time.seconds = (r_sec + 1) % 60;
+    node->die_time.minutes = ((r_min + ((r_sec + 1) / 60)) % 60);
+    node->die_time.hours = ((r_hour + ((r_min + ((r_sec + 1) / 60)) / 60)));
+    node->die_interval = message["d"]["st"].as<int>();
+    Serial.println(String(node->die_time.hours) + ":" + String(node->die_time.minutes) + ":" + String(node->die_time.seconds));
     }
     if (message.containsKey("change"))
     {
@@ -84,8 +117,14 @@ void receivedCallback(uint32_t from, String &msg)
         Serial.println("end read confugires:\n");
         node->configure_ready = true;
     }
-    Serial.println("sends measures");
-    node->emptyQueue();
+
+    if(!node->myqueue.empty() &&(node->time , node->myqueue.back().time, 5)){
+        node->emptyQueue();
+    }
+    else{
+        node->call_measurements();
+        node->emptyQueue();
+    }
 }
 void newConnectionCallback(uint32_t nodeId)
 {
@@ -108,17 +147,23 @@ void MeshNode::update()
     {
         time_update();
         lasttime = millis();
+        printLocalTime();
     }
-    if(millis()-time_with_no_connections>=(sample_interval*1000) && !connected_to_bridge){
-        Serial.println("entering deep sleep for no connection to bridge");
-        store_timing(time, die_interval);
-        ESP.deepSleep((sample_interval)*1000000);
+    if(millis() - time_with_no_connections>=(wake_up_time*1000) && !connected_to_bridge){
+
+        Serial.println("entering deep sleep for no connection to bridge + was up for:" + String(millis() - time_with_no_connections)+ " lcic " + String(lost_connection_interval_counter));
+        lost_connection_interval_counter+=1;
+        Serial.println("Storing time:" + String(time.hours)+":"+String(time.minutes)+":"+String(time.seconds));
+
+        store_timing(time, die_interval, lost_connection_interval_counter);
+        ESP.deepSleep((deep_sleep_time)*1000000);
     }
     if ((die_time.hours == time.hours || die_time.hours - 12 == time.hours) && die_time.minutes == time.minutes && die_time.seconds == time.seconds)
     {
         // put here store function
-        Serial.println("entering deep sleep for timeout");
-        store_timing(time, die_interval);
+        Serial.println("entering deep sleep for timeout for " + String(die_interval) + " lcic " + String(lost_connection_interval_counter));
+        Serial.println("Storing time:" + String(time.hours)+":"+String(time.minutes)+":"+String(time.seconds));
+        store_timing(time, die_interval,lost_connection_interval_counter);
         ESP.deepSleep((die_interval)*1000000);
     }
     if (alive)
@@ -175,21 +220,25 @@ void MeshNode::time_update()
     //  would continue to correct for an entire hour that is 24 - startingHour.
 }
 
-void MeshNode::store_timing(Time &time, int &sleep_time)
+void MeshNode::store_timing(Time &time, int &sleep_time, int& lost_connection_interval_counter)
 {
     EEPROM.begin(EEPROM_SIZE);
     EEPROM.put(0, sleep_time);
     EEPROM.put(sizeof(sleep_time), time);
+    EEPROM.put(sizeof(time),lost_connection_interval_counter);
+    //int size_of_queue = (sizeof(Measurement)*myqueue.size())*2;
+    //EEPROM.put(size_of_queue,myqueue);
     EEPROM.commit();
     EEPROM.end();
     Serial.println("time stored");
 }
 
-void MeshNode::load_timing(Time &time, int &sleep_time)
+void MeshNode::load_timing(Time &time, int &sleep_time, int& lost_connection_interval_counter)
 {
     EEPROM.begin(EEPROM_SIZE);
     EEPROM.get(0, sleep_time);
     EEPROM.get(sizeof(sleep_time), time);
+    EEPROM.get(sizeof(time),lost_connection_interval_counter);
     EEPROM.end();
     Serial.println("time loaded");
 }
@@ -209,7 +258,7 @@ vector<String> MeshNode::splitString(string str, string delimiter)
     return ret;
 }
 
-void MeshNode::setTimeVal(string str, string delimiter)
+void MeshNode::setTimeVal(string str, String AmPm,string delimiter)
 {
     Serial.println("set Time:");
     vector<int> ret;
@@ -230,6 +279,10 @@ void MeshNode::setTimeVal(string str, string delimiter)
     time.minutes = ret[1];
     time.seconds = ret[2];
     Serial.printf("hours: %d , minutes: %d , seconds %d\n", time.hours, time.minutes, time.seconds);
+    if(AmPm=="AM")
+        time.Am=1;
+    else
+        time.Am=0;
     printLocalTime();
 }
 
@@ -239,14 +292,14 @@ void MeshNode::set_global_config(JsonObject global_config)
     MESH_PREFIX = global_config["mesh"]["mesh_prefix"].as<String>();
     MESH_PASSWORD = global_config["mesh"]["mesh_password"].as<String>();
     MESH_PORT = global_config["mesh"]["mesh_port"].as<size_t>();
-    sample_interval = global_config["mesh"]["mesh_connection_time"].as<int>() + global_config["mesh"]["deep_sleep_time"].as<int>();
-    Serial.println("config done, sample interval=" + String(sample_interval));
+    wake_up_time =  global_config["mesh"]["mesh_connection_time"].as<int>();
+    deep_sleep_time = global_config["mesh"]["deep_sleep_time"].as<int>();
 }
 
 void MeshNode::init_clock()
 {
     Time t;
-    load_timing(t, die_interval);
+    load_timing(t, die_interval,lost_connection_interval_counter);
     time.seconds = (t.seconds + die_interval) % 60;
     time.minutes = ((t.minutes + ((t.seconds + die_interval) / 60)) % 60);
     time.hours = ((t.hours + ((t.minutes + ((t.seconds + die_interval) / 60)) / 60)) % 24);
@@ -268,50 +321,29 @@ void MeshNode::init_mesh()
     Serial.println("node id: " + String(mesh.getNodeId()));
     node = this;
     alive = true;
+    if(lost_connection_interval_counter >=3){
+        deep_sleep_time =deep_sleep_time+wake_up_time; 
+        wake_up_time=deep_sleep_time;
+    }
 }
 
 void MeshNode::send_values(std::function<Measurements()> get_values_callback)
 {
         Measurements meas;
         meas = get_values_callback();
-        String time1;
-        // printLocalTime();
-        if (AmPm == "AM")
-        {
-            time1 += (time.hours < 10) ? "0" + String(time.hours - 3) + ":" : "0" + String(time.hours - 3) + ":";
-            time1 += (time.minutes < 10) ? "0" + String(time.minutes) + ":" : String(time.minutes) + ":";
-            time1 += (time.seconds < 10) ? "0" + String(time.seconds) : String(time.seconds);
-        }
-        else
-        {
-            time1 += String(time.hours + 12 - 3) + ":";
-            time1 += (time.minutes < 10) ? "0" + String(time.minutes) + ":" : String(time.minutes) + ":";
-            time1 += (time.seconds < 10) ? "0" + String(time.seconds) : String(time.seconds);
-        }
-        String timeStamp = date + "T" + time1 + "Z";
-        DynamicJsonDocument measure1(256); // ameassure sample Json
-        Serial.println("Sensor took " +String(meas.size()) + " measures");
-        for (Measurement m : meas)
-        {
 
-            measure1["nodeId"] = mesh.getNodeId();
-            measure1["sensorId"] = "sensor" + String(m.sensor_id);
-            measure1["meassure_type"] = m.type;
-            std::string m_type = std::string(m.type.c_str());
-            std::replace(m_type.begin(), m_type.end(), ' ', '_');
-            measure1["meassure_type"] = String(m_type.c_str());
-            measure1["value"] = m.value;
-            measure1["time"]["timestampValue"] = timeStamp;
-            String mapKey = String(m.sensor_id)+"_"+String(m_type.c_str());
-            if (measure1["meassure_type"].as<String>() != "")
-            {
-                String castString = measure1.as<String>();
-                Serial.println("read message and set in queue:");
-                Serial.println(measure1.as<String>());
-                myqueue[mapKey].push(measure1.as<String>());
-            }
-        Serial.println("for key: " +String(mapKey) + " the queue contains: " + String(myqueue[mapKey].size()) );
+    for (Measurement m : meas)
+    {            
+        if (m.type != "")
+        {
+            String mapKey = String(m.sensor_id)+"_"+String(m.type.c_str());
+            m.time= time;
+            Serial.println("read message and set in queue:");
+            Serial.println(String(m.sensor_id) + " " + String(m.type));
+            myqueue.push(m);
+        }
     }
+    Serial.println("queue size is:" + String(myqueue.size()));
 }
 
 void MeshNode::add_measurement(std::function<Measurements()> callable, unsigned long interval, long iterations)
@@ -328,27 +360,6 @@ void MeshNode::get_battery_level(Measurement battery_level)
 
 void firestoreMapBatteryUpdate(String nodeId, float value) {}
 
-bool computeTimeDifference(Time t1, Time t2, int acceptable_difference_minutes){
-    
-    Time difftime;
-    if(t2.seconds > t1.seconds)
-    {
-        --t1.minutes;
-        t1.seconds += 60;
-    }
-
-    difftime.seconds= t1.seconds - t2.seconds;
-    if(t2.minutes > t1.minutes)
-    {
-        --t1.hours;
-        t1.minutes += 60;
-    }
-    difftime.minutes= t1.minutes-t2.minutes;
-    difftime.hours= t1.hours-t2.hours;
-    if (difftime.hours ==0 && difftime.minutes<=acceptable_difference_minutes)
-        return true;
-    return false;
-}
 
 void MeshNode::call_measurements(){
     for(list<std::function<Measurements()>>::iterator iter = funcs.begin(); iter != funcs.end(); ++iter)
@@ -358,14 +369,37 @@ void MeshNode::call_measurements(){
 }
 
 void MeshNode::emptyQueue(){
-    for(std::map<String,queue<String>>::iterator iter = myqueue.begin(); iter != myqueue.end(); ++iter){
-        while(!iter->second.empty() && mesh.isConnected(bridgeId)){
-            mesh.sendSingle(bridgeId, iter->second.front());
-            iter->second.pop();
-        }
-    }
-        for(std::map<String,queue<String>>::iterator iter = myqueue.begin(); iter != myqueue.end(); ++iter){
-            if(iter->second.empty())
-                myqueue.erase(iter->first);
+    Serial.println("number of measurements:" + String(myqueue.size()));
+        while(!myqueue.empty() && mesh.isConnected(bridgeId)){
+            Measurement meas = myqueue.front();
+            String time1;
+            Serial.println("sending values we are at: " + time.Am);
+            Serial.println("meas time:" + String(meas.time.hours) + ":" + String(meas.time.minutes)+ ":" + String(meas.time.seconds));
+            if (time.Am == 1)
+            {
+                time1 += (meas.time.hours < 10) ? "0" + String(meas.time.hours - 3) + ":" : "0" + String(meas.time.hours - 3) + ":";
+                time1 += (meas.time.minutes < 10) ? "0" + String(meas.time.minutes) + ":" : String(meas.time.minutes) + ":";
+                time1 += (meas.time.seconds < 10) ? "0" + String(meas.time.seconds) : String(meas.time.seconds);
+            }
+            else
+            {
+                time1 += String(meas.time.hours + 12 - 3) + ":";
+                time1 += (meas.time.minutes < 10) ? "0" + String(meas.time.minutes) + ":" : String(meas.time.minutes) + ":";
+                time1 += (meas.time.seconds < 10) ? "0" + String(meas.time.seconds) : String(meas.time.seconds);
+            }
+
+            String timeStamp = date + "T" + time1 + "Z";
+            DynamicJsonDocument measure1(256); // ameassure sample Json
+            measure1["nodeId"] = mesh.getNodeId();
+            measure1["sensorId"] = "sensor" + String(meas.sensor_id);
+            std::string m_type = std::string(meas.type.c_str());
+            std::replace(m_type.begin(), m_type.end(), ' ', '_');
+            measure1["meassure_type"] = String(m_type.c_str());
+            measure1["value"] = meas.value;
+            measure1["time"]["timestampValue"] = timeStamp;
+
+            mesh.sendSingle(bridgeId, measure1.as<String>());
+            myqueue.pop();
         }
 }
+

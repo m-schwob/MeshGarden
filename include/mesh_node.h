@@ -49,19 +49,18 @@ private:
 public:
 	painlessMesh mesh;
 	int lasttime = 0;
-	int time_with_no_connections = 0;
+	unsigned long time_with_no_connections = 0;
 	bool connected_to_bridge = false;
 	bool initialized = false;
 	bool configure_ready = false;
 	String config_string;
-	int sample_interval=5;//default value 5 seconds
 	MeshNode();
 	void update();
 	void sendMessage();
 	void remove_task();
 	vector<String> splitString(string str, string delimiter = " ");
 	list<std::function<Measurements()>> funcs;
-	void setTimeVal(string str, string delimiter = ":");
+	void setTimeVal(string str,String AmPm, string delimiter = ":");
 	void set_global_config(JsonObject global_config);
 	void init_mesh();
 	void init_clock();
@@ -74,33 +73,34 @@ public:
 	Time time;
 	int days = 0;
 	String date;
-	String AmPm = "AM";
 
 	// Accuracy settings
 	int dailyErrorFast = 0;	  // set the average number of milliseconds your microcontroller's time is fast on a daily basis
 	int dailyErrorBehind = 0; // set the average number of milliseconds your microcontroller's time is behind on a daily basis
 	int correctedToday = 1;	  // do not change this variable, one means that the time has already been corrected today for the error in your boards crystal. This is true for the first day because you just set the time when you uploaded the sketch.
 	void time_update();
-	void store_timing(Time &time, int &sleep_time);
-	void load_timing(Time &time, int &sleep_time);
+	void store_timing(Time &time, int &sleep_time,int& lost_connection_interval_counter);
+	void load_timing(Time &time, int &sleep_time,int& lost_connection_interval_counter);
 	void printLocalTime();
 	uint32_t bridgeId = 0;
 	// measurment settings:
 	void add_measurement(std::function<Measurements()> callable, unsigned long interval, long iterations);
 	void send_values(std::function<Measurements()> get_values_callback);
 
-	// int die_minute = 0;
-	// int die_hour = 25;
-	// int die_second = 0;
 	Time die_time;
 	int die_interval = 10000;
-	std::map<String,queue<String>> myqueue;
+	queue<Measurement> myqueue;
 	Time calculate_time();
 
 	void get_battery_level(Measurement battery_level);
 	void call_measurements();
 	void emptyQueue();
 	float node_battery_level = -1;
+	void calculate_death();
+
+	int wake_up_time;
+	int deep_sleep_time;
+	int lost_connection_interval_counter=0;
 };
 
 #endif /* _MESHNODE_H_ */

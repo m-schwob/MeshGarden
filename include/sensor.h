@@ -5,6 +5,7 @@
 #include <vector>
 #include <functional>
 #include "Device.h"
+#include "constants_utils.h"
 
 #define DEVICE_TYPE_SENSOR F("Sensor")
 #define MEASUREMENT_TYPE_KEY F("measuremen_type")
@@ -15,6 +16,7 @@ struct Measurement
     unsigned int sensor_id;
     String type;
     float value;
+    Time time;
 };
 
 typedef std::vector<Measurement> Measurements;

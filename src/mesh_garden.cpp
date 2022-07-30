@@ -202,9 +202,10 @@ void MeshGarden::init_mesh_connection()
     // init mesh network
     network->set_global_config(config["network_config"]);
     network->init_clock();
-    #ifdef ESP32
-        network->firebaseNetworkSet(config);
-    #endif
+   
+#ifdef ESP32
+    network->firebaseNetworkSet(config);
+#endif 
 
 #ifdef ESP8266
     for (Device *device : device_list)
@@ -215,19 +216,13 @@ void MeshGarden::init_mesh_connection()
         }
     }
 #endif
-
-    Serial.print("init mesh..");
-    network->printLocalTime();
-
     network->init_mesh();
 
-    Serial.println("init mesh connection done. taking measurements..");
-    network->printLocalTime();
-
+    Serial.println("init mesh connection done");
+#ifdef ESP8266
     network->call_measurements();
+#endif
 
-    Serial.println("done measurements mesh connection done..");
-    network->printLocalTime();
 }
 
 MeshGarden::MeshGarden() : config(0)
@@ -313,3 +308,4 @@ void MeshGarden::update()
     }
     network->update();
 }
+

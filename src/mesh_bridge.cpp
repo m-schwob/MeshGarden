@@ -33,9 +33,10 @@ void receivedCallback(uint32_t from, String &msg)
     }
     else
     {
-        String key = doc["sensorId"].as<String>()+"_"+doc["meassure_type"].as<String>();
+        String key = doc["nodeId"].as<String>() + "_" + doc["sensorId"].as<String>()+"_"+doc["meassure_type"].as<String>();
         node->server_data[key].push(doc.as<String>());
-        serializeJson(doc, Serial);
+        Serial.println("server data has: " + String(node->server_data.size()) + " keys");
+        Serial.println("key: " + key + " has " + String(node->server_data[key].size()) + " values");
     }
 }
 // event driven function for the mesh
@@ -69,7 +70,7 @@ void newConnectionCallback(uint32_t nodeId)
     death_time["d"]["m"] = node->die_minutes;
     death_time["d"]["h"] = node->die_hours;
     death_time["d"]["s"] = node->die_seconds;
-    death_time["d"]["st"] = node->NODE_DEEP_SLEEP_TIME; // send the sleep time
+    death_time["d"]["st"] = (node->NODE_DEEP_SLEEP_TIME-1); // send the sleep time
     node->mesh.sendSingle(nodeId,death_time.as<String>());
     Serial.println("next death time:" + death_time.as<String>());
 
@@ -90,6 +91,34 @@ void newConnectionCallback(uint32_t nodeId)
 void changedConnectionCallback()
 {
     Serial.printf("Changed connections\n");
+        char s[100];
+    struct tm timeinfo;
+   if (!getLocalTime(&timeinfo))
+    {
+        Serial.println("Failed to obtain time try again");
+        return;
+    }
+    int rc = strftime(s, sizeof(s), "20%y--%d at %r", &timeinfo);
+    String firebaseReadyDate = String(s);
+    int monthId = timeinfo.tm_mon + 1;
+    if (monthId < 10)
+        firebaseReadyDate = firebaseReadyDate.substring(0, 5) + "0" + String(monthId) + firebaseReadyDate.substring(5);
+    else
+        firebaseReadyDate = firebaseReadyDate.substring(0, 5) + String(monthId) + firebaseReadyDate.substring(5);
+    Serial.println("current time:" + firebaseReadyDate);
+    DynamicJsonDocument timer(firebaseReadyDate.length() + 32);
+    timer["clock"] = firebaseReadyDate;
+    Serial.println("created clock json");
+    serializeJson(timer, Serial);
+    node->mesh.sendBroadcast(timer.as<String>());
+
+    DynamicJsonDocument death_time(NEXT_DEATH_JSON);
+    death_time["d"]["m"] = node->die_minutes;
+    death_time["d"]["h"] = node->die_hours;
+    death_time["d"]["s"] = node->die_seconds;
+    death_time["d"]["st"] = (node->NODE_DEEP_SLEEP_TIME-1); // send the sleep time
+    node->mesh.sendBroadcast(death_time.as<String>());
+    Serial.println("next death time:" + death_time.as<String>());
 }
 // event driven functions for the mesh
 void nodeTimeAdjustedCallback(int32_t offset)
@@ -406,7 +435,6 @@ when the node will reconnect to the bridge it will recieve the changes and resta
 */
 void MeshBridge::firestoreReadChanges()
 {
-    Serial.println("read changes");
     if (WiFi.status() == WL_CONNECTED && Firebase.ready())
     {
         for (list<String>::iterator iter = mesh_values.begin(); iter != mesh_values.end(); ++iter)
@@ -416,7 +444,6 @@ void MeshBridge::firestoreReadChanges()
             FirebaseJson json;
             bool response;
             FirebaseJsonData data;
-            Serial.printf("check change for %s\n", documentPath.c_str());
             // if we get a document here hence the node_id has gone through changes.
             if (Firebase.Firestore.getDocument(&fbdo, FIREBASE_PROJECT_ID, "", documentPath.c_str(), content.raw()))
             {
@@ -429,12 +456,11 @@ void MeshBridge::firestoreReadChanges()
                     Serial.println(error.f_str());
                 }
                 String changeLog1 = doc["fields"]["config"]["stringValue"].as<String>();
-                Serial.println("read changes for node"+ String(*iter) + " was successful and the change is:\n"+changeLog1);
                 String changeid;
                 String network_data;
                 // if( get_node_changes((*iter), changeid) && firestoreReadNetwork(network_data))
                 change_log[(*iter)] = changeLog1;
-
+                Serial.println("read change for node:" + String(*iter));
                 // A CODE TO DELETE A CHANGE THAT HAS BEEN READ:: for now its in comment cause the insertion is manual
                 if (Firebase.Firestore.deleteDocument(&fbdo, FIREBASE_PROJECT_ID, "", documentPath.c_str(), content.raw()))
                 {
@@ -445,6 +471,10 @@ void MeshBridge::firestoreReadChanges()
                 {
                     Serial.println(fbdo.errorReason());
                 }
+            }
+            else
+            {
+                    Serial.println(fbdo.errorReason());
             }
         }
     }
@@ -492,6 +522,7 @@ void MeshBridge::set_bridge_in_firebase(String nodeId)
         content.set("fields/nickname/stringValue/", nodeId.c_str());
         content.set("fields/bridge/booleanValue/", true);
         content.set("fields/active/booleanValue/", true);
+        content.set("fields/battery/doubleValue/", 100);
         if (Firebase.Firestore.createDocument(&fbdo, FIREBASE_PROJECT_ID, "", documentPath.c_str(), content.raw()))
         {
             Serial.printf("initializing bridge succeed\n");
@@ -515,10 +546,11 @@ void MeshBridge::set_in_firebase(String nodeId)
         content.set("fields/nickname/stringValue/", nodeId.c_str());
         content.set("fields/bridge/booleanValue/", false);
         content.set("fields/active/booleanValue/", true);
-        content.set("fields/battery/doubleValue/", 0.1);
+        content.set("fields/battery/doubleValue/", 100.0);
         if (Firebase.Firestore.createDocument(&fbdo, FIREBASE_PROJECT_ID, "", documentPath.c_str(), content.raw()))
         {
             Serial.printf("initialize node:%s\n", nodeId.c_str());
+            delay(2000);
             return;
         }
         else
@@ -553,7 +585,6 @@ void MeshBridge::exit_mesh_connect_server()
     if (!initialized)
     {
         set_bridge_in_firebase(nodeId);
-        firestoreNetworkDataCollectionUpdate();
     }
     // go through the nodes in the system and will set uninitialized nodes in the NodesDocument:
     Serial.println("initialize:");
@@ -600,6 +631,7 @@ void MeshBridge::exit_mesh_connect_server()
     //*************updating Measurements and collections****************//
     // Serial.println("send to server list:");
     Serial.println("delay after changing battery");
+    delay(100);
     firestoreReadChanges();
     mesh_values.clear();
     Serial.println("WiFi disconnected. initialize mesh");
@@ -680,6 +712,28 @@ void MeshBridge::firebaseNetworkSet(DynamicJsonDocument config){
     WiFi.disconnect(true);
     WiFi.mode(WIFI_OFF);
     }
+
+
+void MeshBridge::set_default_nickname(String nodeId)
+{
+    if (WiFi.status() == WL_CONNECTED && Firebase.ready())
+    {
+        String documentPath = "NodesNickname/" + nodeId;
+        FirebaseJson content;
+        bool response;
+        content.set("fields/nodeId/stringValue/", nodeId.c_str());
+
+        if (Firebase.Firestore.patchDocument(&fbdo, FIREBASE_PROJECT_ID, "", documentPath.c_str(), content.raw(), "nodeId"))
+        {
+            Serial.printf("defauld nickname set");
+            return;
+        }
+        else
+        {
+            Serial.println(fbdo.errorReason());
+        }
+    }
+}
 
 
     

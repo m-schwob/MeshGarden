@@ -5,9 +5,10 @@ SoilMoistureSensor::SoilMoistureSensor(DEVICE_CONSTRUCTOR_ARGUMENTS)
 {
 
     // temp fix
-    // pinMode(D5, OUTPUT);
-    // digitalWrite(D5, HIGH);
-
+#ifdef ESP8266
+    pinMode(D5, OUTPUT);
+    digitalWrite(D5, HIGH);
+#endif
     if (pinout.containsKey("AOUT"))
         analog_pin = pin(pinout["AOUT"].as<String>());
     else
