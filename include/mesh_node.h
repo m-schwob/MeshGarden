@@ -46,6 +46,9 @@ private:
 	friend void nodeTimeAdjustedCallback(int32_t offset);
 	// friend void sendMessage();
 
+	void print_meas(Measurement meas);
+	void store_queue(std::queue<Measurement> &q);
+void load_queue(std::queue<Measurement> &q);
 public:
 	painlessMesh mesh;
 	int lasttime = 0;

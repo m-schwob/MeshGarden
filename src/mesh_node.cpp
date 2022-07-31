@@ -245,7 +245,10 @@ void MeshNode::store_timing(Time &time, int &sleep_time, int& lost_connection_in
     //EEPROM.put(size_of_queue,myqueue);
     EEPROM.commit();
     EEPROM.end();
-    Serial.println("time stored");
+    Serial.println("timing stored");
+    Serial.println("sleep_time " + String(sleep_time) + " lost_connection_interval_counter: " + String(lost_connection_interval_counter) +
+                   " time: " + String(time.hours) + ":" + String(time.minutes) + ":" + time.seconds + " AM?" + time.Am);
+    store_queue(myqueue);
 }
 
 void MeshNode::load_timing(Time &time, int &sleep_time, int& lost_connection_interval_counter)
@@ -255,8 +258,92 @@ void MeshNode::load_timing(Time &time, int &sleep_time, int& lost_connection_int
     EEPROM.get(sizeof(sleep_time), time);
     EEPROM.get(sizeof(time),lost_connection_interval_counter);
     EEPROM.end();
-    Serial.println("time loaded");
+    Serial.println("timing loaded");
+    Serial.println("sleep_time " + String(sleep_time) + " lost_connection_interval_counter: " + String(lost_connection_interval_counter) +
+                   " time: " + String(time.hours) + ":" + String(time.minutes) + ":" + time.seconds + " AM?" + time.Am);
+    load_queue(myqueue);
 }
+
+void print_meas(Measurement meas)
+#define MEAS_QUEUE_SIZE (sizeof(Time) + sizeof(Measurement) + 150) // estimation TODO make a better performance
+{
+    Serial.println("sensor " + String(meas.sensor_id) + " " + meas.type + " value: " + String(meas.value) +
+                   " time: " + String(meas.time.hours) + ":" + String(meas.time.minutes) + ":" + meas.time.seconds + " AM?" + meas.time.Am);
+}
+
+void store_queue(std::queue<Measurement> &q)
+{
+    Serial.println("convert measurements queue to json..");
+    DynamicJsonDocument doc(q.size() * MEAS_QUEUE_SIZE);
+    JsonArray array = doc.to<JsonArray>();
+
+    while (!q.empty())
+    {
+        JsonObject nested = array.createNestedObject();
+        Measurement meas = q.front();
+        print_meas(meas);
+        nested["sensor_id"] = meas.sensor_id;
+        nested["type"] = meas.type;
+        nested["value"] = meas.value;
+        nested["hours"] = meas.time.hours;
+        nested["minutes"] = meas.time.minutes;
+        nested["seconds"] = meas.time.seconds;
+        nested["Am"] = meas.time.Am;
+        q.pop();
+    }
+    Serial.println("capacity: " + String(doc.capacity()) + ", actual size: " + String(doc.memoryUsage()) + ", overflowed: " + String(doc.overflowed()));
+
+    Serial.println("saving measurements queue to file..");
+    File file = LittleFS.open("/queue.json", "w");
+    serializeJson(doc, file);
+    Serial.println("save to file complete with:");
+    Serial.println("File Size: " + String(file.size()));
+    file.close();
+}
+
+void load_queue(std::queue<Measurement> &q)
+{
+    Serial.println("loading measurements queue file to json..");
+    File file = LittleFS.open("/queue.json", "r");
+    if (!file)
+    {
+        Serial.println("file open failed");
+        return;
+    }
+    Serial.println("open file complete with:");
+    Serial.println("File Size: " + String(file.size()));
+
+    // getting the measurements 
+    Serial.println("convert json to measurements queue ..");
+    DynamicJsonDocument doc(file.size() * 2); // estimation TODO make a better performance
+    DeserializationError error = deserializeJson(doc, file);
+    if (error)
+    {
+        Serial.print(F("deserializeJson() failed: "));
+        Serial.println(error.f_str());
+        return;
+    }
+    Serial.println("capacity: " + String(doc.capacity()) + ", actual size: " + String(doc.memoryUsage()) + ", overflowed: " + String(doc.overflowed()));
+
+    JsonArray arr = doc.as<JsonArray>();
+    for (JsonVariant j_meas : arr)
+    {
+        Measurement meas;
+        meas.sensor_id = j_meas["sensor_id"];
+        meas.type = j_meas["type"].as<String>();
+        meas.value = j_meas["value"];
+        meas.time.hours = j_meas["hours"];
+        meas.time.minutes = j_meas["minutes"];
+        meas.time.seconds = j_meas["seconds"];
+        meas.time.Am = j_meas["Am"];
+        q.push(meas);
+        print_meas(meas);
+    }
+
+    // free space
+    // doc.~BasicJsonDocument(); // why fail and crush?
+}
+
 
 vector<String> MeshNode::splitString(string str, string delimiter)
 {
