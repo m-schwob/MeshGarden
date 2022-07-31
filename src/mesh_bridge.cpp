@@ -8,6 +8,7 @@ void printLocalTime()
     if (!getLocalTime(&timeinfo))
     {
         Serial.println("Failed to obtain time");
+        ESP.restart();
         return;
     }
     Serial.println(&timeinfo, "%A, %B %d %Y %H:%M:%S");
@@ -42,7 +43,7 @@ void receivedCallback(uint32_t from, String &msg)
 // event driven function for the mesh
 void newConnectionCallback(uint32_t nodeId)
 {
-    uint32_t time = node->mesh.getNodeTime();
+    // uint32_t time = node->mesh.getNodeTime();
     Serial.printf("--> startHere: New Connection, nodeId = %u\n", nodeId);
     struct tm timeinfo;
     if (!getLocalTime(&timeinfo))
@@ -119,6 +120,24 @@ void changedConnectionCallback()
     death_time["d"]["st"] = (node->NODE_DEEP_SLEEP_TIME-1); // send the sleep time
     node->mesh.sendBroadcast(death_time.as<String>());
     Serial.println("next death time:" + death_time.as<String>());
+
+    node->get_mesh_nodes();
+    for (std::list<String>::iterator it = node->mesh_values.begin(); it != node->mesh_values.end(); ++it){
+        Serial.println("check if there is a change for node: " + *it);
+    if (node->change_log.find(*it) != node->change_log.end())
+    {
+        Serial.println("update node " + *it + "\n" + String(node->change_log[*it]));
+        if (node->change_log[*it] != "")
+        {
+            DynamicJsonDocument doc(node->change_log[*it].length() + 32);
+            doc["change"] = node->change_log[*it];
+            serializeJson(doc, Serial);
+            node->mesh.sendSingle(atoi((*it).c_str()), doc.as<String>());
+            node->change_log.erase(*it);
+        }
+    }    
+    }
+        node->mesh_values.clear();
 }
 // event driven functions for the mesh
 void nodeTimeAdjustedCallback(int32_t offset)

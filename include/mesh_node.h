@@ -83,6 +83,7 @@ public:
 	void load_timing(Time &time, int &sleep_time,int& lost_connection_interval_counter);
 	void printLocalTime();
 	uint32_t bridgeId = 0;
+	bool sent_in_the_interval = false;
 	// measurment settings:
 	void add_measurement(std::function<Measurements()> callable, unsigned long interval, long iterations);
 	void send_values(std::function<Measurements()> get_values_callback);

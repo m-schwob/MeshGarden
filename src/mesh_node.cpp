@@ -92,6 +92,7 @@ void receivedCallback(uint32_t from, String &msg)
             battery_level["battery"] = node->node_battery_level;
             Serial.println("created battery json");
             serializeJson(battery_level, Serial);
+            Serial.println("sending battery signal");
             node->mesh.sendSingle(from, battery_level.as<String>());
         }
     }
@@ -117,13 +118,16 @@ void receivedCallback(uint32_t from, String &msg)
         Serial.println("end read confugires:\n");
         node->configure_ready = true;
     }
-
+        if(!node->sent_in_the_interval && node->bridgeId!=0 && node->mesh.isConnected(node->bridgeId)){    
     if(!node->myqueue.empty() &&(node->time , node->myqueue.back().time, 5)){
         node->emptyQueue();
+        node->sent_in_the_interval=true;
     }
     else{
         node->call_measurements();
         node->emptyQueue();
+        node->sent_in_the_interval=true;
+    }
     }
 }
 void newConnectionCallback(uint32_t nodeId)
@@ -132,7 +136,18 @@ void newConnectionCallback(uint32_t nodeId)
 }
 void changedConnectionCallback()
 {
-    Serial.printf("Changed connections at time: %d\n", node->mesh.getNodeTime());
+    // Serial.printf("Changed connections at time: %d\n", node->mesh.getNodeTime());
+    if(!node->sent_in_the_interval && node->bridgeId!=0 && node->mesh.isConnected(node->bridgeId)){    
+    if(!node->myqueue.empty() &&(node->time , node->myqueue.back().time, 5)){
+        node->emptyQueue();
+        node->sent_in_the_interval=true;
+    }
+    else{
+        node->call_measurements();
+        node->emptyQueue();
+        node->sent_in_the_interval=true;
+    }
+    }
 }
 void nodeTimeAdjustedCallback(int32_t offset)
 {
@@ -400,7 +415,7 @@ void MeshNode::emptyQueue(){
             measure1["meassure_type"] = String(m_type.c_str());
             measure1["value"] = meas.value;
             measure1["time"]["timestampValue"] = timeStamp;
-
+            Serial.println("sending measurement");
             mesh.sendSingle(bridgeId, measure1.as<String>());
             myqueue.pop();
         }
