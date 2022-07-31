@@ -1,3 +1,13 @@
+# MeshGarden - repository content
+The repository contains 3 main folder:
+- MeshGardenApp - contains the source good of the android app (built using dart).
+- Firbase - contains the source code for firebase cloud functions (written in javaScript).
+- ESP - contains the source code for the hardware, ESP32/ESP8266 (written in c++ using arduino framework).
+
+Other useful folders:
+- utils - contain some useful code for development but not necessary.
+- ESP/examples - contains some side code and example used to develop some of the code unit saperetly. great as code reference.
+
 # MeshGarden - introduction
 
 MeshGarden project is an iot system designed to monitor and maintain small and large scale gardens the system supports a verity of controllers. 
