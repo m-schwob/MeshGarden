@@ -8,10 +8,16 @@ messages passes down from the sensors to the bridge node via local Mesh network,
 the data passes from the bridge node to a firestore server and can be accessed and changed with a designated cell phone app.
 
 # MeshGarden - system diagram
-![Alt text](/docs/images/system_scheme.jpeg)
+
+![Alt text](/docs/images/system_diagram.png)
 
 As explained, the system composed over 3 major parts: the mesh network , the firestore server and the MeshGarden application 
 that are interconnected.
+
+# MeshGarden - nodes life cycle
+
+![Alt text](/docs/images/life_cycle.png)
+
 
 # MeshGarden - library dependency
 
@@ -78,6 +84,8 @@ App screenshots:
   </tr>
  </table>
 
+# MeshGarden - setup the system
+
 ## **step 1:** setup firebase server
 
 follow the instruction in the videos bellow by "That Project" in order to setup your own firestore server
@@ -96,7 +104,7 @@ create a new flutter project and follow the above video
 
 ## **step 2:** create an account in the MeshGarden app with your own usermane and password
 
-## **step 3:** bui 
+## **step 3:** assembly the micro controllers as shown bellow
 
 ## **step 4:** prepare the configure.json file
 
@@ -137,7 +145,8 @@ Components:
 
 > The LED use as indicator and connected in parallel to ESP32 module build in LED. So it can be skipped if the build in LED visible.
 
-Assembly:
+## Assembly:
+
 ![](/docs/hardware/fritzing/bridge_bb.jpg)
 
 ## Node Components and assembly:
@@ -182,17 +191,11 @@ Optional Build in Sensors Assembly (in additional to the Base module!!):
 ![](/docs/hardware/fritzing/library_sensors_node_bb.jpg)
 
 
-## build a new ESP8266 micro controller with the new hardware for your new sensor.
-
-
-
-### Basic Aardware
-
-## follow the instructions in the main.cpp file to create your own sensor class by programing the following functions:
-
 ## make sure to upload the code to the micro controller and connect it to the mesh network
 
 ## enter the MeshGarden app find the designated node, and set the sensor as descripted in the pictures bellow
+
+## Note: do not add any sensors to the bridge node 
 
 ## BE AWARE: in the type value every new word has to start with a capital letter from A-Z and use underscore " _ " insted of space bar
 
