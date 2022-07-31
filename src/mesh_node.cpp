@@ -336,8 +336,8 @@ void MeshNode::init_mesh()
     Serial.println("node id: " + String(mesh.getNodeId()));
     node = this;
     alive = true;
-    if(lost_connection_interval_counter >=3){
-        deep_sleep_time =deep_sleep_time+wake_up_time; 
+    if(lost_connection_interval_counter > 5){
+        deep_sleep_time = deep_sleep_time+wake_up_time; 
         wake_up_time=deep_sleep_time;
     }
 }

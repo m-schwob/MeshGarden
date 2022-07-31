@@ -632,7 +632,7 @@ void MeshBridge::exit_mesh_connect_server()
     firestoreMeshCollectionClear();
     firestoreMeshCollectionUpdate();
     //*************updating Measurements and battery collections****************//
-
+    if(!server_data.empty()){
     for(std::map<String,queue<String>>::iterator iter = server_data.begin(); iter != server_data.end(); ++iter){
         Serial.println("node "+ iter->first+" has " + iter->second.size() +" cached messages");
         while(!iter->second.empty()){
@@ -646,7 +646,7 @@ void MeshBridge::exit_mesh_connect_server()
         }
     }
     server_data.clear();
-
+    }
     Serial.printf("sending %d battey messages..\n", battery_map.size());
     for (std::map<String, float>::iterator iter = battery_map.begin(); iter != battery_map.end(); ++iter)
     {
