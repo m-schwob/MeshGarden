@@ -75,7 +75,7 @@ void receivedCallback(uint32_t from, String &msg)
     {
         node->bridgeId = from;
         Serial.println(message["clock"].as<String>());
-
+        node->reset_time=node->time;
         // int index = 0;
         vector<String> values = node->splitString(message["clock"].as<String>().c_str());
         Serial.println("clock message string:");
@@ -118,12 +118,13 @@ void receivedCallback(uint32_t from, String &msg)
         Serial.println("end read confugires:\n");
         node->configure_ready = true;
     }
-        if(!node->sent_in_the_interval && node->bridgeId!=0 && node->mesh.isConnected(node->bridgeId)){    
-    if(!node->myqueue.empty() &&(node->time , node->myqueue.back().time, 5)){
+    if(!node->sent_in_the_interval && node->bridgeId!=0 && node->mesh.isConnected(node->bridgeId)){    
+    if(!node->myqueue.empty() && computeTimeDifference(node->time , node->reset_time, 5)){
         node->emptyQueue();
         node->sent_in_the_interval=true;
     }
     else{
+        Serial.println("taking measures again");
         node->call_measurements();
         node->emptyQueue();
         node->sent_in_the_interval=true;
@@ -138,7 +139,7 @@ void changedConnectionCallback()
 {
     // Serial.printf("Changed connections at time: %d\n", node->mesh.getNodeTime());
     if(!node->sent_in_the_interval && node->bridgeId!=0 && node->mesh.isConnected(node->bridgeId)){    
-    if(!node->myqueue.empty() &&(node->time , node->myqueue.back().time, 5)){
+    if(!node->myqueue.empty() &&computeTimeDifference(node->time , node->reset_time, 5)){
         node->emptyQueue();
         node->sent_in_the_interval=true;
     }

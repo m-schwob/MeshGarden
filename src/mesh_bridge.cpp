@@ -64,6 +64,7 @@ void newConnectionCallback(uint32_t nodeId)
     DynamicJsonDocument timer(firebaseReadyDate.length() + 32);
     timer["clock"] = firebaseReadyDate;
     Serial.println("created clock json");
+    
     serializeJson(timer, Serial);
     node->mesh.sendBroadcast(timer.as<String>());
 

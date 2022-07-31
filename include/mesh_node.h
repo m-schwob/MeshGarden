@@ -87,7 +87,7 @@ public:
 	// measurment settings:
 	void add_measurement(std::function<Measurements()> callable, unsigned long interval, long iterations);
 	void send_values(std::function<Measurements()> get_values_callback);
-
+	Time reset_time;
 	Time die_time;
 	int die_interval = 10000;
 	queue<Measurement> myqueue;
