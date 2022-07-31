@@ -163,7 +163,6 @@ void MeshNode::update()
     {
         time_update();
         lasttime = millis();
-        printLocalTime();
     }
     if(millis() - time_with_no_connections>=(wake_up_time*1000) && !connected_to_bridge){
 

@@ -8,7 +8,12 @@ void printLocalTime()
     if (!getLocalTime(&timeinfo))
     {
         Serial.println("Failed to obtain time");
-        ESP.restart();
+        while(1){
+        digitalWrite(LED_BUILTIN, LOW); // turn the LED on (HIGH is the voltage level)
+        delay(1000);
+        digitalWrite(LED_BUILTIN, HIGH); // turn the LED on (HIGH is the voltage level)
+        delay(1000);
+        }
         return;
     }
     Serial.println(&timeinfo, "%A, %B %d %Y %H:%M:%S");
