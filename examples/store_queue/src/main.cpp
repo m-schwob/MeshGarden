@@ -1,5 +1,7 @@
 #include <Arduino.h>
-#include <EEPROM.h>
+// #include <EEPROM.h>
+#include <LittleFS.h>
+#include <ArduinoJson.h>
 #include <queue>
 
 struct Time
@@ -20,97 +22,93 @@ struct Measurement
 
 void print_meas(Measurement meas)
 {
-    // Serial.println("sensor " + String(meas.sensor_id) + " " + meas.type + " value: " + String(meas.value) +
-    //                " time: " + String(meas.time.hours) + ":" + String(meas.time.minutes) + ":" + meas.time.seconds + " AM?" + meas.time.Am);
-    Serial.print("sensor " + String(meas.sensor_id));
+    Serial.println("sensor " + String(meas.sensor_id) + " " + meas.type + " value: " + String(meas.value) +
+                   " time: " + String(meas.time.hours) + ":" + String(meas.time.minutes) + ":" + meas.time.seconds + " AM?" + meas.time.Am);
+    // Serial.print("sensor " + String(meas.sensor_id));
     // Serial.print(" type: " + meas.type);
     // Serial.print(" value: " + String(meas.value));
     // Serial.print(" time: " + String(meas.time.hours));
     // Serial.print(":" + String(meas.time.minutes));
     // Serial.print(":" + String(meas.time.seconds));
     // Serial.print(" AM?" + String(meas.time.Am));
-    Serial.println();
+    // Serial.println();
 }
 
-#define MEAS_EEPROM_SIZE (sizeof(Time) + sizeof(Measurement) + 100) // 100 for string in measurement
-
+#define MEAS_QUEUE_SIZE (sizeof(Time) + sizeof(Measurement) + 150) // estimation TODO make a better performance
 void store_queue(int addr, std::queue<Measurement> &q)
 {
-    Serial.println("MEAS_EEPROM_SIZE -> " + String(MEAS_EEPROM_SIZE));
-    EEPROM.begin(MEAS_EEPROM_SIZE);
-    EEPROM.put(addr, q.size());
-    addr += sizeof(q.size());
-    EEPROM.commit();
-    EEPROM.end();
-    Serial.println("addr: " + String(addr));
+    Serial.println("convert measurements queue to json..");
+    DynamicJsonDocument doc(q.size() * MEAS_QUEUE_SIZE);
+    JsonArray array = doc.to<JsonArray>();
 
     while (!q.empty())
     {
+        JsonObject nested = array.createNestedObject();
         Measurement meas = q.front();
-        Serial.println("storing measurement at address " + String(addr));
         print_meas(meas);
-        EEPROM.put(addr, meas.sensor_id);
-        addr += sizeof(meas.sensor_id);
-        Serial.println("addr: " + String(addr));
-
-        // EEPROM.put(addr, meas.value);
-        // addr += sizeof(meas.value);
-        // EEPROM.put(addr, meas.time);
-        // addr += sizeof(meas.time);
-
-        // EEPROM.put(addr, meas.type.length()); // write the string size
-        // addr += sizeof(meas.type.length());
-
-        // write the string itself
-        // for (size_t i = addr; i < addr + meas.type.length(); ++i)
-        //     EEPROM.write(i, meas.type[i]);
-        // addr += meas.type.length();
-
-        Serial.println("committed? " + String(EEPROM.commit()));
-        EEPROM.end();
+        nested["sensor_id"] = meas.sensor_id;
+        nested["type"] = meas.type;
+        nested["value"] = meas.value;
+        nested["hours"] = meas.time.hours;
+        nested["minutes"] = meas.time.minutes;
+        nested["seconds"] = meas.time.seconds;
+        nested["Am"] = meas.time.Am;
         q.pop();
     }
+    Serial.println("capacity: " + String(doc.capacity()) + ", actual size: " + String(doc.memoryUsage()) + ", overflowed: " + String(doc.overflowed()));
+    // Serial.println(doc.as<String>());
+
+    Serial.println("saving measurements queue to file..");
+    File file = LittleFS.open("/queue.json", "w");
+    serializeJson(doc, file);
+    Serial.println("save to file complete with:");
+    Serial.println("File Size: " + String(file.size()));
+    file.close();
 }
 
-// load configuration from memory to json object
 void load_queue(int addr, std::queue<Measurement> &q)
 {
-    EEPROM.begin(MEAS_EEPROM_SIZE);
-    size_t q_size;
-    EEPROM.get(addr, q_size);
-    addr += sizeof(q_size);
-    EEPROM.commit();
-    EEPROM.end();
-        Serial.println("addr: " + String(addr));
-
-
-    for (size_t i = 0; i < q_size; ++i)
+    Serial.println("loading measurements queue file to json..");
+    File file = LittleFS.open("/queue.json", "r");
+    if (!file)
     {
+        Serial.println("file open failed");
+        return;
+    }
+    Serial.println("open file complete with:");
+    Serial.println("File Size: " + String(file.size()));
+
+    // getting the measurements 
+    Serial.println("convert json to measurements queue ..");
+    DynamicJsonDocument doc(file.size() * 2); // estimation TODO make a better performance
+    DeserializationError error = deserializeJson(doc, file);
+    if (error)
+    {
+        Serial.print(F("deserializeJson() failed: "));
+        Serial.println(error.f_str());
+        return;
+    }
+    Serial.println("capacity: " + String(doc.capacity()) + ", actual size: " + String(doc.memoryUsage()) + ", overflowed: " + String(doc.overflowed()));
+
+    JsonArray arr = doc.as<JsonArray>();
+    for (JsonVariant j_meas : arr)
+    {
+        // Serial.println(j_meas.as<String>());
+        // Serial.println(j_meas["sensor_id"].as<String>());
         Measurement meas;
-        Serial.println("loading measurement from address " + String(addr));
-        EEPROM.begin(MEAS_EEPROM_SIZE);
-        meas.sensor_id = EEPROM.get(addr, meas.sensor_id);
-        addr += sizeof(meas.sensor_id);
-            Serial.println("addr: " + String(addr));
-
-        // EEPROM.get(addr, meas.value);
-        // addr += sizeof(meas.value);
-        // EEPROM.get(addr, meas.time);
-        // addr += sizeof(meas.time);
-
-        // size_t size = meas.type.length();
-        // EEPROM.get(addr, size); // write the string size
-        // addr += sizeof(size);
-
-        // // write the string itself
-        // for (size_t i = addr; i < addr + size; ++i)
-        //     meas.type += char(EEPROM.read(i));
-        // addr += size;
-
-        EEPROM.end();
+        meas.sensor_id = j_meas["sensor_id"];
+        meas.type = j_meas["type"].as<String>();
+        meas.value = j_meas["value"];
+        meas.time.hours = j_meas["hours"];
+        meas.time.minutes = j_meas["minutes"];
+        meas.time.seconds = j_meas["seconds"];
+        meas.time.Am = j_meas["Am"];
         q.push(meas);
         print_meas(meas);
     }
+
+    // free space
+    // doc.~BasicJsonDocument(); // why fail and crush?
 }
 
 std::queue<Measurement> queue;
@@ -119,6 +117,16 @@ void setup()
 {
     Serial.begin(115200);
     Serial.println();
+
+    if (!LittleFS.begin())
+    {
+        Serial.println("fail to start files system.");
+        return; // exit(1);
+    }
+    else
+    {
+        Serial.println("started the file system");
+    }
 
     Serial.println("pushing to queue..");
     size_t size = 5;
@@ -146,6 +154,13 @@ void setup()
 
     Serial.println("loading queue..");
     load_queue(addr, queue);
+
+    Serial.println("printing queue..");
+    while(!queue.empty()){
+        print_meas(queue.front());
+        queue.pop();
+    }
+
 }
 
 void loop()
