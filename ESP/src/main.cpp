@@ -125,6 +125,7 @@ DHT22 air humidity and temperature sensor.
 
 DHT dht(DHTPIN, DHTTYPE);
 
+/* create  two functions */
 void init_DHT()
 {
     dht.begin();
@@ -133,25 +134,14 @@ void init_DHT()
 
 Measurements measure_DHT()
 {
-    // Reading temperature or humidity takes about 250 milliseconds!
-    // Sensor readings may also be up to 2 seconds 'old' (its a very slow sensor)
+    // Reading temperature and humidity
     float h = dht.readHumidity();
-    // Read temperature as Celsius (the default)
     float t = dht.readTemperature();
-    // Read temperature as Fahrenheit (isFahrenheit = true)
-    float f = dht.readTemperature(true);
 
-    // Check if any reads failed and exit early (to try again).
     if (isnan(h) || isnan(t) || isnan(f))
-    {
-        Serial.println(F("Failed to read from DHT sensor!"));
-        // return; TODO handle failed situation
+    {   // Check if any reads failed 
+        Serial.println(F("Failed to read from DHT sensor!")); 
     }
-
-    // // Compute heat index in Fahrenheit (the default)
-    // float hif = dht.computeHeatIndex(f, h);
-    // // Compute heat index in Celsius (isFahreheit = false)
-    // float hic = dht.computeHeatIndex(t, h, false);
 
     Measurements measurements(2);
     Measurement temperature;
@@ -168,17 +158,17 @@ Measurements measure_DHT()
     return measurements; // temporary for compiling
 }
 
-/*****************************************************/
+/* register your sensor */
+REGISTER_SENSOR("DHT22 Sensor");  
 
 MeshGarden garden;
-
-REGISTER_SENSOR("DHT22 Sensor"); // TODO solve registering using add_sensor function
 
 void setup()
 {
     Serial.begin(115200);
     Serial.println();
 
+    /* register your functions */
     garden.add_sensor("DHT22 Sensor", init_DHT, measure_DHT);
     garden.begin();
 
@@ -192,5 +182,4 @@ void setup()
 void loop()
 {
     garden.update();
-    // delay(5000); // temporary
 }
